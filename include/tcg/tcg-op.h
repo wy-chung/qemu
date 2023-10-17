@@ -114,6 +114,7 @@ tcg_gen_qemu_st_i128(TCGv_i128 v, TCGv a, TCGArg i, MemOp m)
                                TCGv_##S n, TCGArg i, MemOp m)           \
     { N##_##S##_chk(r, tcgv_tl_temp(a), o, n, i, m, TCG_TYPE_TL); }
 
+#if !defined(WYC)
 DEF_ATOMIC3(tcg_gen_atomic_cmpxchg, i32)
 DEF_ATOMIC3(tcg_gen_atomic_cmpxchg, i64)
 DEF_ATOMIC3(tcg_gen_atomic_cmpxchg, i128)
@@ -158,6 +159,7 @@ DEF_ATOMIC2(tcg_gen_atomic_smax_fetch, i32)
 DEF_ATOMIC2(tcg_gen_atomic_smax_fetch, i64)
 DEF_ATOMIC2(tcg_gen_atomic_umax_fetch, i32)
 DEF_ATOMIC2(tcg_gen_atomic_umax_fetch, i64)
+#endif // !defined(WYC)
 
 #undef DEF_ATOMIC2
 #undef DEF_ATOMIC3
@@ -279,7 +281,7 @@ DEF_ATOMIC2(tcg_gen_atomic_umax_fetch, i64)
 #define tcg_gen_dup_tl_vec  tcg_gen_dup_i64_vec
 #define tcg_gen_dup_tl tcg_gen_dup_i64
 #define dup_const_tl dup_const
-#else
+#else // TARGET_LONG_BITS != 64
 #define tcg_gen_movi_tl tcg_gen_movi_i32
 #define tcg_gen_mov_tl tcg_gen_mov_i32
 #define tcg_gen_ld8u_tl tcg_gen_ld8u_i32

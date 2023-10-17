@@ -1285,7 +1285,7 @@ void tcg_gen_mul_i64(TCGv_i64 ret, TCGv_i64 arg1, TCGv_i64 arg2)
     tcg_temp_free_i32(t1);
 }
 
-#else
+#else // TCG_TARGET_REG_BITS != 32
 
 void tcg_gen_movi_i64(TCGv_i64 ret, int64_t arg)
 {

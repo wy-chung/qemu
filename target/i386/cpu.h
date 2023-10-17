@@ -174,32 +174,32 @@ typedef enum X86Seg {
 #define HF_UMIP_SHIFT       27 /* CR4.UMIP */
 #define HF_AVX_EN_SHIFT     28 /* AVX Enabled (CR4+XCR0) */
 
-#define HF_CPL_MASK          (3 << HF_CPL_SHIFT)
+#define HF_CPL_MASK          (3 << HF_CPL_SHIFT)	/* current cpl */
 #define HF_INHIBIT_IRQ_MASK  (1 << HF_INHIBIT_IRQ_SHIFT)
-#define HF_CS32_MASK         (1 << HF_CS32_SHIFT)
+#define HF_CS32_MASK         (1 << HF_CS32_SHIFT)	/* 16 or 32 segments */
 #define HF_SS32_MASK         (1 << HF_SS32_SHIFT)
-#define HF_ADDSEG_MASK       (1 << HF_ADDSEG_SHIFT)
-#define HF_PE_MASK           (1 << HF_PE_SHIFT)
-#define HF_TF_MASK           (1 << HF_TF_SHIFT)
-#define HF_MP_MASK           (1 << HF_MP_SHIFT)
+#define HF_ADDSEG_MASK       (1 << HF_ADDSEG_SHIFT)	/* zero base for DS, ES and SS */
+#define HF_PE_MASK           (1 << HF_PE_SHIFT)	/* copy of CR0.PE (protected mode) */
+#define HF_TF_MASK           (1 << HF_TF_SHIFT)	/* must be same as eflags */
+#define HF_MP_MASK           (1 << HF_MP_SHIFT)	/* the order must be MP, EM, TS */
 #define HF_EM_MASK           (1 << HF_EM_SHIFT)
 #define HF_TS_MASK           (1 << HF_TS_SHIFT)
-#define HF_IOPL_MASK         (3 << HF_IOPL_SHIFT)
-#define HF_LMA_MASK          (1 << HF_LMA_SHIFT)
-#define HF_CS64_MASK         (1 << HF_CS64_SHIFT)
-#define HF_RF_MASK           (1 << HF_RF_SHIFT)
-#define HF_VM_MASK           (1 << HF_VM_SHIFT)
-#define HF_AC_MASK           (1 << HF_AC_SHIFT)
-#define HF_SMM_MASK          (1 << HF_SMM_SHIFT)
-#define HF_SVME_MASK         (1 << HF_SVME_SHIFT)
-#define HF_GUEST_MASK        (1 << HF_GUEST_SHIFT)
-#define HF_OSFXSR_MASK       (1 << HF_OSFXSR_SHIFT)
-#define HF_SMAP_MASK         (1 << HF_SMAP_SHIFT)
-#define HF_IOBPT_MASK        (1 << HF_IOBPT_SHIFT)
-#define HF_MPX_EN_MASK       (1 << HF_MPX_EN_SHIFT)
-#define HF_MPX_IU_MASK       (1 << HF_MPX_IU_SHIFT)
-#define HF_UMIP_MASK         (1 << HF_UMIP_SHIFT)
-#define HF_AVX_EN_MASK       (1 << HF_AVX_EN_SHIFT)
+#define HF_IOPL_MASK         (3 << HF_IOPL_SHIFT)	/* must be same as eflags */
+#define HF_LMA_MASK          (1 << HF_LMA_SHIFT)	/* long mode active */
+#define HF_CS64_MASK         (1 << HF_CS64_SHIFT)	/* 64 bit code segment */
+#define HF_RF_MASK           (1 << HF_RF_SHIFT)	/* must be same as eflags */
+#define HF_VM_MASK           (1 << HF_VM_SHIFT)	/* must be same as eflags */
+#define HF_AC_MASK           (1 << HF_AC_SHIFT)	/* must be same as eflags */
+#define HF_SMM_MASK          (1 << HF_SMM_SHIFT)	/* CPU in SMM mode */
+#define HF_SVME_MASK         (1 << HF_SVME_SHIFT)	/* SVME enabled (copy of EFER.SVME) */
+#define HF_GUEST_MASK        (1 << HF_GUEST_SHIFT)	/* SVM intercepts are active */
+#define HF_OSFXSR_MASK       (1 << HF_OSFXSR_SHIFT)	/* CR4.OSFXSR */
+#define HF_SMAP_MASK         (1 << HF_SMAP_SHIFT)	/* CR4.SMAP */
+#define HF_IOBPT_MASK        (1 << HF_IOBPT_SHIFT)	/* an io breakpoint enabled */
+#define HF_MPX_EN_MASK       (1 << HF_MPX_EN_SHIFT)	/* MPX Enabled (CR4+XCR0+BNDCFGx) */
+#define HF_MPX_IU_MASK       (1 << HF_MPX_IU_SHIFT)	/* BND registers in-use */
+#define HF_UMIP_MASK         (1 << HF_UMIP_SHIFT)	/* CR4.UMIP */
+#define HF_AVX_EN_MASK       (1 << HF_AVX_EN_SHIFT)	/* AVX Enabled (CR4+XCR0) */
 
 /* hflags2 */
 
@@ -1836,7 +1836,7 @@ typedef struct CPUArchState {
     int64_t user_tsc_khz; /* for sanity check only */
     uint64_t apic_bus_freq;
     uint64_t tsc;
-#if defined(CONFIG_KVM) || defined(CONFIG_HVF)
+#if defined(CONFIG_KVM) || defined(CONFIG_HVF) //wyc HVF is a QEMU accelerator on macOS
     void *xsave_buf;
     uint32_t xsave_buf_len;
 #endif
@@ -1879,7 +1879,7 @@ typedef struct CPUArchState {
     TPRAccess tpr_access_type;
 
     unsigned nr_dies;
-} CPUX86State;
+} CPUX86State; // typedef struct CPUArchState
 
 struct kvm_msrs;
 

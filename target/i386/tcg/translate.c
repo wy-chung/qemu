@@ -147,7 +147,7 @@ typedef struct DisasContext {
 #define DISAS_JUMP             DISAS_TARGET_3
 
 /* The environment in which user-only runs is constrained. */
-#ifdef CONFIG_USER_ONLY
+#ifdef CONFIG_USER_ONLY //wyc For usermode syscall translation
 #define PE(S)     true
 #define CPL(S)    3
 #define IOPL(S)   0
@@ -181,7 +181,7 @@ typedef struct DisasContext {
 #if defined(CONFIG_SOFTMMU) && !defined(TARGET_X86_64)
 #define LMA(S)    false
 #else
-#define LMA(S)    (((S)->flags & HF_LMA_MASK) != 0)
+#define LMA(S)    (((S)->flags & HF_LMA_MASK) != 0)	// long mode active
 #endif
 
 #ifdef TARGET_X86_64
@@ -198,6 +198,7 @@ typedef struct DisasContext {
 #define REX_B(S)       0
 #endif
 
+#ifdef CONFIG_USER_ONLY
 /*
  * Many sysemu-only helpers are not reachable for user-only.
  * Define stub generators here, so that we need not either sprinkle
@@ -207,7 +208,6 @@ typedef struct DisasContext {
     static inline void gen_helper_##NAME(__VA_ARGS__) \
     { qemu_build_not_reached(); }
 
-#ifdef CONFIG_USER_ONLY
 STUB_HELPER(clgi, TCGv_env env)
 STUB_HELPER(flush_page, TCGv_env env, TCGv addr)
 STUB_HELPER(hlt, TCGv_env env, TCGv_i32 pc_ofs)

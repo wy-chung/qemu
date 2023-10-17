@@ -21,6 +21,7 @@
  * Incomplete struct types
  * Please keep this list in case-insensitive alphabetical order.
  */
+#if !defined(WYC)
 typedef struct AccelCPUState AccelCPUState;
 typedef struct AccelState AccelState;
 typedef struct AdapterInfo AdapterInfo;
@@ -138,6 +139,7 @@ typedef struct VirtIODevice VirtIODevice;
 typedef struct Visitor Visitor;
 typedef struct VMChangeStateEntry VMChangeStateEntry;
 typedef struct VMStateDescription VMStateDescription;
+#endif // !defined(WYC)
 
 /*
  * Pointer types

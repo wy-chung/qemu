@@ -175,6 +175,9 @@ void translator_loop(CPUState *cpu, TranslationBlock *tb, int *max_insns,
             set_can_do_io(db, true);
         }
         ops->translate_insn(db, cpu);
+#if defined(WYC)
+        i386_tr_translate_insn(db, cpu);
+#endif
 
         /*
          * We can't instrument after instructions that change control

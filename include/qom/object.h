@@ -18,12 +18,14 @@
 #include "qemu/module.h"
 
 struct TypeImpl;
+#if !defined(WYC)
 typedef struct TypeImpl *Type;
 
 typedef struct TypeInfo TypeInfo;
 
 typedef struct InterfaceClass InterfaceClass;
 typedef struct InterfaceInfo InterfaceInfo;
+#endif
 
 #define TYPE_OBJECT "object"
 

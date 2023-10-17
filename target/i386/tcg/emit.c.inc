@@ -18,6 +18,7 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
+//wyc included by translate.c
 
 #define ZMM_OFFSET(reg) offsetof(CPUX86State, xmm_regs[reg])
 
@@ -226,7 +227,11 @@ static void gen_load(DisasContext *s, X86DecodedInsn *decode, int opn, TCGv v)
     case X86_OP_SKIP:
         return;
     case X86_OP_SEG:
+#if defined(WYC)
+        tcg_gen_ld32u_i64(v, cpu_env,
+#else
         tcg_gen_ld32u_tl(v, cpu_env,
+#endif
                          offsetof(CPUX86State,segs[op->n].selector));
         break;
     case X86_OP_CR:
