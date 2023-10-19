@@ -82,6 +82,7 @@ struct TranslationBlock {
 
     uint32_t flags; /* flags defining in which context the code was generated */
     uint32_t cflags;    /* compile flags */
+//wyc the definitions of the cflags are moved out of the struct
 
     /*
      * Above fields used for comparing
