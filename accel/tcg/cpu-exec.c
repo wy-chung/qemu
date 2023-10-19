@@ -404,7 +404,11 @@ static inline bool check_for_breakpoints(CPUState *cpu, vaddr pc,
  * If found, return the code pointer.  If not found, return
  * the tcg epilogue so that we return into cpu_tb_exec.
  */
+#if !defined(WYC)
 const void *HELPER(lookup_tb_ptr)(CPUArchState *env)
+#else
+const void *helper_lookup_tb_ptr(CPUArchState *env)
+#endif
 {
     CPUState *cpu = env_cpu(env);
     TranslationBlock *tb;
