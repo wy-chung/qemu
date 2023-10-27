@@ -59,8 +59,7 @@ typedef int (*WriteCoreDumpFunction)(const void *buf, size_t size,
  * cpu_exec_realizefn() for use in hot code paths.
  */
 typedef struct CPUClass CPUClass;
-DECLARE_CLASS_CHECKERS(CPUClass, CPU,
-                       TYPE_CPU)
+DECLARE_CLASS_CHECKERS(CPUClass, CPU, TYPE_CPU);
 
 /**
  * OBJECT_DECLARE_CPU_TYPE:

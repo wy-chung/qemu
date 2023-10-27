@@ -18,7 +18,7 @@
 #define ACCEL_OPS_NAME(name) (name "-" TYPE_ACCEL_OPS)
 
 typedef struct AccelOpsClass AccelOpsClass;
-DECLARE_CLASS_CHECKERS(AccelOpsClass, ACCEL_OPS, TYPE_ACCEL_OPS)
+DECLARE_CLASS_CHECKERS(AccelOpsClass, ACCEL_OPS, TYPE_ACCEL_OPS);
 
 /* cpus.c operations interface */
 struct AccelOpsClass {

@@ -118,8 +118,7 @@ typedef struct DBusChardevClass {
     void (*parent_chr_be_event)(Chardev *s, QEMUChrEvent event);
 } DBusChardevClass;
 
-DECLARE_CLASS_CHECKERS(DBusChardevClass, DBUS_CHARDEV,
-                       TYPE_CHARDEV_DBUS)
+DECLARE_CLASS_CHECKERS(DBusChardevClass, DBUS_CHARDEV, TYPE_CHARDEV_DBUS);
 
 typedef struct DBusChardev {
     SocketChardev parent;
