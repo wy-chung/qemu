@@ -176,8 +176,7 @@ struct IPMIInterfaceClass {
  * Define a BMC simulator (or perhaps a connection to a real BMC)
  */
 #define TYPE_IPMI_BMC "ipmi-bmc"
-OBJECT_DECLARE_TYPE(IPMIBmc, IPMIBmcClass,
-                    IPMI_BMC)
+OBJECT_DECLARE_TYPE(IPMIBmc, IPMIBmcClass, IPMI_BMC);
 
 struct IPMIBmc {
     DeviceState parent;

@@ -16,8 +16,7 @@
 #include "block/aio.h"
 
 #define TYPE_EVENT_LOOP_BASE         "event-loop-base"
-OBJECT_DECLARE_TYPE(EventLoopBase, EventLoopBaseClass,
-                    EVENT_LOOP_BASE)
+OBJECT_DECLARE_TYPE(EventLoopBase, EventLoopBaseClass, EVENT_LOOP_BASE);
 
 struct EventLoopBaseClass {
     ObjectClass parent_class;

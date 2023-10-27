@@ -21,7 +21,7 @@
  */
 #define TYPE_VIRTIO_MD_PCI "virtio-md-pci"
 
-OBJECT_DECLARE_TYPE(VirtIOMDPCI, VirtIOMDPCIClass, VIRTIO_MD_PCI)
+OBJECT_DECLARE_TYPE(VirtIOMDPCI, VirtIOMDPCIClass, VIRTIO_MD_PCI);
 
 struct VirtIOMDPCIClass {
     /* private */

@@ -19,8 +19,7 @@ typedef struct virtio_input_event virtio_input_event;
 /* qemu internals                                                    */
 
 #define TYPE_VIRTIO_INPUT "virtio-input-device"
-OBJECT_DECLARE_TYPE(VirtIOInput, VirtIOInputClass,
-                    VIRTIO_INPUT)
+OBJECT_DECLARE_TYPE(VirtIOInput, VirtIOInputClass, VIRTIO_INPUT);
 #define VIRTIO_INPUT_GET_PARENT_CLASS(obj) \
         OBJECT_GET_PARENT_CLASS(obj, TYPE_VIRTIO_INPUT)
 

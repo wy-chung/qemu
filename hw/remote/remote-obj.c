@@ -23,7 +23,7 @@
 #include "monitor/monitor.h"
 
 #define TYPE_REMOTE_OBJECT "x-remote-object"
-OBJECT_DECLARE_TYPE(RemoteObject, RemoteObjectClass, REMOTE_OBJECT)
+OBJECT_DECLARE_TYPE(RemoteObject, RemoteObjectClass, REMOTE_OBJECT);
 
 struct RemoteObjectClass {
     ObjectClass parent_class;

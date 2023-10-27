@@ -9,8 +9,7 @@
  * virtio-vga-base: This extends VirtioPCIProxy.
  */
 #define TYPE_VIRTIO_VGA_BASE "virtio-vga-base"
-OBJECT_DECLARE_TYPE(VirtIOVGABase, VirtIOVGABaseClass,
-                    VIRTIO_VGA_BASE)
+OBJECT_DECLARE_TYPE(VirtIOVGABase, VirtIOVGABaseClass, VIRTIO_VGA_BASE);
 
 struct VirtIOVGABase {
     VirtIOPCIProxy parent_obj;

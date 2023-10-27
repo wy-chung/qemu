@@ -8,8 +8,7 @@
 /* hda bus                                                               */
 
 #define TYPE_HDA_CODEC_DEVICE "hda-codec"
-OBJECT_DECLARE_TYPE(HDACodecDevice, HDACodecDeviceClass,
-                    HDA_CODEC_DEVICE)
+OBJECT_DECLARE_TYPE(HDACodecDevice, HDACodecDeviceClass, HDA_CODEC_DEVICE);
 
 #define TYPE_HDA_BUS "HDA"
 OBJECT_DECLARE_SIMPLE_TYPE(HDACodecBus, HDA_BUS)
