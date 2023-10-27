@@ -93,7 +93,7 @@ struct TranslationBlock {
     uint16_t size;
     uint16_t icount;
 
-    struct tb_tc tc;
+    struct tb_tc tc;	// translation cache
 
     /*
      * Track tb_page_addr_t intervals that intersect this TB.

@@ -158,7 +158,7 @@ static inline void stl_phys_notdirty(AddressSpace *as, hwaddr addr, uint32_t val
 
 /* page related stuff */
 
-#ifdef TARGET_PAGE_BITS_VARY
+#ifdef TARGET_PAGE_BITS_VARY // only for arm and mips
 # include "exec/page-vary.h"
 extern const TargetPageBits target_page;
 #ifdef CONFIG_DEBUG_TCG

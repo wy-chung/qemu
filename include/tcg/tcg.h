@@ -427,9 +427,9 @@ typedef struct TCGTemp {
     uintptr_t state;
     void *state_ptr;
 } TCGTemp;
-
+#if !defined(WYC)
 typedef struct TCGContext TCGContext;
-
+#endif
 typedef struct TCGTempSet {
     unsigned long l[BITS_TO_LONGS(TCG_MAX_TEMPS)];
 } TCGTempSet;

@@ -385,15 +385,15 @@ void QEMU_ERROR("code path is reachable")
     })
 
 #ifdef __COVERITY__
-# define MIN_CONST(a, b) ((a) < (b) ? (a) : (b))
-# define MAX_CONST(a, b) ((a) > (b) ? (a) : (b))
+ #define MIN_CONST(a, b) ((a) < (b) ? (a) : (b))
+ #define MAX_CONST(a, b) ((a) > (b) ? (a) : (b))
 #else
-# define MIN_CONST(a, b)                                        \
+ #define MIN_CONST(a, b)                                        \
     __builtin_choose_expr(                                      \
         __builtin_constant_p(a) && __builtin_constant_p(b),     \
         (a) < (b) ? (a) : (b),                                  \
         ((void)0))
-# define MAX_CONST(a, b)                                        \
+ #define MAX_CONST(a, b)                                        \
     __builtin_choose_expr(                                      \
         __builtin_constant_p(a) && __builtin_constant_p(b),     \
         (a) > (b) ? (a) : (b),                                  \
