@@ -736,7 +736,7 @@ static inline bool cpu_handle_exception(CPUState *cpu, int *ret)
             cpu_handle_debug_exception(cpu);
         }
         cpu->exception_index = -1;
-        return true;
+        return true;	// exit cpu_exec_loop()
     } else {
 #if defined(CONFIG_USER_ONLY)
         /* if user mode only, we simulate a fake exception
@@ -763,14 +763,14 @@ static inline bool cpu_handle_exception(CPUState *cpu, int *ret)
                  * raised when single-stepping so that GDB doesn't miss the
                  * next instruction.
                  */
-                *ret = EXCP_DEBUG;
                 cpu_handle_debug_exception(cpu);
-                return true;
+                *ret = EXCP_DEBUG;
+                return true;	// exit cpu_exec_loop()
             }
         } else if (!replay_has_interrupt()) {
             /* give a chance to iothread in replay mode */
             *ret = EXCP_INTERRUPT;
-            return true;
+            return true;	// exit cpu_exec_loop()
         }
 #endif
     }
@@ -825,7 +825,7 @@ static inline bool cpu_handle_interrupt(CPUState *cpu,
             cpu->interrupt_request &= ~CPU_INTERRUPT_DEBUG;
             cpu->exception_index = EXCP_DEBUG;
             qemu_mutex_unlock_iothread();
-            return true;
+            return true;	// exit cpu_exec_loop()
         }
 #if !defined(CONFIG_USER_ONLY)
         if (replay_mode == REPLAY_MODE_PLAY && !replay_has_interrupt()) {
@@ -836,7 +836,7 @@ static inline bool cpu_handle_interrupt(CPUState *cpu,
             cpu->halted = 1;
             cpu->exception_index = EXCP_HLT;
             qemu_mutex_unlock_iothread();
-            return true;
+            return true;	// exit cpu_exec_loop()
         }
 #if defined(TARGET_I386)
         else if (interrupt_request & CPU_INTERRUPT_INIT) {
@@ -854,7 +854,7 @@ static inline bool cpu_handle_interrupt(CPUState *cpu,
             replay_interrupt();
             cpu_reset(cpu);
             qemu_mutex_unlock_iothread();
-            return true;
+            return true;	// exit cpu_exec_loop()
         }
 #endif /* !TARGET_I386 */
         /* The target hook has 3 exit conditions:
@@ -907,7 +907,7 @@ static inline bool cpu_handle_interrupt(CPUState *cpu,
         if (cpu->exception_index == -1) {
             cpu->exception_index = EXCP_INTERRUPT;
         }
-        return true;
+        return true;	// exit cpu_exec_loop()
     }
 
     return false;

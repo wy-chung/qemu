@@ -39,6 +39,7 @@ struct tb_tc {
 };
 
 /* Note that TCG_MAX_INSNS is 512; we validate this match elsewhere. */
+// CF means compiler flags
 #define CF_COUNT_MASK    0x000001ff
 #define CF_NO_GOTO_TB    0x00000200 /* Do not chain with goto_tb */
 #define CF_NO_GOTO_PTR   0x00000400 /* Do not chain with goto_ptr */
