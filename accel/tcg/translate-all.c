@@ -265,7 +265,7 @@ void page_init(void)
  */
 static int setjmp_gen_code(CPUArchState *env, TranslationBlock *tb,
                            vaddr pc, void *host_pc,
-                           int *max_insns, int64_t *ti)
+                           int *max_insns /* IN/OUT *//*, int64_t *ti*/ /* not used */)
 {
     int ret = sigsetjmp(tcg_ctx->jmp_trans, 0);
     if (unlikely(ret != 0)) {
@@ -293,7 +293,7 @@ TranslationBlock *tb_gen_code(CPUState *cpu,
     tb_page_addr_t phys_pc, phys_p2;
     tcg_insn_unit *gen_code_buf;
     int gen_code_size, search_size, max_insns;
-    int64_t ti;
+    //int64_t ti;
     void *host_pc;
 
     assert_memory_lock();
@@ -357,7 +357,7 @@ TranslationBlock *tb_gen_code(CPUState *cpu,
  restart_translate:
     trace_translate_block(tb, pc, tb->tc.ptr);
 
-    gen_code_size = setjmp_gen_code(env, tb, pc, host_pc, &max_insns, &ti);
+    gen_code_size = setjmp_gen_code(env, tb, pc, host_pc, &max_insns/*, &ti*/);
     if (unlikely(gen_code_size < 0)) {
         switch (gen_code_size) {
         case -1:

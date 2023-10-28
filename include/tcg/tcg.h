@@ -251,7 +251,8 @@ typedef enum TCGType {
     TCG_TYPE_V256,
 
     /* Number of different types (integer not enum) */
-#define TCG_TYPE_COUNT  (TCG_TYPE_V256 + 1)
+//#define TCG_TYPE_COUNT  (TCG_TYPE_V256 + 1)
+    TCG_TYPE_COUNT,
 
     /* An alias for the size of the host register.  */
 #if TCG_TARGET_REG_BITS == 32
