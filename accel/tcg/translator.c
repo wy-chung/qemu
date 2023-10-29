@@ -142,11 +142,17 @@ void translator_loop(CPUState *cpu, TranslationBlock *tb, int *max_insns,
     db->host_addr[1] = NULL;
 
     ops->init_disas_context(db, cpu);
+#if defined(WYC)
+    i386_tr_init_disas_context(db, cpu);
+#endif
     tcg_debug_assert(db->is_jmp == DISAS_NEXT);  /* no early exit */
 
     /* Start translating.  */
     icount_start_insn = gen_tb_start(db, cflags);
     ops->tb_start(db, cpu);
+#if defined(WYC)
+    i386_tr_tb_start(db, cpu);
+#endif
     tcg_debug_assert(db->is_jmp == DISAS_NEXT);  /* no early exit */
 
     if (cflags & CF_MEMI_ONLY) {
@@ -160,6 +166,9 @@ void translator_loop(CPUState *cpu, TranslationBlock *tb, int *max_insns,
     while (true) {
         *max_insns = ++db->num_insns;
         ops->insn_start(db, cpu);
+#if defined(WYC)
+        i386_tr_insn_start(db, cpu);
+#endif
         tcg_debug_assert(db->is_jmp == DISAS_NEXT);  /* no early exit */
 
         if (plugin_enabled) {
@@ -207,6 +216,9 @@ void translator_loop(CPUState *cpu, TranslationBlock *tb, int *max_insns,
 
     /* Emit code to exit the TB, as indicated by db->is_jmp.  */
     ops->tb_stop(db, cpu);
+#if defined(WYC)
+    i386_tr_tb_stop(db, cpu);
+#endif
     gen_tb_end(tb, cflags, icount_start_insn, db->num_insns);
 
     if (plugin_enabled) {
@@ -223,6 +235,9 @@ void translator_loop(CPUState *cpu, TranslationBlock *tb, int *max_insns,
         if (logfile) {
             fprintf(logfile, "----------------\n");
             ops->disas_log(db, cpu, logfile);
+#if defined(WYC)
+            i386_tr_disas_log(db, cpu, logfile);
+#endif
             fprintf(logfile, "\n");
             qemu_log_unlock(logfile);
         }

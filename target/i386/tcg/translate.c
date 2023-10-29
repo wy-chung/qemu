@@ -3089,7 +3089,7 @@ static bool disas_insn(DisasContext *s, CPUState *cpu)
     target_ulong orig_pc_save = s->pc_save;
 
     s->pc = s->base.pc_next;
-    s->override = -1;
+    s->override = -1;	// no segment override
 #ifdef TARGET_X86_64
     s->rex_r = 0;
     s->rex_x = 0;
