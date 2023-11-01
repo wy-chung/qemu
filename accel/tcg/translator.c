@@ -336,11 +336,11 @@ uint8_t translator_ldub(CPUArchState *env, DisasContextBase *db, abi_ptr pc)
     void *p = translator_access(env, db, pc, sizeof(ret));
 
     if (p) {
-        plugin_insn_append(pc, p, sizeof(ret));
+        plugin_insn_append(pc, p, sizeof(ret)); // ignore plugin
         return ldub_p(p);
     }
     ret = cpu_ldub_code(env, pc);
-    plugin_insn_append(pc, &ret, sizeof(ret));
+    plugin_insn_append(pc, &ret, sizeof(ret)); // ignore plugin
     return ret;
 }
 
@@ -350,12 +350,12 @@ uint16_t translator_lduw(CPUArchState *env, DisasContextBase *db, abi_ptr pc)
     void *p = translator_access(env, db, pc, sizeof(ret));
 
     if (p) {
-        plugin_insn_append(pc, p, sizeof(ret));
+        plugin_insn_append(pc, p, sizeof(ret)); // ignore plugin
         return lduw_p(p);
     }
     ret = cpu_lduw_code(env, pc);
     plug = tswap16(ret);
-    plugin_insn_append(pc, &plug, sizeof(ret));
+    plugin_insn_append(pc, &plug, sizeof(ret)); // ignore plugin
     return ret;
 }
 
@@ -365,12 +365,12 @@ uint32_t translator_ldl(CPUArchState *env, DisasContextBase *db, abi_ptr pc)
     void *p = translator_access(env, db, pc, sizeof(ret));
 
     if (p) {
-        plugin_insn_append(pc, p, sizeof(ret));
+        plugin_insn_append(pc, p, sizeof(ret)); // ignore plugin
         return ldl_p(p);
     }
     ret = cpu_ldl_code(env, pc);
     plug = tswap32(ret);
-    plugin_insn_append(pc, &plug, sizeof(ret));
+    plugin_insn_append(pc, &plug, sizeof(ret)); // ignore plugin
     return ret;
 }
 
@@ -380,16 +380,16 @@ uint64_t translator_ldq(CPUArchState *env, DisasContextBase *db, abi_ptr pc)
     void *p = translator_access(env, db, pc, sizeof(ret));
 
     if (p) {
-        plugin_insn_append(pc, p, sizeof(ret));
+        plugin_insn_append(pc, p, sizeof(ret)); // ignore plugin
         return ldq_p(p);
     }
     ret = cpu_ldq_code(env, pc);
     plug = tswap64(ret);
-    plugin_insn_append(pc, &plug, sizeof(ret));
+    plugin_insn_append(pc, &plug, sizeof(ret)); // ignore plugin
     return ret;
 }
 
 void translator_fake_ldb(uint8_t insn8, abi_ptr pc)
 {
-    plugin_insn_append(pc, &insn8, sizeof(insn8));
+    plugin_insn_append(pc, &insn8, sizeof(insn8)); // ignore plugin
 }

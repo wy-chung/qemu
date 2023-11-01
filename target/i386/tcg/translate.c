@@ -104,11 +104,12 @@ typedef struct DisasContext {
     uint8_t rip_offset; /* only used in x86_64, but left for simplicity */
 
 #ifdef TARGET_X86_64
-    uint8_t rex_r;
-    uint8_t rex_x;
-    uint8_t rex_b;
+    uint8_t rex_r; // an extension to the MODRM.reg field
+    uint8_t rex_x; // an extension to the SIB.index field
+    uint8_t rex_b; // an extension to the MODRM.rm field or the SIB.base field
 #endif
-    bool vex_w; /* used by AVX even on 32-bit processors */
+    // rex_w: When 1, a 64-bit operand size is used. Otherwise, when 0, the default operand size is used
+    bool vex_w; // rex_w /* used by AVX even on 32-bit processors */
     bool jmp_opt; /* use direct block chaining for direct jumps */
     bool repz_opt; /* optimize jumps within repz instructions */
     bool cc_op_dirty;
@@ -3079,11 +3080,12 @@ static void gen_cmpxchg16b(DisasContext *s, CPUX86State *env, int modrm)
    be stopped. Return the next pc value */
 static bool disas_insn(DisasContext *s, CPUState *cpu)
 {
-    CPUX86State *env = cpu->env_ptr;
     int b, prefixes;
     int shift;
     MemOp ot, aflag, dflag;
     int modrm, reg, rm, mod, op, opreg, val;
+
+    CPUX86State *env = cpu->env_ptr;
     bool orig_cc_op_dirty = s->cc_op_dirty;
     CCOp orig_cc_op = s->cc_op;
     target_ulong orig_pc_save = s->pc_save;
@@ -3099,13 +3101,13 @@ static bool disas_insn(DisasContext *s, CPUState *cpu)
     s->vex_l = 0;
     s->vex_v = 0;
     s->vex_w = false;
-    switch (sigsetjmp(s->jmpbuf, 0)) {
+    switch (sigsetjmp(s->jmpbuf, 0)) { // sigsetjmp returns 0
     case 0:
         break;
-    case 1:
+    case 1: // > X86_MAX_INSN_LENGTH
         gen_exception_gpf(s);
         return true;
-    case 2:
+    case 2: // a subsequent insn that crosses a page boundary
         /* Restore state that may affect the next instruction. */
         s->pc = s->base.pc_next;
         /*
@@ -3177,7 +3179,7 @@ static bool disas_insn(DisasContext *s, CPUState *cpu)
         if (CODE64(s)) {
             /* REX prefix */
             prefixes |= PREFIX_REX;
-            s->vex_w = (b >> 3) & 1;
+            s->vex_w = (b >> 3) & 1; // i.e. rex_w
             s->rex_r = (b & 0x4) << 1;
             s->rex_x = (b & 0x2) << 2;
             s->rex_b = (b & 0x1) << 3;

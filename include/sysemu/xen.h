@@ -13,11 +13,11 @@
 #include "exec/cpu-common.h"
 
 #ifdef NEED_CPU_H
-# ifdef CONFIG_XEN
-#  define CONFIG_XEN_IS_POSSIBLE
-# endif
+ #ifdef CONFIG_XEN
+  #define CONFIG_XEN_IS_POSSIBLE
+ #endif
 #else
-# define CONFIG_XEN_IS_POSSIBLE
+ #define CONFIG_XEN_IS_POSSIBLE
 #endif
 
 #ifdef CONFIG_XEN_IS_POSSIBLE
