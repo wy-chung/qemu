@@ -126,17 +126,17 @@ typedef enum X86Seg {
 #define IOPL_SHIFT 12
 #define VM_SHIFT   17
 
-#define TF_MASK                 0x00000100
-#define IF_MASK                 0x00000200
-#define DF_MASK                 0x00000400
-#define IOPL_MASK               0x00003000
-#define NT_MASK                 0x00004000
-#define RF_MASK                 0x00010000
-#define VM_MASK                 0x00020000
-#define AC_MASK                 0x00040000
-#define VIF_MASK                0x00080000
-#define VIP_MASK                0x00100000
-#define ID_MASK                 0x00200000
+#define TF_MASK                 0x00000100	// Trap flag
+#define IF_MASK                 0x00000200	// Interrupt enable flag
+#define DF_MASK                 0x00000400	// Direction flag for string operaction
+#define IOPL_MASK               0x00003000	// I/O privilege level
+#define NT_MASK                 0x00004000	// Nested task flag
+#define RF_MASK                 0x00010000	// Resume flag
+#define VM_MASK                 0x00020000	// Virtual 8086 mode flag
+#define AC_MASK                 0x00040000	// Alignment Check, SMAP Access Check
+#define VIF_MASK                0x00080000	// Virtual(8086) interrupt flag
+#define VIP_MASK                0x00100000	// Virtual(8086) interrupt pending
+#define ID_MASK                 0x00200000	// Able to use CPUID instruction
 
 /* hidden flags - used internally by qemu to represent additional cpu
    states. Only the INHIBIT_IRQ, SMM and SVMI are not redundant. We
@@ -194,7 +194,7 @@ typedef enum X86Seg {
 #define HF_SVME_MASK         (1 << HF_SVME_SHIFT)	/* SVME enabled (copy of EFER.SVME) */
 #define HF_GUEST_MASK        (1 << HF_GUEST_SHIFT)	/* SVM intercepts are active */
 #define HF_OSFXSR_MASK       (1 << HF_OSFXSR_SHIFT)	/* CR4.OSFXSR */
-#define HF_SMAP_MASK         (1 << HF_SMAP_SHIFT)	/* CR4.SMAP */
+#define HF_SMAP_MASK         (1 << HF_SMAP_SHIFT)	/* CR4.SMAP */ // Supervisor Mode Access Prevention
 #define HF_IOBPT_MASK        (1 << HF_IOBPT_SHIFT)	/* an io breakpoint enabled */
 #define HF_MPX_EN_MASK       (1 << HF_MPX_EN_SHIFT)	/* MPX Enabled (CR4+XCR0+BNDCFGx) */
 #define HF_MPX_IU_MASK       (1 << HF_MPX_IU_SHIFT)	/* BND registers in-use */
@@ -226,41 +226,41 @@ typedef enum X86Seg {
 #define CR0_PE_SHIFT 0
 #define CR0_MP_SHIFT 1
 
-#define CR0_PE_MASK  (1U << 0)
-#define CR0_MP_MASK  (1U << 1)
-#define CR0_EM_MASK  (1U << 2)
-#define CR0_TS_MASK  (1U << 3)
-#define CR0_ET_MASK  (1U << 4)
-#define CR0_NE_MASK  (1U << 5)
-#define CR0_WP_MASK  (1U << 16)
-#define CR0_AM_MASK  (1U << 18)
-#define CR0_NW_MASK  (1U << 29)
-#define CR0_CD_MASK  (1U << 30)
-#define CR0_PG_MASK  (1U << 31)
+#define CR0_PE_MASK  (1U << 0)	// Protected Mode Enable
+#define CR0_MP_MASK  (1U << 1)	// Monitor co-processor
+#define CR0_EM_MASK  (1U << 2)	// If set, no x87 floating-point unit present
+#define CR0_TS_MASK  (1U << 3)	// Task switched
+#define CR0_ET_MASK  (1U << 4)	// to specify whether the external math coprocessor was an 80287 or 80387
+#define CR0_NE_MASK  (1U << 5)	// Enable internal x87 floating point error reporting
+#define CR0_WP_MASK  (1U << 16)	// can't write to read-only pages when privilege level is 0
+#define CR0_AM_MASK  (1U << 18)	// Alignment check enabled
+#define CR0_NW_MASK  (1U << 29)	// Not-write through
+#define CR0_CD_MASK  (1U << 30)	// Cache disable
+#define CR0_PG_MASK  (1U << 31)	// enable paging
 
-#define CR4_VME_MASK  (1U << 0)
-#define CR4_PVI_MASK  (1U << 1)
-#define CR4_TSD_MASK  (1U << 2)
-#define CR4_DE_MASK   (1U << 3)
-#define CR4_PSE_MASK  (1U << 4)
-#define CR4_PAE_MASK  (1U << 5)
-#define CR4_MCE_MASK  (1U << 6)
-#define CR4_PGE_MASK  (1U << 7)
-#define CR4_PCE_MASK  (1U << 8)
-#define CR4_OSFXSR_SHIFT 9
+#define CR4_VME_MASK  (1U << 0)	// Virtual 8086 Mode Extensions
+#define CR4_PVI_MASK  (1U << 1)	// Protected-mode Virtual Interrupts
+#define CR4_TSD_MASK  (1U << 2)	// Time Stamp Disable
+#define CR4_DE_MASK   (1U << 3)	// Debugging Extensions
+#define CR4_PSE_MASK  (1U << 4)	// Page Size Extension
+#define CR4_PAE_MASK  (1U << 5)	// Physical Address Extension
+#define CR4_MCE_MASK  (1U << 6)	// Machine Check Exception
+#define CR4_PGE_MASK  (1U << 7)	// Page Global Enabled
+#define CR4_PCE_MASK  (1U << 8)	// Performance-Monitoring Counter enable
+#define CR4_OSFXSR_SHIFT 9	// Operating system support for FXSAVE and FXRSTOR instructions
 #define CR4_OSFXSR_MASK (1U << CR4_OSFXSR_SHIFT)
-#define CR4_OSXMMEXCPT_MASK  (1U << 10)
-#define CR4_UMIP_MASK   (1U << 11)
-#define CR4_LA57_MASK   (1U << 12)
-#define CR4_VMXE_MASK   (1U << 13)
-#define CR4_SMXE_MASK   (1U << 14)
-#define CR4_FSGSBASE_MASK (1U << 16)
-#define CR4_PCIDE_MASK  (1U << 17)
-#define CR4_OSXSAVE_MASK (1U << 18)
-#define CR4_SMEP_MASK   (1U << 20)
-#define CR4_SMAP_MASK   (1U << 21)
-#define CR4_PKE_MASK   (1U << 22)
-#define CR4_PKS_MASK   (1U << 24)
+#define CR4_OSXMMEXCPT_MASK  (1U << 10)	// Operating System Support for Unmasked SIMD Floating-Point Exceptions
+#define CR4_UMIP_MASK   (1U << 11)	// User-Mode Instruction Prevention
+#define CR4_LA57_MASK   (1U << 12)	// 57-Bit Linear Addresses
+#define CR4_VMXE_MASK   (1U << 13)	// Virtual Machine Extensions Enable
+#define CR4_SMXE_MASK   (1U << 14)	// Safer Mode Extensions Enable
+#define CR4_FSGSBASE_MASK (1U << 16)	// FS.BASE GS.BASE Enable
+#define CR4_PCIDE_MASK  (1U << 17)	// process-context identifier Enable
+#define CR4_OSXSAVE_MASK (1U << 18)	// XSAVE and Processor Extended States Enable
+#define CR4_SMEP_MASK   (1U << 20)	// Supervisor Mode Execution Protection
+#define CR4_SMAP_MASK   (1U << 21)	// Supervisor Mode Access Prevention
+#define CR4_PKE_MASK   (1U << 22)	// Protection Key Enable
+#define CR4_PKS_MASK   (1U << 24)	// Protection Keys for Supervisor-Mode Pages
 
 #define CR4_RESERVED_MASK \
 (~(target_ulong)(CR4_VME_MASK | CR4_PVI_MASK | CR4_TSD_MASK \
@@ -327,18 +327,18 @@ typedef enum X86Seg {
 #define PG_ERROR_I_D_MASK  0x10
 #define PG_ERROR_PK_MASK   0x20
 
-#define PG_MODE_PAE      (1 << 0)
-#define PG_MODE_LMA      (1 << 1)
-#define PG_MODE_NXE      (1 << 2)
-#define PG_MODE_PSE      (1 << 3)
-#define PG_MODE_LA57     (1 << 4)
+#define PG_MODE_PAE      (1 << 0)	// Physical Address Extension
+#define PG_MODE_LMA      (1 << 1)	// long mode active
+#define PG_MODE_NXE      (1 << 2)	// No-Execute Enable
+#define PG_MODE_PSE      (1 << 3)	// Page Size Extension
+#define PG_MODE_LA57     (1 << 4)	// 57-Bit Linear Addresses
 #define PG_MODE_SVM_MASK MAKE_64BIT_MASK(0, 15)
 
 /* Bits of CR4 that do not affect the NPT page format.  */
-#define PG_MODE_WP       (1 << 16)
-#define PG_MODE_PKE      (1 << 17)
-#define PG_MODE_PKS      (1 << 18)
-#define PG_MODE_SMEP     (1 << 19)
+#define PG_MODE_WP       (1 << 16)	// can't write to read-only pages when privilege level is 0
+#define PG_MODE_PKE      (1 << 17)	// Protection Key Enable
+#define PG_MODE_PKS      (1 << 18)	// Protection Keys for Supervisor-Mode Pages
+#define PG_MODE_SMEP     (1 << 19)	// Supervisor Mode Execution Prevention
 
 #define MCG_CTL_P       (1ULL<<8)   /* MCG_CAP register available */
 #define MCG_SER_P       (1ULL<<24) /* MCA recovery/new status bits */
@@ -491,14 +491,14 @@ typedef enum X86Seg {
 #define MSR_IA32_RTIT_ADDR3_B           0x587
 #define MAX_RTIT_ADDRS                  8
 
-#define MSR_EFER                        0xc0000080
+#define MSR_EFER                        0xc0000080	// Extended Feature Enable Register
 
-#define MSR_EFER_SCE   (1 << 0)
-#define MSR_EFER_LME   (1 << 8)
-#define MSR_EFER_LMA   (1 << 10)
-#define MSR_EFER_NXE   (1 << 11)
-#define MSR_EFER_SVME  (1 << 12)
-#define MSR_EFER_FFXSR (1 << 14)
+#define MSR_EFER_SCE   (1 << 0)		// System Call Extensions
+#define MSR_EFER_LME   (1 << 8)		// Long Mode Enable
+#define MSR_EFER_LMA   (1 << 10)	// Long Mode Active
+#define MSR_EFER_NXE   (1 << 11)	// No-Execute Enable
+#define MSR_EFER_SVME  (1 << 12)	// Secure Virtual Machine Enable
+#define MSR_EFER_FFXSR (1 << 14)	// Fast FXSAVE/FXRSTOR
 
 #define MSR_EFER_RESERVED\
         (~(target_ulong)(MSR_EFER_SCE | MSR_EFER_LME\
@@ -2251,9 +2251,9 @@ uint64_t cpu_get_tsc(CPUX86State *env);
 #define cpu_list x86_cpu_list
 
 /* MMU modes definitions */
-#define MMU_KSMAP_IDX   0
-#define MMU_USER_IDX    1
-#define MMU_KNOSMAP_IDX 2
+#define MMU_KSMAP_IDX   0	// kernel super mode access prevention
+#define MMU_USER_IDX    1	// user
+#define MMU_KNOSMAP_IDX 2	// kernel no super mode access prevention
 #define MMU_NESTED_IDX  3
 #define MMU_PHYS_IDX    4
 

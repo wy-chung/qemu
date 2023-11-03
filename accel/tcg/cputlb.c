@@ -1801,13 +1801,14 @@ typedef struct MMULookupLocals {
 static bool mmu_lookup1(CPUArchState *env, MMULookupPageData *data,
                         int mmu_idx, MMUAccessType access_type, uintptr_t ra)
 {
+    CPUTLBEntryFull *full;
+    int flags;
+
     vaddr addr = data->addr;
     uintptr_t index = tlb_index(env, mmu_idx, addr);
     CPUTLBEntry *entry = tlb_entry(env, mmu_idx, addr);
     uint64_t tlb_addr = tlb_read_idx(entry, access_type);
     bool maybe_resized = false;
-    CPUTLBEntryFull *full;
-    int flags;
 
     /* If the TLB entry is for a different page, reload and try again.  */
     if (!tlb_hit(tlb_addr, addr)) {
@@ -1879,7 +1880,7 @@ static void mmu_watch_or_dirty(CPUArchState *env, MMULookupPageData *data,
  * bytes.  Return true if the lookup crosses a page boundary.
  */
 static bool mmu_lookup(CPUArchState *env, vaddr addr, MemOpIdx oi,
-                       uintptr_t ra, MMUAccessType type, MMULookupLocals *l)
+                       uintptr_t ra, MMUAccessType type, MMULookupLocals *l /* OUT */)
 {
     unsigned a_bits;
     bool crosspage;

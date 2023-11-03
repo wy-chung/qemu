@@ -70,7 +70,7 @@ typedef enum MemOp {
     MO_ALIGN_16 = 4 << MO_ASHIFT,
     MO_ALIGN_32 = 5 << MO_ASHIFT,
     MO_ALIGN_64 = 6 << MO_ASHIFT,
-    MO_ALIGN    = MO_AMASK,
+    MO_ALIGN    = MO_AMASK,	// the alignment size is the size of a memory access
 
     /*
      * MO_ATOM_* describes the atomicity requirements of the operation:

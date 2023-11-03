@@ -83,8 +83,13 @@ static inline int load_segment_ra(CPUX86State *env, uint32_t *e1_ptr,
         return -1;
     }
     ptr = dt->base + index;
+#if !defined(WYC)
     *e1_ptr = cpu_ldl_kernel_ra(env, ptr, retaddr);
     *e2_ptr = cpu_ldl_kernel_ra(env, ptr + 4, retaddr);
+#else
+    *e1_ptr = cpu_ldl_mmuidx_ra(env, ptr, cpu_mmu_index_kernel(env), retaddr);
+    *e2_ptr = cpu_ldl_mmuidx_ra(env, ptr + 4, cpu_mmu_index_kernel(env), retaddr);
+#endif
     return 0;
 }
 

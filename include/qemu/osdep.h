@@ -29,7 +29,7 @@
 
 #include "config-host.h"
 #ifdef NEED_CPU_H
-#include CONFIG_TARGET
+#include CONFIG_TARGET	// x86_64-softmmu-config-target.h
 #else
 #include "exec/poison.h"
 #endif
