@@ -5097,7 +5097,7 @@ grp2:
         gen_bnd_jmp(s);
         s->base.is_jmp = DISAS_JUMP;
         break;
-case 0xca: /* lret im */
+    case 0xca: /* lret im */
         val = x86_ldsw_code(env, s);
 do_lret:
         if (PE(s) && !VM86(s)) { // protected mode and ! virtual 86 mode
