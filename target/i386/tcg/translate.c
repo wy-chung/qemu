@@ -148,7 +148,7 @@ typedef struct DisasContext {
 #define DISAS_JUMP             DISAS_TARGET_3
 
 /* The environment in which user-only runs is constrained. */
-#ifdef CONFIG_USER_ONLY //wyc For usermode syscall translation
+#ifdef CONFIG_USER_ONLY // For usermode syscall translation
 #define PE(S)     true
 #define CPL(S)    3
 #define IOPL(S)   0
@@ -188,9 +188,9 @@ typedef struct DisasContext {
 #ifdef TARGET_X86_64
 #define REX_PREFIX(S)  (((S)->prefix & PREFIX_REX) != 0)
 #define REX_W(S)       ((S)->vex_w)
-#define REX_R(S)       ((S)->rex_r + 0)
-#define REX_X(S)       ((S)->rex_x + 0)
-#define REX_B(S)       ((S)->rex_b + 0)
+#define REX_R(S)       ((S)->rex_r + 0) // 4th bit for register
+#define REX_X(S)       ((S)->rex_x + 0) // 4th bit for index register
+#define REX_B(S)       ((S)->rex_b + 0) // 4th bit for base register
 #else
 #define REX_PREFIX(S)  false
 #define REX_W(S)       false
@@ -2531,7 +2531,7 @@ static void gen_movl_seg_T0(DisasContext *s, X86Seg seg_reg)
 {
     if (PE(s) && !VM86(s)) {
         tcg_gen_trunc_tl_i32(s->tmp2_i32, s->T0);
-        gen_helper_load_seg(cpu_env, tcg_constant_i32(seg_reg), s->tmp2_i32);
+        gen_helper_load_seg(cpu_env, tcg_constant_i32(seg_reg), s->tmp2_i32); //wyc
         /* abort translation because the addseg value may change or
            because ss32 may change. For R_SS, translation must always
            stop as a special handling must be done to disable hardware
@@ -3202,7 +3202,7 @@ static bool disas_insn(DisasContext *s, CPUState *cpu)
             return s->pc;
         }
         break;
-    }
+    } // switch (b) Collect prefixes
 
     /* Post-process prefixes.  */
     if (CODE64(s)) {
@@ -3250,8 +3250,8 @@ static bool disas_insn(DisasContext *s, CPUState *cpu)
 
             ot = mo_b_d(b, dflag);
 
-            switch(f) {
-            case 0: /* OP Ev, Gv */ // OP dst, src
+            switch(f) { // OP dst, src
+            case 0: /* OP Ev, Gv */ // OP gpr|mem, gpr
                 modrm = x86_ldub_code(env, s);
                 reg = ((modrm >> 3) & 7) | REX_R(s);
                 mod = (modrm >> 6) & 3;
@@ -3277,7 +3277,7 @@ xor_zero:
                 mod = (modrm >> 6) & 3;
                 reg = ((modrm >> 3) & 7) | REX_R(s);
                 rm = (modrm & 7) | REX_B(s);
-                if (mod != 3) {
+                if (mod != 3) { // 3 means register direct addressing
                     gen_lea_modrm(env, s, modrm);
                     gen_op_ld_v(s, ot, s->T1, s->A0);
                 } else if (op == OP_XORL && rm == reg) {
@@ -3668,16 +3668,16 @@ do_lcall:
             gen_add_A0_im(s, 1 << ot);
             gen_op_ld_v(s, MO_16, s->T0, s->A0);
 do_ljmp:
-            if (PE(s) && !VM86(s)) {
+            if (PE(s) && !VM86(s)) { // protected mode and ! virtual 86 mode
                 tcg_gen_trunc_tl_i32(s->tmp2_i32, s->T0);
                 gen_helper_ljmp_protected(cpu_env, s->tmp2_i32, s->T1,
-                                          eip_next_tl(s));
+                                          eip_next_tl(s)); //wyc
             } else {
                 gen_op_movl_seg_T0_vm(s, R_CS);
                 gen_op_jmp_v(s, s->T1);
             }
             s->base.is_jmp = DISAS_JUMP;
-            break;
+            break; // ljmp Ev
         case 6: /* push Ev */
             gen_push_v(s, s->T0);
             break;
@@ -4060,7 +4060,7 @@ do_rdrand:
 
         /**************************/
         /* mov */
-    case 0x88:
+    case 0x88: // OP dst, src
     case 0x89: /* mov Gv, Ev */
         ot = mo_b_d(b, dflag);
         modrm = x86_ldub_code(env, s);
@@ -4069,7 +4069,7 @@ do_rdrand:
         /* generate a generic store */
         gen_ldst_modrm(env, s, modrm, ot, reg, 1);
         break;
-    case 0xc6:
+    case 0xc6: // OP dst, src
     case 0xc7: /* mov Ev, Iv */
         ot = mo_b_d(b, dflag);
         modrm = x86_ldub_code(env, s);
@@ -4086,7 +4086,7 @@ do_rdrand:
             gen_op_mov_reg_v(s, ot, (modrm & 7) | REX_B(s), s->T0);
         }
         break;
-    case 0x8a:
+    case 0x8a: // OP dst, src
     case 0x8b: /* mov Ev, Gv */
         ot = mo_b_d(b, dflag);
         modrm = x86_ldub_code(env, s);
@@ -4100,7 +4100,7 @@ do_rdrand:
         reg = (modrm >> 3) & 7;
         if (reg >= 6 || reg == R_CS)
             goto illegal_op;
-        gen_ldst_modrm(env, s, modrm, MO_16, OR_TMP0, 0);
+        gen_ldst_modrm(env, s, modrm, MO_16, OR_TMP0, 0); // 0 means load
         gen_movl_seg_T0(s, reg);
         break;
     case 0x8c: /* mov Gv, seg */
@@ -4111,7 +4111,7 @@ do_rdrand:
             goto illegal_op;
         gen_op_movl_T0_seg(s, reg);
         ot = mod == 3 ? dflag : MO_16;
-        gen_ldst_modrm(env, s, modrm, ot, OR_TMP0, 1);
+        gen_ldst_modrm(env, s, modrm, ot, OR_TMP0, 1); // 1 means store
         break;
 
     case 0x1b6: /* movzbS Gv, Eb */
@@ -5100,7 +5100,7 @@ grp2:
 case 0xca: /* lret im */
         val = x86_ldsw_code(env, s);
 do_lret:
-        if (PE(s) && !VM86(s)) {
+        if (PE(s) && !VM86(s)) { // protected mode and ! virtual 86 mode
             gen_update_cc_op(s);
             gen_update_eip_cur(s);
             gen_helper_lret_protected(cpu_env, tcg_constant_i32(dflag - 1),
@@ -5120,7 +5120,7 @@ do_lret:
             gen_stack_update(s, val + (2 << dflag));
         }
         s->base.is_jmp = DISAS_EOB_ONLY;
-        break;
+        break; // lret
     case 0xcb: /* lret */
         val = 0;
         goto do_lret;
