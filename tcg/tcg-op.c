@@ -1287,6 +1287,7 @@ void tcg_gen_mul_i64(TCGv_i64 ret, TCGv_i64 arg1, TCGv_i64 arg2)
 
 #else // TCG_TARGET_REG_BITS != 32
 
+// mov imm. arg is imm
 void tcg_gen_movi_i64(TCGv_i64 ret, int64_t arg)
 {
     tcg_gen_mov_i64(ret, tcg_constant_i64(arg));
@@ -1294,6 +1295,7 @@ void tcg_gen_movi_i64(TCGv_i64 ret, int64_t arg)
 
 #endif /* TCG_TARGET_REG_SIZE == 32 */
 
+// add imm. arg2 is imm
 void tcg_gen_addi_i64(TCGv_i64 ret, TCGv_i64 arg1, int64_t arg2)
 {
     /* some cases can be optimized here */

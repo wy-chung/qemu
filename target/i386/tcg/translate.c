@@ -487,6 +487,7 @@ static TCGv gen_op_deposit_reg_v(DisasContext *s, MemOp ot, int reg, TCGv dest, 
     return cpu_regs[reg];
 }
 
+// reg = t0, _v meas TCGv
 static void gen_op_mov_reg_v(DisasContext *s, MemOp ot, int reg, TCGv t0)
 {
     gen_op_deposit_reg_v(s, ot, reg, NULL, t0);
@@ -2300,7 +2301,7 @@ static TCGv gen_lea_modrm_1(DisasContext *s, AddressParts a, bool is_vsib)
 {
     TCGv ea = NULL;
 
-    if (a.index >= 0 && !is_vsib) {
+    if (a.index >= 0 && !is_vsib) { // v ?? sib(scale, index, base)
         if (a.scale == 0) {
             ea = cpu_regs[a.index];
         } else {
@@ -2541,7 +2542,7 @@ static void gen_movl_seg_T0(DisasContext *s, X86Seg seg_reg)
         } else if (CODE32(s) && seg_reg < R_FS) {
             s->base.is_jmp = DISAS_EOB_NEXT;
         }
-    } else {
+    } else { // 8086 mode
         gen_op_movl_seg_T0_vm(s, seg_reg);
         if (seg_reg == R_SS) {
             s->base.is_jmp = DISAS_EOB_INHIBIT_IRQ;
