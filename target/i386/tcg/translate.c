@@ -2378,7 +2378,7 @@ static void gen_ldst_modrm(CPUX86State *env, DisasContext *s, int modrm,
             if (reg != OR_TMP0)
                 gen_op_mov_v_reg(s, ot, s->T0, reg);
             gen_op_mov_reg_v(s, ot, rm, s->T0);
-        } else {
+        } else { // load
             gen_op_mov_v_reg(s, ot, s->T0, rm);
             if (reg != OR_TMP0)
                 gen_op_mov_reg_v(s, ot, reg, s->T0);
@@ -2389,7 +2389,7 @@ static void gen_ldst_modrm(CPUX86State *env, DisasContext *s, int modrm,
             if (reg != OR_TMP0)
                 gen_op_mov_v_reg(s, ot, s->T0, reg);
             gen_op_st_v(s, ot, s->T0, s->A0);
-        } else {
+        } else { // load
             gen_op_ld_v(s, ot, s->T0, s->A0);
             if (reg != OR_TMP0)
                 gen_op_mov_reg_v(s, ot, reg, s->T0);
@@ -2531,7 +2531,7 @@ static void gen_movl_seg_T0(DisasContext *s, X86Seg seg_reg)
 {
     if (PE(s) && !VM86(s)) {
         tcg_gen_trunc_tl_i32(s->tmp2_i32, s->T0);
-        gen_helper_load_seg(cpu_env, tcg_constant_i32(seg_reg), s->tmp2_i32); //wyc
+        gen_helper_load_seg(cpu_env, tcg_constant_i32(seg_reg), s->tmp2_i32); //wyc helper.h:38
         /* abort translation because the addseg value may change or
            because ss32 may change. For R_SS, translation must always
            stop as a special handling must be done to disable hardware
@@ -4027,10 +4027,10 @@ do_rdrand:
     case 0xc9: /* leave */
         gen_leave(s);
         break;
-    case 0x06: /* push es */
     case 0x0e: /* push cs */
-    case 0x16: /* push ss */
     case 0x1e: /* push ds */
+    case 0x06: /* push es */
+    case 0x16: /* push ss */
         if (CODE64(s))
             goto illegal_op;
         gen_op_movl_T0_seg(s, b >> 3);
@@ -4041,9 +4041,9 @@ do_rdrand:
         gen_op_movl_T0_seg(s, (b >> 3) & 7);
         gen_push_v(s, s->T0);
         break;
+    case 0x1f: /* pop ds */
     case 0x07: /* pop es */
     case 0x17: /* pop ss */
-    case 0x1f: /* pop ds */
         if (CODE64(s))
             goto illegal_op;
         reg = b >> 3;
