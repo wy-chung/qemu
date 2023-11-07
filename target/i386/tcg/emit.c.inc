@@ -227,12 +227,11 @@ static void gen_load(DisasContext *s, X86DecodedInsn *decode, int opn, TCGv v)
     case X86_OP_SKIP:
         return;
     case X86_OP_SEG:
-#if defined(WYC)
-        tcg_gen_ld32u_i64(v, cpu_env,
-#else
         tcg_gen_ld32u_tl(v, cpu_env,
-#endif
                          offsetof(CPUX86State,segs[op->n].selector));
+#if defined(WYC)
+        tcg_gen_ld32u_i64();
+#endif
         break;
     case X86_OP_CR:
         tcg_gen_ld_tl(v, cpu_env, offsetof(CPUX86State, cr[op->n]));

@@ -272,7 +272,7 @@ static int setjmp_gen_code(CPUArchState *env, TranslationBlock *tb,
         return ret;
     }
 
-    tcg_func_start(tcg_ctx);
+    tcg_func_start(tcg_ctx); // initialize tcg_cxt
 
     tcg_ctx->cpu = env_cpu(env);
     gen_intermediate_code(env_cpu(env), tb, max_insns, pc, host_pc);

@@ -30,13 +30,11 @@
 
 #define QEMU_ALIGNED(X) __attribute__((aligned(X)))
 
-#if !defined(WYC)
 #ifndef glue
 #define xglue(x, y) x ## y
 #define glue(x, y) xglue(x, y)
 #define stringify(s) tostring(s)
 #define tostring(s) #s
-#endif
 #endif
 
 #ifndef likely

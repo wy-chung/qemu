@@ -2423,6 +2423,7 @@ static target_ulong insn_get_addr(CPUX86State *env, DisasContext *s, MemOp ot)
     return ret;
 }
 
+// fetch code
 static inline uint32_t insn_get(CPUX86State *env, DisasContext *s, MemOp ot)
 {
     uint32_t ret;
@@ -2572,7 +2573,7 @@ static void gen_push_v(DisasContext *s, TCGv val)
     int size = 1 << d_ot;
     TCGv new_esp = s->A0;
 
-    tcg_gen_subi_tl(s->A0, cpu_regs[R_ESP], size);
+    tcg_gen_subi_tl(s->A0, cpu_regs[R_ESP], size); // R_ESP -= size
 
     if (!CODE64(s)) {
         if (ADDSEG(s)) {
@@ -3970,11 +3971,11 @@ do_rdrand:
 
         /**************************/
         /* push/pop */
-    case 0x50 ... 0x57: /* push */
-        gen_op_mov_v_reg(s, MO_32, s->T0, (b & 7) | REX_B(s));
-        gen_push_v(s, s->T0);
+    case 0x50 ... 0x57: /* push gpr */
+        gen_op_mov_v_reg(s, MO_32, s->T0, (b & 7) | REX_B(s)); // v(s->T0) = reg
+        gen_push_v(s, s->T0); // push v(s->T0)
         break;
-    case 0x58 ... 0x5f: /* pop */
+    case 0x58 ... 0x5f: /* pop gpr */
         ot = gen_pop_T0(s);
         /* NOTE: order is important for pop %sp */
         gen_pop_update(s, ot);
@@ -3991,14 +3992,14 @@ do_rdrand:
         gen_popa(s);
         break;
     case 0x68: /* push Iv */
-    case 0x6a:
+    case 0x6a: // push Ib
         ot = mo_pushpop(s, dflag);
         if (b == 0x68)
             val = insn_get(env, s, ot);
         else
             val = (int8_t)insn_get(env, s, MO_8);
-        tcg_gen_movi_tl(s->T0, val);
-        gen_push_v(s, s->T0);
+        tcg_gen_movi_tl(s->T0, val); // s->t0 = val
+        gen_push_v(s, s->T0);	// push v(s->T0)
         break;
     case 0x8f: /* pop Ev */
         modrm = x86_ldub_code(env, s);
@@ -4008,11 +4009,11 @@ do_rdrand:
             /* NOTE: order is important for pop %sp */
             gen_pop_update(s, ot);
             rm = (modrm & 7) | REX_B(s);
-            gen_op_mov_reg_v(s, ot, rm, s->T0);
+            gen_op_mov_reg_v(s, ot, rm, s->T0); // reg(rm) = v(s->T0)
         } else {
             /* NOTE: order is important too for MMU exceptions */
             s->popl_esp_hack = 1 << ot;
-            gen_ldst_modrm(env, s, modrm, ot, OR_TMP0, 1);
+            gen_ldst_modrm(env, s, modrm, ot, OR_TMP0/* reg */, 1/* is_store */);
             s->popl_esp_hack = 0;
             gen_pop_update(s, ot);
         }
@@ -6920,7 +6921,7 @@ void tcg_x86_init(void)
     }
 }
 
-static void i386_tr_init_disas_context(DisasContextBase *dcbase, CPUState *cpu)
+static void i386_tr_init_disas_context(DisasContextBase *dcbase, CPUState *cpu/* IN */)
 {
     DisasContext *dc = container_of(dcbase, DisasContext, base);
     CPUX86State *env = cpu->env_ptr;

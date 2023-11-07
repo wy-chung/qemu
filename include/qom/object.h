@@ -17,19 +17,19 @@
 #include "qapi/qapi-builtin-types.h"
 #include "qemu/module.h"
 
-struct TypeImpl;
 #if !defined(WYC)
+struct TypeImpl;
 typedef struct TypeImpl *Type;
 
 typedef struct TypeInfo TypeInfo;
 
 typedef struct InterfaceClass InterfaceClass;
 typedef struct InterfaceInfo InterfaceInfo;
-#endif
-
-#define TYPE_OBJECT "object"
 
 typedef struct ObjectProperty ObjectProperty;
+#endif // !defined(WYC)
+
+#define TYPE_OBJECT "object"
 
 /**
  * typedef ObjectPropertyAccessor:

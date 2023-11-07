@@ -143,7 +143,7 @@ void translator_loop(CPUState *cpu, TranslationBlock *tb, int *max_insns,
 
     ops->init_disas_context(db, cpu);
 #if defined(WYC)
-    i386_tr_init_disas_context(db, cpu);
+    i386_tr_init_disas_context(db, cpu/* IN */); // initialize container_of db, i.e. DisasContext
 #endif
     tcg_debug_assert(db->is_jmp == DISAS_NEXT);  /* no early exit */
 
