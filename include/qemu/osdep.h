@@ -29,7 +29,7 @@
 
 #include "config-host.h"
 #ifdef NEED_CPU_H
-#include CONFIG_TARGET
+#include CONFIG_TARGET	// x86_64-softmmu-config-target.h
 #else
 #include "exec/poison.h"
 #endif
@@ -385,15 +385,15 @@ void QEMU_ERROR("code path is reachable")
     })
 
 #ifdef __COVERITY__
-# define MIN_CONST(a, b) ((a) < (b) ? (a) : (b))
-# define MAX_CONST(a, b) ((a) > (b) ? (a) : (b))
+ #define MIN_CONST(a, b) ((a) < (b) ? (a) : (b))
+ #define MAX_CONST(a, b) ((a) > (b) ? (a) : (b))
 #else
-# define MIN_CONST(a, b)                                        \
+ #define MIN_CONST(a, b)                                        \
     __builtin_choose_expr(                                      \
         __builtin_constant_p(a) && __builtin_constant_p(b),     \
         (a) < (b) ? (a) : (b),                                  \
         ((void)0))
-# define MAX_CONST(a, b)                                        \
+ #define MAX_CONST(a, b)                                        \
     __builtin_choose_expr(                                      \
         __builtin_constant_p(a) && __builtin_constant_p(b),     \
         (a) > (b) ? (a) : (b),                                  \
@@ -723,6 +723,7 @@ size_t qemu_get_host_physmem(void);
  */
 #if defined(MAC_OS_VERSION_11_0) && \
     MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_VERSION_11_0
+ #if !defined(WYC)
 static inline void qemu_thread_jit_execute(void)
 {
     pthread_jit_write_protect_np(true);
@@ -732,6 +733,7 @@ static inline void qemu_thread_jit_write(void)
 {
     pthread_jit_write_protect_np(false);
 }
+ #endif
 #else
 static inline void qemu_thread_jit_write(void) {}
 static inline void qemu_thread_jit_execute(void) {}

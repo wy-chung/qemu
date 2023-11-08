@@ -232,8 +232,7 @@ enum pmbus_registers {
 #define PMBUS_ERR_BYTE          0xFF
 
 #define TYPE_PMBUS_DEVICE "pmbus-device"
-OBJECT_DECLARE_TYPE(PMBusDevice, PMBusDeviceClass,
-                    PMBUS_DEVICE)
+OBJECT_DECLARE_TYPE(PMBusDevice, PMBusDeviceClass, PMBUS_DEVICE);
 
 /* flags */
 #define PB_HAS_COEFFICIENTS        BIT_ULL(9)

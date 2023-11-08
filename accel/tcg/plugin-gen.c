@@ -90,13 +90,25 @@ enum plugin_gen_cb {
  * These helpers are stubs that get dynamically switched out for calls
  * direct to the plugin if they are subscribed to.
  */
+#if !defined(WYC)
 void HELPER(plugin_vcpu_udata_cb)(uint32_t cpu_index, void *udata)
 { }
+#else
+void helper_plugin_vcpu_udata_cb(uint32_t cpu_index, void *udata)
+{ }
+#endif
 
+#if !defined(WYC)
 void HELPER(plugin_vcpu_mem_cb)(unsigned int vcpu_index,
                                 qemu_plugin_meminfo_t info, uint64_t vaddr,
                                 void *userdata)
 { }
+#else
+void helper_plugin_vcpu_mem_cb(unsigned int vcpu_index,
+                               qemu_plugin_meminfo_t info, uint64_t vaddr,
+                               void *userdata)
+{ }
+#endif
 
 static void gen_empty_udata_cb(void)
 {

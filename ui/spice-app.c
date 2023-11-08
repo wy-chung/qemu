@@ -54,7 +54,7 @@ struct VCChardevClass {
 };
 
 #define TYPE_CHARDEV_VC "chardev-vc"
-OBJECT_DECLARE_TYPE(VCChardev, VCChardevClass, CHARDEV_VC)
+OBJECT_DECLARE_TYPE(VCChardev, VCChardevClass, CHARDEV_VC);
 
 static ChardevBackend *
 chr_spice_backend_new(void)

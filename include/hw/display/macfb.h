@@ -82,7 +82,7 @@ struct MacfbSysBusState {
 };
 
 #define TYPE_NUBUS_MACFB "nubus-macfb"
-OBJECT_DECLARE_TYPE(MacfbNubusState, MacfbNubusDeviceClass, NUBUS_MACFB)
+OBJECT_DECLARE_TYPE(MacfbNubusState, MacfbNubusDeviceClass, NUBUS_MACFB);
 
 struct MacfbNubusDeviceClass {
     DeviceClass parent_class;

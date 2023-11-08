@@ -29,8 +29,10 @@
 
 #include "hw/vmstate-if.h"
 
+#if !defined(WYC)
 typedef struct VMStateInfo VMStateInfo;
 typedef struct VMStateField VMStateField;
+#endif
 
 /* VMStateInfo allows customized migration of objects that don't fit in
  * any category in VMStateFlags. Additional information is always passed

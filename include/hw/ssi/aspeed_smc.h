@@ -45,7 +45,7 @@ struct AspeedSMCFlash {
 };
 
 #define TYPE_ASPEED_SMC "aspeed.smc"
-OBJECT_DECLARE_TYPE(AspeedSMCState, AspeedSMCClass, ASPEED_SMC)
+OBJECT_DECLARE_TYPE(AspeedSMCState, AspeedSMCClass, ASPEED_SMC);
 
 #define ASPEED_SMC_R_MAX        (0x100 / 4)
 #define ASPEED_SMC_CS_MAX       5

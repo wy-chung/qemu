@@ -151,7 +151,7 @@ struct MOS6522State {
 };
 
 #define TYPE_MOS6522 "mos6522"
-OBJECT_DECLARE_TYPE(MOS6522State, MOS6522DeviceClass, MOS6522)
+OBJECT_DECLARE_TYPE(MOS6522State, MOS6522DeviceClass, MOS6522);
 
 struct MOS6522DeviceClass {
     DeviceClass parent_class;

@@ -48,7 +48,7 @@ struct EMC141XClass {
 };
 
 #define TYPE_EMC141X "emc141x"
-OBJECT_DECLARE_TYPE(EMC141XState, EMC141XClass, EMC141X)
+OBJECT_DECLARE_TYPE(EMC141XState, EMC141XClass, EMC141X);
 
 static void emc141x_get_temperature(Object *obj, Visitor *v, const char *name,
                                     void *opaque, Error **errp)

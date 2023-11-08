@@ -188,7 +188,7 @@ int x86_cpu_write_elf64_note(WriteCoreDumpFunction f, CPUState *cs,
     X86CPU *first_x86_cpu = X86_CPU(first_cpu);
     bool lma = !!(first_x86_cpu->env.hflags & HF_LMA_MASK);
 
-    if (lma) {
+    if (lma) { // long mode active
         ret = x86_64_write_elf64_note(f, &cpu->env, cpuid, s);
     } else {
 #endif

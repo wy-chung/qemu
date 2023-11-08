@@ -32,7 +32,7 @@
 
 
 #define TYPE_PIC_COMMON "pic-common"
-OBJECT_DECLARE_TYPE(PICCommonState, PICCommonClass, PIC_COMMON)
+OBJECT_DECLARE_TYPE(PICCommonState, PICCommonClass, PIC_COMMON);
 
 struct PICCommonClass {
     DeviceClass parent_class;

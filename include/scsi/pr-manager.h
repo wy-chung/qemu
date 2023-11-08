@@ -8,8 +8,7 @@
 
 #define TYPE_PR_MANAGER "pr-manager"
 
-OBJECT_DECLARE_TYPE(PRManager, PRManagerClass,
-                    PR_MANAGER)
+OBJECT_DECLARE_TYPE(PRManager, PRManagerClass, PR_MANAGER);
 
 struct sg_io_hdr;
 

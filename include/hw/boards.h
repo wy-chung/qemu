@@ -20,7 +20,7 @@
 
 #define TYPE_MACHINE "machine"
 #undef MACHINE  /* BSD defines it and QEMU does not use it */
-OBJECT_DECLARE_TYPE(MachineState, MachineClass, MACHINE)
+OBJECT_DECLARE_TYPE(MachineState, MachineClass, MACHINE);
 
 extern MachineState *current_machine;
 

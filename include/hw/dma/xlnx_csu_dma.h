@@ -51,7 +51,7 @@ typedef struct XlnxCSUDMA {
     RegisterInfo regs_info[XLNX_CSU_DMA_R_MAX];
 } XlnxCSUDMA;
 
-OBJECT_DECLARE_TYPE(XlnxCSUDMA, XlnxCSUDMAClass, XLNX_CSU_DMA)
+OBJECT_DECLARE_TYPE(XlnxCSUDMA, XlnxCSUDMAClass, XLNX_CSU_DMA);
 
 struct XlnxCSUDMAClass {
     SysBusDeviceClass parent_class;

@@ -85,6 +85,10 @@ static inline int load_segment_ra(CPUX86State *env, uint32_t *e1_ptr,
     ptr = dt->base + index;
     *e1_ptr = cpu_ldl_kernel_ra(env, ptr, retaddr);
     *e2_ptr = cpu_ldl_kernel_ra(env, ptr + 4, retaddr);
+#if defined(WYC)
+    *e1_ptr = cpu_ldl_le_mmuidx_ra(env, ptr,     cpu_mmu_index_kernel(env), retaddr);
+    *e2_ptr = cpu_ldl_le_mmuidx_ra(env, ptr + 4, cpu_mmu_index_kernel(env), retaddr);
+#endif
     return 0;
 }
 
@@ -1311,8 +1315,12 @@ void helper_load_seg(CPUX86State *env, int seg_reg, int selector)
             raise_exception_err_ra(env, EXCP0D_GPF, selector & 0xfffc, GETPC());
         }
         ptr = dt->base + index;
-        e1 = cpu_ldl_kernel_ra(env, ptr, GETPC());
+        e1 = cpu_ldl_kernel_ra(env, ptr, GETPC()); // ra means return address
         e2 = cpu_ldl_kernel_ra(env, ptr + 4, GETPC());
+#if defined(WYC)
+        e1 = cpu_ldl_le_mmuidx_ra(env, ptr,     cpu_mmu_index_kernel(env), GETPC());
+        e2 = cpu_ldl_le_mmuidx_ra(env, ptr + 4, cpu_mmu_index_kernel(env), GETPC());
+#endif
 
         if (!(e2 & DESC_S_MASK)) {
             raise_exception_err_ra(env, EXCP0D_GPF, selector & 0xfffc, GETPC());

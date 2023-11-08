@@ -500,7 +500,7 @@ struct IDEBus {
 };
 
 #define TYPE_IDE_DEVICE "ide-device"
-OBJECT_DECLARE_TYPE(IDEDevice, IDEDeviceClass, IDE_DEVICE)
+OBJECT_DECLARE_TYPE(IDEDevice, IDEDeviceClass, IDE_DEVICE);
 
 struct IDEDeviceClass {
     DeviceClass parent_class;

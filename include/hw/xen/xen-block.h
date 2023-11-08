@@ -70,7 +70,7 @@ struct XenBlockDeviceClass {
 };
 
 #define TYPE_XEN_BLOCK_DEVICE  "xen-block"
-OBJECT_DECLARE_TYPE(XenBlockDevice, XenBlockDeviceClass, XEN_BLOCK_DEVICE)
+OBJECT_DECLARE_TYPE(XenBlockDevice, XenBlockDeviceClass, XEN_BLOCK_DEVICE);
 
 struct XenDiskDevice {
     XenBlockDevice blockdev;
