@@ -359,6 +359,9 @@ static bool check_for_breakpoints_slow(CPUState *cpu, vaddr pc,
                 CPUClass *cc = CPU_GET_CLASS(cpu);
                 assert(cc->tcg_ops->debug_check_breakpoint);
                 match_bp = cc->tcg_ops->debug_check_breakpoint(cpu);
+ #if defined(WYC)
+                match_bp = x86_debug_check_breakpoint();
+ #endif
 #endif
             }
 
@@ -483,6 +486,9 @@ cpu_tb_exec(CPUState *cpu, TranslationBlock *itb, int *tb_exit)
 
         if (cc->tcg_ops->synchronize_from_tb) {
             cc->tcg_ops->synchronize_from_tb(cpu, last_tb);
+#if defined(WYC)
+            x86_cpu_synchronize_from_tb();
+#endif
         } else {
             tcg_debug_assert(!(tb_cflags(last_tb) & CF_PCREL));
             assert(cc->set_pc);
@@ -518,6 +524,9 @@ static void cpu_exec_enter(CPUState *cpu)
 
     if (cc->tcg_ops->cpu_exec_enter) {
         cc->tcg_ops->cpu_exec_enter(cpu);
+#if defined(WYC)
+        x86_cpu_exec_enter();
+#endif
     }
 }
 
@@ -527,6 +536,9 @@ static void cpu_exec_exit(CPUState *cpu)
 
     if (cc->tcg_ops->cpu_exec_exit) {
         cc->tcg_ops->cpu_exec_exit(cpu);
+#if defined(WYC)
+        x86_cpu_exec_exit();
+#endif
     }
 }
 
@@ -713,6 +725,9 @@ static inline void cpu_handle_debug_exception(CPUState *cpu)
 
     if (cc->tcg_ops->debug_excp_handler) {
         cc->tcg_ops->debug_excp_handler(cpu);
+#if defined(WYC)
+        breakpoint_handler();
+#endif
     }
 }
 
@@ -754,6 +769,9 @@ static inline bool cpu_handle_exception(CPUState *cpu, int *ret)
             CPUClass *cc = CPU_GET_CLASS(cpu);
             qemu_mutex_lock_iothread();
             cc->tcg_ops->do_interrupt(cpu);
+#if defined(WYC)
+            x86_cpu_do_interrupt();
+#endif
             qemu_mutex_unlock_iothread();
             cpu->exception_index = -1;
 
@@ -865,7 +883,12 @@ static inline bool cpu_handle_interrupt(CPUState *cpu,
             CPUClass *cc = CPU_GET_CLASS(cpu);
 
             if (cc->tcg_ops->cpu_exec_interrupt &&
-                cc->tcg_ops->cpu_exec_interrupt(cpu, interrupt_request)) {
+#if !defined(WYC)
+                cc->tcg_ops->cpu_exec_interrupt(cpu, interrupt_request)
+#else
+                x86_cpu_exec_interrupt()
+#endif
+                ) {
                 if (need_replay_interrupt(interrupt_request)) {
                     replay_interrupt();
                 }
@@ -1099,6 +1122,9 @@ void tcg_exec_realizefn(CPUState *cpu, Error **errp)
 
     if (!tcg_target_initialized) {
         cc->tcg_ops->initialize();
+#if defined(WYC)
+        tcg_x86_init();
+#endif
         tcg_target_initialized = true;
     }
 

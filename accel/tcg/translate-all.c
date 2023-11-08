@@ -218,6 +218,9 @@ void cpu_restore_state_from_tb(CPUState *cpu, TranslationBlock *tb,
     }
 
     cpu->cc->tcg_ops->restore_state_to_opc(cpu, tb, data);
+#if defined(WYC)
+    x86_restore_state_to_opc();
+#endif
 }
 
 bool cpu_restore_state(CPUState *cpu, uintptr_t host_pc)

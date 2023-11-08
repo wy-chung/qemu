@@ -262,7 +262,7 @@ static void *translator_access(CPUArchState *env, DisasContextBase *db,
     if (likely(is_same_page(db, end))) {
         host = db->host_addr[0];
         base = db->pc_first;
-    } else {
+    } else { // not same page
         host = db->host_addr[1];
         base = TARGET_PAGE_ALIGN(db->pc_first);
         if (host == NULL) {
@@ -303,7 +303,7 @@ static void *translator_access(CPUArchState *env, DisasContextBase *db,
         if (is_same_page(db, pc)) {
             return NULL;
         }
-    }
+    } // else not_same_page
 
     tcg_debug_assert(pc >= base);
     return host + (pc - base);

@@ -1335,6 +1335,9 @@ static void tlb_fill(CPUState *cpu, vaddr addr, int size,
      */
     ok = cpu->cc->tcg_ops->tlb_fill(cpu, addr, size,
                                     access_type, mmu_idx, false, retaddr);
+#if defined(WYC)
+         x86_cpu_tlb_fill();
+#endif
     assert(ok);
 }
 
@@ -1344,6 +1347,9 @@ static inline void cpu_unaligned_access(CPUState *cpu, vaddr addr,
 {
     cpu->cc->tcg_ops->do_unaligned_access(cpu, addr, access_type,
                                           mmu_idx, retaddr);
+#if defined(WYC)
+    x86_cpu_do_unaligned_access();
+#endif
 }
 
 static inline void cpu_transaction_failed(CPUState *cpu, hwaddr physaddr,
@@ -1532,9 +1538,12 @@ static int probe_access_internal(CPUArchState *env, vaddr addr,
     if (!tlb_hit_page(tlb_addr, page_addr)) {
         if (!victim_tlb_hit(env, mmu_idx, index, access_type, page_addr)) {
             CPUState *cs = env_cpu(env);
-
+#if !defined(WYC)
             if (!cs->cc->tcg_ops->tlb_fill(cs, addr, fault_size, access_type,
                                            mmu_idx, nonfault, retaddr)) {
+#else
+            if (!x86_cpu_tlb_fill()) {
+#endif
                 /* Non-faulting page table read failed.  */
                 *phost = NULL;
                 *pfull = NULL;

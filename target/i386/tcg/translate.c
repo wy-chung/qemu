@@ -629,7 +629,7 @@ static TCGv eip_cur_tl(DisasContext *s)
     }
 }
 
-/* Compute SEG:REG into A0.  SEG is selected from the override segment
+/* Compute the effective address of SEG:REG into A0.  SEG is selected from the override segment
    (OVR_SEG) and the default segment (DEF_SEG).  OVR_SEG may be -1 to
    indicate no override.  */
 static void gen_lea_v_seg(DisasContext *s, MemOp aflag, TCGv a0,
@@ -677,7 +677,7 @@ static void gen_lea_v_seg(DisasContext *s, MemOp aflag, TCGv a0,
             tcg_gen_add_tl(s->A0, a0, seg);
         } else if (CODE64(s)) {
             tcg_gen_ext32u_tl(s->A0, a0);
-            tcg_gen_add_tl(s->A0, s->A0, seg);
+            tcg_gen_add_tl(s->A0, s->A0, seg); // s->A0 += seg
         } else {
             tcg_gen_add_tl(s->A0, a0, seg);
             tcg_gen_ext32u_tl(s->A0, s->A0);
@@ -2108,6 +2108,7 @@ static void gen_shifti(DisasContext *s1, int op, MemOp ot, int d, int c)
 
 #define X86_MAX_INSN_LENGTH 15
 
+// return the current pc if (pc + @num_bytes) is still on the same page
 static uint64_t advance_pc(CPUX86State *env, DisasContext *s, int num_bytes)
 {
     uint64_t pc = s->pc;
@@ -2173,6 +2174,7 @@ typedef struct AddressParts {
     target_long disp;
 } AddressParts;
 
+// return { def_seg, base, index, scale, disp}
 static AddressParts gen_lea_modrm_0(CPUX86State *env, DisasContext *s,
                                     int modrm)
 {
@@ -2297,11 +2299,11 @@ static AddressParts gen_lea_modrm_0(CPUX86State *env, DisasContext *s,
 }
 
 /* Compute the address, with a minimum number of TCG ops.  */
-static TCGv gen_lea_modrm_1(DisasContext *s, AddressParts a, bool is_vsib)
+static TCGv gen_lea_modrm_1(DisasContext *s, AddressParts a, bool is_vsib/* has a VSIB byte */)
 {
     TCGv ea = NULL;
 
-    if (a.index >= 0 && !is_vsib) { // v ?? sib(scale, index, base)
+    if (a.index >= 0 && !is_vsib) { // v(vex), sib(scale, index, base)
         if (a.scale == 0) {
             ea = cpu_regs[a.index];
         } else {
@@ -2334,8 +2336,8 @@ static TCGv gen_lea_modrm_1(DisasContext *s, AddressParts a, bool is_vsib)
 static void gen_lea_modrm(CPUX86State *env, DisasContext *s, int modrm)
 {
     AddressParts a = gen_lea_modrm_0(env, s, modrm);
-    TCGv ea = gen_lea_modrm_1(s, a, false);
-    gen_lea_v_seg(s, s->aflag, ea, a.def_seg, s->override);
+    TCGv ea = gen_lea_modrm_1(s, a, false/* is_vsib */);
+    gen_lea_v_seg(s, s->aflag, ea, a.def_seg, s->override); // load effective address of v(ea) and seg(def_seg or s->override) to A0
 }
 
 static void gen_nop_modrm(CPUX86State *env, DisasContext *s, int modrm)
@@ -2374,7 +2376,7 @@ static void gen_ldst_modrm(CPUX86State *env, DisasContext *s, int modrm,
 
     mod = (modrm >> 6) & 3;
     rm = (modrm & 7) | REX_B(s);
-    if (mod == 3) {
+    if (mod == 3) { // rm is a register
         if (is_store) {
             if (reg != OR_TMP0)
                 gen_op_mov_v_reg(s, ot, s->T0, reg);
@@ -2384,8 +2386,8 @@ static void gen_ldst_modrm(CPUX86State *env, DisasContext *s, int modrm,
             if (reg != OR_TMP0)
                 gen_op_mov_reg_v(s, ot, reg, s->T0);
         }
-    } else {
-        gen_lea_modrm(env, s, modrm);
+    } else { // rm is memory
+        gen_lea_modrm(env, s, modrm); // load effective address to A0
         if (is_store) {
             if (reg != OR_TMP0)
                 gen_op_mov_v_reg(s, ot, s->T0, reg);
@@ -2544,7 +2546,7 @@ static void gen_movl_seg_T0(DisasContext *s, X86Seg seg_reg)
             s->base.is_jmp = DISAS_EOB_NEXT;
         }
     } else { // 8086 mode
-        gen_op_movl_seg_T0_vm(s, seg_reg);
+        gen_op_movl_seg_T0_vm(s, seg_reg); // vm means vm86 mode
         if (seg_reg == R_SS) {
             s->base.is_jmp = DISAS_EOB_INHIBIT_IRQ;
         }
@@ -3712,7 +3714,7 @@ do_ljmp:
         set_cc_op(s, CC_OP_LOGICB + ot);
         break;
 
-    case 0x98: /* CWDE/CBW */
+    case 0x98: /* CWDE/CBW */ // convert word to doubleword / convert byte to word
         switch (dflag) {
 #ifdef TARGET_X86_64
         case MO_64:
@@ -3735,7 +3737,7 @@ do_ljmp:
             g_assert_not_reached();
         }
         break;
-    case 0x99: /* CDQ/CWD */
+    case 0x99: /* CDQ/CWD */ // Convert Doubleword to Quadword/Convert Word to Doubleword
         switch (dflag) {
 #ifdef TARGET_X86_64
         case MO_64:
@@ -3762,7 +3764,7 @@ do_ljmp:
         break;
     case 0x1af: /* imul Gv, Ev */
     case 0x69: /* imul Gv, Ev, I */
-    case 0x6b:
+    case 0x6b: // imul Gv, Ev, Ib
         ot = dflag;
         modrm = x86_ldub_code(env, s);
         reg = ((modrm >> 3) & 7) | REX_R(s);
@@ -4094,7 +4096,7 @@ do_rdrand:
         modrm = x86_ldub_code(env, s);
         reg = ((modrm >> 3) & 7) | REX_R(s);
 
-        gen_ldst_modrm(env, s, modrm, ot, OR_TMP0, 0);
+        gen_ldst_modrm(env, s, modrm, ot, OR_TMP0, 0/* load */);
         gen_op_mov_reg_v(s, ot, reg, s->T0);
         break;
     case 0x8e: /* mov seg, Gv */
@@ -4102,8 +4104,8 @@ do_rdrand:
         reg = (modrm >> 3) & 7;
         if (reg >= 6 || reg == R_CS)
             goto illegal_op;
-        gen_ldst_modrm(env, s, modrm, MO_16, OR_TMP0, 0); // 0 means load
-        gen_movl_seg_T0(s, reg);
+        gen_ldst_modrm(env, s, modrm, MO_16, OR_TMP0, 0/* load */); // load to OR_TMP0
+        gen_movl_seg_T0(s, reg); // seg = T0
         break;
     case 0x8c: /* mov Gv, seg */
         modrm = x86_ldub_code(env, s);
@@ -4111,9 +4113,9 @@ do_rdrand:
         mod = (modrm >> 6) & 3;
         if (reg >= 6)
             goto illegal_op;
-        gen_op_movl_T0_seg(s, reg);
+        gen_op_movl_T0_seg(s, reg); // T0 = seg
         ot = mod == 3 ? dflag : MO_16;
-        gen_ldst_modrm(env, s, modrm, ot, OR_TMP0, 1); // 1 means store
+        gen_ldst_modrm(env, s, modrm, ot, OR_TMP0, 1/* store */);
         break;
 
     case 0x1b6: /* movzbS Gv, Eb */
