@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
-//wyc included by translate.c
+// included by translate.c
 
 #define ZMM_OFFSET(reg) offsetof(CPUX86State, xmm_regs[reg])
 

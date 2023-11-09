@@ -1302,7 +1302,7 @@ void helper_load_seg(CPUX86State *env, int seg_reg, int selector)
             ) {
             raise_exception_err_ra(env, EXCP0D_GPF, 0, GETPC());
         }
-        cpu_x86_load_seg_cache(env, seg_reg, selector, 0, 0, 0);
+        cpu_x86_load_seg_cache(env, seg_reg, selector, 0/*base*/, 0/*limit*/, 0/*flag*/);
     } else {
 
         if (selector & 0x4) {

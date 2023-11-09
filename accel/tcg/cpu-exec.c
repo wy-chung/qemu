@@ -461,7 +461,7 @@ cpu_tb_exec(CPUState *cpu, TranslationBlock *itb, int *tb_exit)
     }
 
     qemu_thread_jit_execute();
-    ret = tcg_qemu_tb_exec(env, tb_ptr); //wyc can not find the source code for this function
+    ret = tcg_qemu_tb_exec(env, tb_ptr); //wyc? gdb cannot step into this function
     cpu->can_do_io = 1;
     qemu_plugin_disable_mem_helpers(cpu);
     /*

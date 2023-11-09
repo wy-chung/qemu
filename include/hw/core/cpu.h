@@ -79,7 +79,7 @@ DECLARE_CLASS_CHECKERS(CPUClass, CPU, TYPE_CPU);
  */
 #define OBJECT_DECLARE_CPU_TYPE(CpuInstanceType, CpuClassType, CPU_MODULE_OBJ_NAME) \
     typedef struct ArchCPU CpuInstanceType; \
-    OBJECT_DECLARE_TYPE(ArchCPU, CpuClassType, CPU_MODULE_OBJ_NAME) //wyc
+    OBJECT_DECLARE_TYPE(ArchCPU, CpuClassType, CPU_MODULE_OBJ_NAME) //wyc semicolon removed
 
 typedef enum MMUAccessType {
     MMU_DATA_LOAD  = 0,

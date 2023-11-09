@@ -1836,7 +1836,7 @@ typedef struct CPUArchState {
     int64_t user_tsc_khz; /* for sanity check only */
     uint64_t apic_bus_freq;
     uint64_t tsc;
-#if defined(CONFIG_KVM) || defined(CONFIG_HVF) //wyc HVF is a QEMU accelerator on macOS
+#if defined(CONFIG_KVM) || defined(CONFIG_HVF) // HVF is a QEMU accelerator on macOS
     void *xsave_buf;
     uint32_t xsave_buf_len;
 #endif
