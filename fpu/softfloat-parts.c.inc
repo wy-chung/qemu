@@ -416,8 +416,12 @@ static FloatPartsN *partsN(addsub)(FloatPartsN *a, FloatPartsN *b,
  * `b'. The operation is performed according to the IEC/IEEE Standard
  * for Binary Floating-Point Arithmetic.
  */
-static FloatPartsN *partsN(mul)(FloatPartsN *a, FloatPartsN *b,
-                                float_status *s)
+#if !defined(WYC)
+static FloatPartsN *partsN(mul)
+#else
+static FloatPartsN *parts64_mul
+#endif
+  (FloatPartsN *a, FloatPartsN *b, float_status *s)
 {
     int ab_mask = float_cmask(a->cls) | float_cmask(b->cls);
     bool sign = a->sign ^ b->sign;
@@ -475,8 +479,12 @@ static FloatPartsN *partsN(mul)(FloatPartsN *a, FloatPartsN *b,
  * Requires A and C extracted into a double-sized structure to provide the
  * extra space for the widening multiply.
  */
-static FloatPartsN *partsN(muladd)(FloatPartsN *a, FloatPartsN *b,
-                                   FloatPartsN *c, int flags, float_status *s)
+#if !defined(WYC)
+static FloatPartsN *partsN(muladd)
+#else
+static FloatPartsN *parts64_muladd
+#endif
+  (FloatPartsN *a, FloatPartsN *b, FloatPartsN *c, int flags, float_status *s)
 {
     int ab_mask, abc_mask;
     FloatPartsW p_widen, c_widen;
@@ -594,8 +602,12 @@ static FloatPartsN *partsN(muladd)(FloatPartsN *a, FloatPartsN *b,
  * corresponding value `b'. The operation is performed according to
  * the IEC/IEEE Standard for Binary Floating-Point Arithmetic.
  */
-static FloatPartsN *partsN(div)(FloatPartsN *a, FloatPartsN *b,
-                                float_status *s)
+#if !defined(WYC)
+static FloatPartsN *partsN(div)
+#else
+static FloatPartsN *parts64_div
+#endif
+  (FloatPartsN *a, FloatPartsN *b, float_status *s)
 {
     int ab_mask = float_cmask(a->cls) | float_cmask(b->cls);
     bool sign = a->sign ^ b->sign;

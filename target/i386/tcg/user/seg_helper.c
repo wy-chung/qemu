@@ -94,7 +94,7 @@ void x86_cpu_do_interrupt(CPUState *cs)
 
 void cpu_x86_load_seg(CPUX86State *env, X86Seg seg_reg, int selector)
 {
-    if (!(env->cr[0] & CR0_PE_MASK) || (env->eflags & VM_MASK)) {
+    if (!(env->cr[0] & CR0_PE_MASK) || (env->eflags & VM_MASK)) { // 8086 mode
         int dpl = (env->eflags & VM_MASK) ? 3 : 0;
         selector &= 0xffff;
         cpu_x86_load_seg_cache(env, seg_reg, selector,
