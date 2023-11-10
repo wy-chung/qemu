@@ -1003,7 +1003,7 @@ cpu_exec_loop(CPUState *cpu, SyncClocks *sc)
             uint64_t cs_base;
             uint32_t flags, cflags;
 
-            cpu_get_tb_cpu_state(cpu->env_ptr, &pc, &cs_base, &flags);
+            cpu_get_tb_cpu_state(cpu->env_ptr, &pc, &cs_base, &flags); // get cs.base
 
             /*
              * When requested, use an exact setting for cflags for the next

@@ -1321,15 +1321,14 @@ void helper_load_seg(CPUX86State *env, int seg_reg, int selector)
         e1 = cpu_ldl_le_mmuidx_ra(env, ptr,     cpu_mmu_index_kernel(env), GETPC());
         e2 = cpu_ldl_le_mmuidx_ra(env, ptr + 4, cpu_mmu_index_kernel(env), GETPC());
 #endif
-
-        if (!(e2 & DESC_S_MASK)) {
+        if (!(e2 & DESC_S_MASK)) { // system descriptor
             raise_exception_err_ra(env, EXCP0D_GPF, selector & 0xfffc, GETPC());
         }
-        rpl = selector & 3;
-        dpl = (e2 >> DESC_DPL_SHIFT) & 3;
+        rpl = selector & 3; // requested privilege level
+        dpl = (e2 >> DESC_DPL_SHIFT) & 3; // descriptor privilege level
         if (seg_reg == R_SS) {
             /* must be writable segment */
-            if ((e2 & DESC_CS_MASK) || !(e2 & DESC_W_MASK)) {
+            if ((e2 & DESC_CS_MASK) || !(e2 & DESC_W_MASK)) { // code segment or read-only
                 raise_exception_err_ra(env, EXCP0D_GPF, selector & 0xfffc, GETPC());
             }
             if (rpl != cpl || dpl != cpl) {
@@ -1337,11 +1336,11 @@ void helper_load_seg(CPUX86State *env, int seg_reg, int selector)
             }
         } else {
             /* must be readable segment */
-            if ((e2 & (DESC_CS_MASK | DESC_R_MASK)) == DESC_CS_MASK) {
+            if ((e2 & (DESC_CS_MASK | DESC_R_MASK)) == DESC_CS_MASK) { // not readable code segment
                 raise_exception_err_ra(env, EXCP0D_GPF, selector & 0xfffc, GETPC());
             }
 
-            if (!(e2 & DESC_CS_MASK) || !(e2 & DESC_C_MASK)) {
+            if (!(e2 & DESC_CS_MASK) || !(e2 & DESC_C_MASK)) { // not cs or not conforming
                 /* if not conforming code, test rights */
                 if (dpl < cpl || dpl < rpl) {
                     raise_exception_err_ra(env, EXCP0D_GPF, selector & 0xfffc, GETPC());

@@ -629,6 +629,7 @@ static TCGv eip_cur_tl(DisasContext *s)
     }
 }
 
+// load the effective address of v(a0) and seg(def_seg or ovr_seg) to A0
 /* Compute the effective address of SEG:REG into A0.  SEG is selected from the override segment
    (OVR_SEG) and the default segment (DEF_SEG).  OVR_SEG may be -1 to
    indicate no override.  */
@@ -671,23 +672,23 @@ static void gen_lea_v_seg(DisasContext *s, MemOp aflag, TCGv a0,
     }
 
     if (ovr_seg >= 0) {
-        TCGv seg = cpu_seg_base[ovr_seg];
+        TCGv seg_base = cpu_seg_base[ovr_seg];
 
         if (aflag == MO_64) {
-            tcg_gen_add_tl(s->A0, a0, seg);
+            tcg_gen_add_tl(s->A0, a0, seg_base);
         } else if (CODE64(s)) {
             tcg_gen_ext32u_tl(s->A0, a0);
-            tcg_gen_add_tl(s->A0, s->A0, seg); // s->A0 += seg
+            tcg_gen_add_tl(s->A0, s->A0, seg_base); // s->A0 += seg_base
         } else {
-            tcg_gen_add_tl(s->A0, a0, seg);
-            tcg_gen_ext32u_tl(s->A0, s->A0);
+            tcg_gen_add_tl(s->A0, a0, seg_base); // s->A0 = a0 + seg_base
+            tcg_gen_ext32u_tl(s->A0, s->A0); // unsigned extension from 32-bit to 64-bit
         }
     }
 }
 
 static inline void gen_string_movl_A0_ESI(DisasContext *s)
 {
-    gen_lea_v_seg(s, s->aflag, cpu_regs[R_ESI], R_DS, s->override);
+    gen_lea_v_seg(s, s->aflag, cpu_regs[R_ESI], R_DS, s->override); 
 }
 
 static inline void gen_string_movl_A0_EDI(DisasContext *s)
@@ -2174,7 +2175,7 @@ typedef struct AddressParts {
     target_long disp;
 } AddressParts;
 
-// return { def_seg, base, index, scale, disp}
+// get { def_seg, base, index, scale, disp} from modrm
 static AddressParts gen_lea_modrm_0(CPUX86State *env, DisasContext *s,
                                     int modrm)
 {
@@ -2521,6 +2522,7 @@ static inline void gen_op_movl_T0_seg(DisasContext *s, X86Seg seg_reg)
                      offsetof(CPUX86State,segs[seg_reg].selector));
 }
 
+// for vm8086 mode
 static inline void gen_op_movl_seg_T0_vm(DisasContext *s, X86Seg seg_reg)
 {
     tcg_gen_ext16u_tl(s->T0, s->T0);
@@ -2536,6 +2538,9 @@ static void gen_movl_seg_T0(DisasContext *s, X86Seg seg_reg)
     if (PE(s) && !VM86(s)) {
         tcg_gen_trunc_tl_i32(s->tmp2_i32, s->T0);
         gen_helper_load_seg(cpu_env, tcg_constant_i32(seg_reg), s->tmp2_i32); //wyc? helper.h:38
+#if defined(WYC)
+        helper_load_seg(env, seg_reg, selector); // this function will be called during exec time
+#endif
         /* abort translation because the addseg value may change or
            because ss32 may change. For R_SS, translation must always
            stop as a special handling must be done to disable hardware
@@ -4064,14 +4069,14 @@ do_rdrand:
 
         /**************************/
         /* mov */
-    case 0x88: // OP dst, src
+    case 0x88: // mov Gb, Eb	OP dst, src
     case 0x89: /* mov Gv, Ev */
         ot = mo_b_d(b, dflag);
         modrm = x86_ldub_code(env, s);
         reg = ((modrm >> 3) & 7) | REX_R(s);
 
         /* generate a generic store */
-        gen_ldst_modrm(env, s, modrm, ot, reg, 1);
+        gen_ldst_modrm(env, s, modrm, ot, reg, 1/*store*/);
         break;
     case 0xc6: // OP dst, src
     case 0xc7: /* mov Ev, Iv */
@@ -4090,7 +4095,7 @@ do_rdrand:
             gen_op_mov_reg_v(s, ot, (modrm & 7) | REX_B(s), s->T0);
         }
         break;
-    case 0x8a: // OP dst, src
+    case 0x8a: // mov Eb, Gb	OP dst, src
     case 0x8b: /* mov Ev, Gv */
         ot = mo_b_d(b, dflag);
         modrm = x86_ldub_code(env, s);

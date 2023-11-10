@@ -123,7 +123,9 @@
 #define VAPIC_ENABLE_BIT                0
 #define VAPIC_ENABLE_MASK               (1 << VAPIC_ENABLE_BIT)
 
+#if !defined(WYC)
 typedef struct APICCommonState APICCommonState;
+#endif
 
 #define TYPE_APIC_COMMON "apic-common"
 typedef struct APICCommonClass APICCommonClass;

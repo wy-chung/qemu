@@ -87,23 +87,23 @@ typedef enum X86Seg {
 } X86Seg;
 
 /* segment descriptor fields */
-#define DESC_G_SHIFT    23
+#define DESC_G_SHIFT    23 // granularity
 #define DESC_G_MASK     (1 << DESC_G_SHIFT)
-#define DESC_B_SHIFT    22
+#define DESC_B_SHIFT    22 // 0: 16-bit segment, 1: 32-bit segment
 #define DESC_B_MASK     (1 << DESC_B_SHIFT)
 #define DESC_L_SHIFT    21 /* x86_64 only : 64 bit code segment */
 #define DESC_L_MASK     (1 << DESC_L_SHIFT)
-#define DESC_AVL_SHIFT  20
+#define DESC_AVL_SHIFT  20 // available for use by system software
 #define DESC_AVL_MASK   (1 << DESC_AVL_SHIFT)
-#define DESC_P_SHIFT    15
+#define DESC_P_SHIFT    15 // segment present
 #define DESC_P_MASK     (1 << DESC_P_SHIFT)
-#define DESC_DPL_SHIFT  13
+#define DESC_DPL_SHIFT  13 // descriptor privelege level
 #define DESC_DPL_MASK   (3 << DESC_DPL_SHIFT)
-#define DESC_S_SHIFT    12
+#define DESC_S_SHIFT    12 // 0: system, 1: code or data
 #define DESC_S_MASK     (1 << DESC_S_SHIFT)
-#define DESC_TYPE_SHIFT 8
+#define DESC_TYPE_SHIFT 8  // segment type
 #define DESC_TYPE_MASK  (15 << DESC_TYPE_SHIFT)
-#define DESC_A_MASK     (1 << 8)
+#define DESC_A_MASK     (1 << 8) // the accessed bit
 
 #define DESC_CS_MASK    (1 << 11) /* 1=code segment 0=data segment */
 #define DESC_C_MASK     (1 << 10) /* code: conforming */
@@ -1198,10 +1198,10 @@ uint64_t x86_cpu_get_supported_feature_word(FeatureWord w,
 #define CPU_INTERRUPT_POLL      CPU_INTERRUPT_TGT_EXT_1
 #define CPU_INTERRUPT_SMI       CPU_INTERRUPT_TGT_EXT_2
 #define CPU_INTERRUPT_NMI       CPU_INTERRUPT_TGT_EXT_3
-#define CPU_INTERRUPT_MCE       CPU_INTERRUPT_TGT_EXT_4
+#define CPU_INTERRUPT_MCE       CPU_INTERRUPT_TGT_EXT_4	// Machine Check Exceptions
 #define CPU_INTERRUPT_VIRQ      CPU_INTERRUPT_TGT_INT_0
-#define CPU_INTERRUPT_SIPI      CPU_INTERRUPT_TGT_INT_1
-#define CPU_INTERRUPT_TPR       CPU_INTERRUPT_TGT_INT_2
+#define CPU_INTERRUPT_SIPI      CPU_INTERRUPT_TGT_INT_1	// Startup Inter-Processor Interrupt
+#define CPU_INTERRUPT_TPR       CPU_INTERRUPT_TGT_INT_2	// Task Priority Register
 
 /* Use a clearer name for this.  */
 #define CPU_INTERRUPT_INIT      CPU_INTERRUPT_RESET
