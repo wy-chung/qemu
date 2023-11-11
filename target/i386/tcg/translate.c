@@ -116,7 +116,7 @@ typedef struct DisasContext {
 
     CCOp cc_op;  /* current CC operation */
     int mem_index; /* select memory access functions */
-    uint32_t flags; /* all execution flags */
+    uint32_t flags; // see CPUArchState.hflags /* all execution flags */
     int cpuid_features;
     int cpuid_ext_features;
     int cpuid_ext2_features;
@@ -4062,6 +4062,7 @@ do_rdrand:
         break;
     case 0x1a1: /* pop fs */
     case 0x1a9: /* pop gs */
+        if (CODE64(s)) goto illegal_op;	//wyctest success
         ot = gen_pop_T0(s);
         gen_movl_seg_T0(s, (b >> 3) & 7);
         gen_pop_update(s, ot);
@@ -4105,6 +4106,7 @@ do_rdrand:
         gen_op_mov_reg_v(s, ot, reg, s->T0);
         break;
     case 0x8e: /* mov seg, Gv */
+        //if (CODE64(s)) goto illegal_op;	//wyctest fail
         modrm = x86_ldub_code(env, s);
         reg = (modrm >> 3) & 7;
         if (reg >= 6 || reg == R_CS)
@@ -4286,6 +4288,7 @@ do_rdrand:
     case 0x1b5: /* lgs Gv */
         op = R_GS;
 do_lxx:
+        if (CODE64(s)) goto illegal_op;	//wyctest success
         ot = dflag != MO_16 ? MO_32 : MO_16;
         modrm = x86_ldub_code(env, s);
         reg = ((modrm >> 3) & 7) | REX_R(s);
@@ -5114,6 +5117,9 @@ do_lret:
             gen_update_eip_cur(s);
             gen_helper_lret_protected(cpu_env, tcg_constant_i32(dflag - 1),
                                       tcg_constant_i32(val));
+#if defined(WYC)
+            helper_lret_protected(CPUX86State *env, int shift, int addend);
+#endif
         } else {
             gen_stack_A0(s);
             /* pop offset */

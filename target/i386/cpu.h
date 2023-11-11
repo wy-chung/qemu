@@ -1586,7 +1586,7 @@ typedef struct HVFX86LazyFlags {
     target_ulong auxbits;
 } HVFX86LazyFlags;
 
-typedef struct CPUArchState {
+typedef struct CPUArchState /* CPUX86State */ {
     /* standard registers */
     target_ulong regs[CPU_NB_REGS];
     target_ulong eip;
@@ -1600,8 +1600,7 @@ typedef struct CPUArchState {
     target_ulong cc_src2;
     uint32_t cc_op;
     int32_t df; /* D flag : 1 if D = 0, -1 if D = 1 */
-    uint32_t hflags; /* TB flags, see HF_xxx constants. These flags
-                        are known at translation time. */
+    uint32_t hflags; // TB flags known at translation time, see HF_CS64_MASK constants and DisasContext.flags
     uint32_t hflags2; /* various other flags, see HF2_xxx constants. */
 
     /* segments */
