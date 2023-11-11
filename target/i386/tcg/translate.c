@@ -5792,7 +5792,7 @@ bt_op:
             ot = mod == 3 ? dflag : MO_16;
             gen_ldst_modrm(env, s, modrm, ot, OR_TMP0, 1);
             break;
-        case 2: /* lldt */
+        case 2: /* lldt: load local descriptor table register */
             if (!PE(s) || VM86(s))
                 goto illegal_op;
             if (check_cpl0(s)) {
@@ -5800,6 +5800,9 @@ bt_op:
                 gen_ldst_modrm(env, s, modrm, MO_16, OR_TMP0, 0);
                 tcg_gen_trunc_tl_i32(s->tmp2_i32, s->T0);
                 gen_helper_lldt(cpu_env, s->tmp2_i32);
+#if defined(WYC)
+                helper_lldt(env, selector);
+#endif
             }
             break;
         case 1: /* str */
@@ -5814,7 +5817,7 @@ bt_op:
             ot = mod == 3 ? dflag : MO_16;
             gen_ldst_modrm(env, s, modrm, ot, OR_TMP0, 1);
             break;
-        case 3: /* ltr */
+        case 3: /* ltr: load task register */
             if (!PE(s) || VM86(s))
                 goto illegal_op;
             if (check_cpl0(s)) {
@@ -5822,6 +5825,9 @@ bt_op:
                 gen_ldst_modrm(env, s, modrm, MO_16, OR_TMP0, 0);
                 tcg_gen_trunc_tl_i32(s->tmp2_i32, s->T0);
                 gen_helper_ltr(cpu_env, s->tmp2_i32);
+#if defined(WYC)
+                helper_ltr(env, selector);
+#endif
             }
             break;
         case 4: /* verr */

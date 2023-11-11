@@ -103,14 +103,17 @@ typedef enum X86Seg {
 #define DESC_S_MASK     (1 << DESC_S_SHIFT)
 #define DESC_TYPE_SHIFT 8  // segment type
 #define DESC_TYPE_MASK  (15 << DESC_TYPE_SHIFT)
-#define DESC_A_MASK     (1 << 8) // the accessed bit
 
+// specify if it's a code or data segment
 #define DESC_CS_MASK    (1 << 11) /* 1=code segment 0=data segment */
+// for code segment
 #define DESC_C_MASK     (1 << 10) /* code: conforming */
 #define DESC_R_MASK     (1 << 9)  /* code: readable */
-
+// for data segment
 #define DESC_E_MASK     (1 << 10) /* data: expansion direction */
 #define DESC_W_MASK     (1 << 9)  /* data: writable */
+// for both code and data segment
+#define DESC_A_MASK     (1 << 8) // the accessed bit
 
 #define DESC_TSS_BUSY_MASK (1 << 9)
 
@@ -1286,7 +1289,7 @@ typedef struct SegmentCache {
     uint32_t selector;
     target_ulong base;
     uint32_t limit;
-    uint32_t flags;
+    uint32_t flags; // the second DW (byte 4..7) of segment descriptor. See DESC_G_MASK for example
 } SegmentCache;
 
 typedef union MMXReg {
@@ -1600,8 +1603,8 @@ typedef struct CPUArchState /* CPUX86State */ {
     target_ulong cc_src2;
     uint32_t cc_op;
     int32_t df; /* D flag : 1 if D = 0, -1 if D = 1 */
-    uint32_t hflags; // TB flags known at translation time, see HF_CS64_MASK constants and DisasContext.flags
-    uint32_t hflags2; /* various other flags, see HF2_xxx constants. */
+    uint32_t hflags; // TB flags known at translation time, see HF_CS64_MASK and DisasContext.flags
+    uint32_t hflags2; /* various other flags, see HF2_GIF_MASK constants. */
 
     /* segments */
     SegmentCache segs[6]; /* selector values */
