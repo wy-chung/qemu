@@ -2268,9 +2268,11 @@ static inline int cpu_mmu_index(CPUX86State *env, bool ifetch)
 
 static inline int cpu_mmu_index_kernel(CPUX86State *env)
 {
-    return !(env->hflags & HF_SMAP_MASK) ? MMU_KNOSMAP_IDX :
+    int ret;
+    ret = !(env->hflags & HF_SMAP_MASK) ? MMU_KNOSMAP_IDX :
         ((env->hflags & HF_CPL_MASK) < 3 && (env->eflags & AC_MASK))
         ? MMU_KNOSMAP_IDX : MMU_KSMAP_IDX;
+    return ret;
 }
 
 #define CC_DST  (env->cc_dst)

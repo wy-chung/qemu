@@ -42,8 +42,8 @@
 #define PREFIX_REPZ   0x01
 #define PREFIX_REPNZ  0x02
 #define PREFIX_LOCK   0x04
-#define PREFIX_DATA   0x08
-#define PREFIX_ADR    0x10
+#define PREFIX_DATA   0x08 // 0x66
+#define PREFIX_ADR    0x10 // 0x67
 #define PREFIX_VEX    0x20
 #define PREFIX_REX    0x40
 
@@ -74,7 +74,7 @@ static TCGv cpu_cc_dst, cpu_cc_src, cpu_cc_src2;
 static TCGv cpu_eip;
 static TCGv_i32 cpu_cc_op;
 static TCGv cpu_regs[CPU_NB_REGS];
-static TCGv cpu_seg_base[6];
+static TCGv cpu_seg_base[6]; // = &CPUX86State.segs[i].base, see #6926
 static TCGv_i64 cpu_bndl[4];
 static TCGv_i64 cpu_bndu[4];
 
@@ -2338,7 +2338,8 @@ static void gen_lea_modrm(CPUX86State *env, DisasContext *s, int modrm)
 {
     AddressParts a = gen_lea_modrm_0(env, s, modrm);
     TCGv ea = gen_lea_modrm_1(s, a, false/* is_vsib */);
-    gen_lea_v_seg(s, s->aflag, ea, a.def_seg, s->override); // load effective address of v(ea) and seg(def_seg or s->override) to A0
+    // load effective address of v(ea) and seg(def_seg or s->override) to A0
+    gen_lea_v_seg(s, s->aflag, ea, a.def_seg, s->override);
 }
 
 static void gen_nop_modrm(CPUX86State *env, DisasContext *s, int modrm)
@@ -3100,7 +3101,7 @@ static bool disas_insn(DisasContext *s, CPUState *cpu)
     target_ulong orig_pc_save = s->pc_save;
 
     s->pc = s->base.pc_next;
-    s->override = -1;	// no segment override
+    s->override = -1;	//wyctodo no segment override
 #ifdef TARGET_X86_64
     s->rex_r = 0;
     s->rex_x = 0;

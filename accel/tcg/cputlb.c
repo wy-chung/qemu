@@ -2418,7 +2418,7 @@ static uint32_t do_ld_4(CPUArchState *env, MMULookupPageData *p, int mmu_idx,
     } else {
         /* Perform the load host endian. */
         ret = load_atom_4(env, ra, p->haddr, memop);
-        if (memop & MO_BSWAP) {
+        if (memop & MO_BSWAP) { // false
             ret = bswap32(ret);
         }
     }
