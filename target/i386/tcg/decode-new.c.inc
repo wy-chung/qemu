@@ -45,6 +45,8 @@
  * as "d" or "q".  These have to be fixed for the decoder to work correctly.
  */
 
+// this is included by translate.c
+
 #define X86_OP_NONE { 0 },
 
 #define X86_OP_GROUP3(op, op0_, s0_, op1_, s1_, op2_, s2_, ...) { \

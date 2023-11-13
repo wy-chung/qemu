@@ -71,10 +71,10 @@
 
 /* global register indexes */
 static TCGv cpu_cc_dst, cpu_cc_src, cpu_cc_src2;
-static TCGv cpu_eip;
-static TCGv_i32 cpu_cc_op;
-static TCGv cpu_regs[CPU_NB_REGS];
-static TCGv cpu_seg_base[6]; // = &CPUX86State.segs[i].base, see #6926
+static TCGv cpu_eip;		// = &CPUX86State.eip
+static TCGv_i32 cpu_cc_op;	// = &CPUX86State.cc_op
+static TCGv cpu_regs[CPU_NB_REGS]; // = &CPUX86State.regs[i]
+static TCGv cpu_seg_base[6];	// = &CPUX86State.segs[i].base, see #6926
 static TCGv_i64 cpu_bndl[4];
 static TCGv_i64 cpu_bndu[4];
 
@@ -2183,7 +2183,7 @@ static AddressParts gen_lea_modrm_0(CPUX86State *env, DisasContext *s,
     target_long disp;
     bool havesib;
 
-    def_seg = R_DS;
+    def_seg = R_DS; //wyc default segment is DS segment
     index = -1;
     scale = 0;
     disp = 0;
@@ -2334,6 +2334,8 @@ static TCGv gen_lea_modrm_1(DisasContext *s, AddressParts a, bool is_vsib/* has 
     return ea;
 }
 
+// load effective address to A0
+// will only be called during code translation
 static void gen_lea_modrm(CPUX86State *env, DisasContext *s, int modrm)
 {
     AddressParts a = gen_lea_modrm_0(env, s, modrm);
@@ -3101,7 +3103,7 @@ static bool disas_insn(DisasContext *s, CPUState *cpu)
     target_ulong orig_pc_save = s->pc_save;
 
     s->pc = s->base.pc_next;
-    s->override = -1;	//wyctodo no segment override
+    s->override = -1;	//wyc the default segment will be specified in gen_lea_modrm_0
 #ifdef TARGET_X86_64
     s->rex_r = 0;
     s->rex_x = 0;
