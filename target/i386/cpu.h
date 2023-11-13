@@ -156,16 +156,16 @@ typedef enum X86Seg {
 #define HF_ADDSEG_SHIFT      6
 /* copy of CR0.PE (protected mode) */
 #define HF_PE_SHIFT          7
-#define HF_TF_SHIFT          8 /* must be same as eflags */
+#define HF_TF_SHIFT          8 /* must be same as eflags' trap flag */
 #define HF_MP_SHIFT          9 /* the order must be MP, EM, TS */
 #define HF_EM_SHIFT         10
 #define HF_TS_SHIFT         11
-#define HF_IOPL_SHIFT       12 /* must be same as eflags */
+#define HF_IOPL_SHIFT       12 /* must be same as eflags' I/O privilege level */
 #define HF_LMA_SHIFT        14 /* only used on x86_64: long mode active */
 #define HF_CS64_SHIFT       15 /* only used on x86_64: 64 bit code segment  */
-#define HF_RF_SHIFT         16 /* must be same as eflags */
-#define HF_VM_SHIFT         17 /* must be same as eflags */
-#define HF_AC_SHIFT         18 /* must be same as eflags */
+#define HF_RF_SHIFT         16 /* must be same as eflags' resume flag */
+#define HF_VM_SHIFT         17 /* must be same as eflags' virtual 8086 mode flag */
+#define HF_AC_SHIFT         18 /* must be same as eflags' alignment check, smap access check flag */
 #define HF_SMM_SHIFT        19 /* CPU in SMM mode */
 #define HF_SVME_SHIFT       20 /* SVME enabled (copy of EFER.SVME) */
 #define HF_GUEST_SHIFT      21 /* SVM intercepts are active */
@@ -183,16 +183,16 @@ typedef enum X86Seg {
 #define HF_SS32_MASK         (1 << HF_SS32_SHIFT)
 #define HF_ADDSEG_MASK       (1 << HF_ADDSEG_SHIFT)	/* zero base for DS, ES and SS */
 #define HF_PE_MASK           (1 << HF_PE_SHIFT)	/* copy of CR0.PE (protected mode) */
-#define HF_TF_MASK           (1 << HF_TF_SHIFT)	/* must be same as eflags */
+#define HF_TF_MASK           (1 << HF_TF_SHIFT)	/* must be same as eflags' TF_MASK */
 #define HF_MP_MASK           (1 << HF_MP_SHIFT)	/* the order must be MP, EM, TS */
 #define HF_EM_MASK           (1 << HF_EM_SHIFT)
 #define HF_TS_MASK           (1 << HF_TS_SHIFT)
-#define HF_IOPL_MASK         (3 << HF_IOPL_SHIFT)	/* must be same as eflags */
+#define HF_IOPL_MASK         (3 << HF_IOPL_SHIFT)	/* must be same as eflags' IOPL_MASK */
 #define HF_LMA_MASK          (1 << HF_LMA_SHIFT)	/* long mode active */
 #define HF_CS64_MASK         (1 << HF_CS64_SHIFT)	/* 64 bit code segment */
-#define HF_RF_MASK           (1 << HF_RF_SHIFT)	/* must be same as eflags */
-#define HF_VM_MASK           (1 << HF_VM_SHIFT)	/* must be same as eflags */
-#define HF_AC_MASK           (1 << HF_AC_SHIFT)	/* must be same as eflags */
+#define HF_RF_MASK           (1 << HF_RF_SHIFT)	/* must be same as eflags' RFMASK */
+#define HF_VM_MASK           (1 << HF_VM_SHIFT)	/* must be same as eflags' VM_MASK */
+#define HF_AC_MASK           (1 << HF_AC_SHIFT)	/* must be same as eflags' AC_MASK */
 #define HF_SMM_MASK          (1 << HF_SMM_SHIFT)	/* CPU in SMM mode */
 #define HF_SVME_MASK         (1 << HF_SVME_SHIFT)	/* SVME enabled (copy of EFER.SVME) */
 #define HF_GUEST_MASK        (1 << HF_GUEST_SHIFT)	/* SVM intercepts are active */

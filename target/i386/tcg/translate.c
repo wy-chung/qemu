@@ -675,12 +675,12 @@ static void gen_lea_v_seg(DisasContext *s, MemOp aflag, TCGv a0,
         TCGv seg_base = cpu_seg_base[ovr_seg];
 
         if (aflag == MO_64) {
-            tcg_gen_add_tl(s->A0, a0, seg_base);
+            tcg_gen_add_tl(s->A0, a0, seg_base);	// s->A0 = a0 + seg_base
         } else if (CODE64(s)) {
             tcg_gen_ext32u_tl(s->A0, a0);
-            tcg_gen_add_tl(s->A0, s->A0, seg_base); // s->A0 += seg_base
+            tcg_gen_add_tl(s->A0, s->A0, seg_base);	// s->A0 = s->A0 + seg_base
         } else {
-            tcg_gen_add_tl(s->A0, a0, seg_base); // s->A0 = a0 + seg_base
+            tcg_gen_add_tl(s->A0, a0, seg_base);	// s->A0 = a0 + seg_base
             tcg_gen_ext32u_tl(s->A0, s->A0); // unsigned extension from 32-bit to 64-bit
         }
     }
@@ -2583,7 +2583,7 @@ static void gen_push_v(DisasContext *s, TCGv val)
     int size = 1 << d_ot;
     TCGv new_esp = s->A0;
 
-    tcg_gen_subi_tl(s->A0, cpu_regs[R_ESP], size); // R_ESP -= size
+    tcg_gen_subi_tl(s->A0, cpu_regs[R_ESP], size); // s-A0 = R_ESP - size
 
     if (!CODE64(s)) {
         if (ADDSEG(s)) {
