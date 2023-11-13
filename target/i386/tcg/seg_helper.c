@@ -1321,6 +1321,8 @@ void helper_load_seg(CPUX86State *env, int seg_reg, int selector)
         e1 = cpu_ldl_le_mmuidx_ra(env, ptr,     cpu_mmu_index_kernel(env), GETPC());
         e2 = cpu_ldl_le_mmuidx_ra(env, ptr + 4, cpu_mmu_index_kernel(env), GETPC());
 #endif
+        //if (CODE64(env)) { //wyctodo
+        //} else {
         if (!(e2 & DESC_S_MASK)) { // system descriptor
             raise_exception_err_ra(env, EXCP0D_GPF, selector & 0xfffc, GETPC());
         }
@@ -1361,7 +1363,7 @@ void helper_load_seg(CPUX86State *env, int seg_reg, int selector)
             e2 |= DESC_A_MASK;
             cpu_stl_kernel_ra(env, ptr + 4, e2, GETPC());
         }
-
+        //}
         cpu_x86_load_seg_cache(env, seg_reg, selector,
                        get_seg_base(e1, e2),
                        get_seg_limit(e1, e2),

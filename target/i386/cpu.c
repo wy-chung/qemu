@@ -7732,6 +7732,7 @@ static void x86_disas_set_info(CPUState *cs, disassemble_info *info)
     info->cap_insn_split = 8;
 }
 
+// only called by kvm_get_sregs and kvm_get_sregs2
 void x86_update_hflags(CPUX86State *env)
 {
    uint32_t hflags;
@@ -7917,6 +7918,7 @@ static Property x86_cpu_properties[] = {
 static const struct SysemuCPUOps i386_sysemu_ops = {
     .get_memory_mapping = x86_cpu_get_memory_mapping,
     .get_paging_enabled = x86_cpu_get_paging_enabled,
+    //.get_phys_page_debug = ,
     .get_phys_page_attrs_debug = x86_cpu_get_phys_page_attrs_debug,
     .asidx_from_attrs = x86_asidx_from_attrs,
     .get_crash_info = x86_cpu_get_crash_info,
@@ -7924,6 +7926,7 @@ static const struct SysemuCPUOps i386_sysemu_ops = {
     .write_elf64_note = x86_cpu_write_elf64_note,
     .write_elf32_qemunote = x86_cpu_write_elf32_qemunote,
     .write_elf64_qemunote = x86_cpu_write_elf64_qemunote,
+    //.virtio_is_big_endian = ,
     .legacy_vmsd = &vmstate_x86_cpu,
 };
 #endif

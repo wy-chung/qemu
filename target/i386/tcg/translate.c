@@ -4056,7 +4056,7 @@ do_rdrand:
     case 0x1f: /* pop ds */
     case 0x07: /* pop es */
     case 0x17: /* pop ss */
-        if (CODE64(s))
+        if (CODE64(s))	// cannot run pop ds, pop es, pop ss in 64-bit mode
             goto illegal_op;
         reg = b >> 3;
         ot = gen_pop_T0(s);

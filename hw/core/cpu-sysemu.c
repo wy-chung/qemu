@@ -29,6 +29,9 @@ bool cpu_paging_enabled(const CPUState *cpu)
 
     if (cc->sysemu_ops->get_paging_enabled) {
         return cc->sysemu_ops->get_paging_enabled(cpu);
+#if defined(WYC)
+        return x86_cpu_get_paging_enabled();
+#endif
     }
 
     return false;
@@ -41,6 +44,9 @@ void cpu_get_memory_mapping(CPUState *cpu, MemoryMappingList *list,
 
     if (cc->sysemu_ops->get_memory_mapping) {
         cc->sysemu_ops->get_memory_mapping(cpu, list, errp);
+#if defined(WYC)
+        x86_cpu_get_memory_mapping();
+#endif
         return;
     }
 
@@ -54,10 +60,13 @@ hwaddr cpu_get_phys_page_attrs_debug(CPUState *cpu, vaddr addr,
 
     if (cc->sysemu_ops->get_phys_page_attrs_debug) {
         return cc->sysemu_ops->get_phys_page_attrs_debug(cpu, addr, attrs);
+#if defined(WYC)
+        return x86_cpu_get_phys_page_attrs_debug();
+#endif
     }
     /* Fallback for CPUs which don't implement the _attrs_ hook */
     *attrs = MEMTXATTRS_UNSPECIFIED;
-    return cc->sysemu_ops->get_phys_page_debug(cpu, addr);
+    return cc->sysemu_ops->get_phys_page_debug(cpu, addr); // get_phys_page_debug is null
 }
 
 hwaddr cpu_get_phys_page_debug(CPUState *cpu, vaddr addr)
@@ -73,6 +82,9 @@ int cpu_asidx_from_attrs(CPUState *cpu, MemTxAttrs attrs)
 
     if (cpu->cc->sysemu_ops->asidx_from_attrs) {
         ret = cpu->cc->sysemu_ops->asidx_from_attrs(cpu, attrs);
+#if defined(WYC)
+        ret = x86_asidx_from_attrs();
+#endif
         assert(ret < cpu->num_ases && ret >= 0);
     }
     return ret;
@@ -87,6 +99,9 @@ int cpu_write_elf32_qemunote(WriteCoreDumpFunction f, CPUState *cpu,
         return 0;
     }
     return (*cc->sysemu_ops->write_elf32_qemunote)(f, cpu, opaque);
+#if defined(WYC)
+    return x86_cpu_write_elf32_qemunote();
+#endif
 }
 
 int cpu_write_elf32_note(WriteCoreDumpFunction f, CPUState *cpu,
@@ -98,6 +113,9 @@ int cpu_write_elf32_note(WriteCoreDumpFunction f, CPUState *cpu,
         return -1;
     }
     return (*cc->sysemu_ops->write_elf32_note)(f, cpu, cpuid, opaque);
+#if defined(WYC)
+    return x86_cpu_write_elf32_note();
+#endif
 }
 
 int cpu_write_elf64_qemunote(WriteCoreDumpFunction f, CPUState *cpu,
@@ -109,6 +127,9 @@ int cpu_write_elf64_qemunote(WriteCoreDumpFunction f, CPUState *cpu,
         return 0;
     }
     return (*cc->sysemu_ops->write_elf64_qemunote)(f, cpu, opaque);
+#if defined(WYC)
+    return x86_cpu_write_elf64_qemunote();
+#endif
 }
 
 int cpu_write_elf64_note(WriteCoreDumpFunction f, CPUState *cpu,
@@ -120,13 +141,16 @@ int cpu_write_elf64_note(WriteCoreDumpFunction f, CPUState *cpu,
         return -1;
     }
     return (*cc->sysemu_ops->write_elf64_note)(f, cpu, cpuid, opaque);
+#if defined(WYC)
+    return x86_cpu_write_elf64_note();
+#endif
 }
 
 bool cpu_virtio_is_big_endian(CPUState *cpu)
 {
     CPUClass *cc = CPU_GET_CLASS(cpu);
 
-    if (cc->sysemu_ops->virtio_is_big_endian) {
+    if (cc->sysemu_ops->virtio_is_big_endian) { // false
         return cc->sysemu_ops->virtio_is_big_endian(cpu);
     }
     return target_words_bigendian();
@@ -139,6 +163,9 @@ GuestPanicInformation *cpu_get_crash_info(CPUState *cpu)
 
     if (cc->sysemu_ops->get_crash_info) {
         res = cc->sysemu_ops->get_crash_info(cpu);
+#if defined(WYC)
+        res = x86_cpu_get_crash_info();
+#endif
     }
     return res;
 }
