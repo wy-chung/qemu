@@ -1023,7 +1023,7 @@ cpu_exec_loop(CPUState *cpu, SyncClocks *sc)
                 break;
             }
 
-            tb = tb_lookup(cpu, pc, cs_base, flags, cflags);
+            tb = tb_lookup(cpu, pc, cs_base, flags, cflags); // pc = cs_base + eip
             if (tb == NULL) {
                 CPUJumpCache *jc;
                 uint32_t h;

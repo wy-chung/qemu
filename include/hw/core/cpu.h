@@ -417,7 +417,7 @@ struct CPUState {
     /* TODO Move common fields from CPUArchState here. */
     int cpu_index;
     int cluster_index;
-    uint32_t tcg_cflags;
+    uint32_t tcg_cflags;                // #define CF_PCREL 0x00200000
     uint32_t halted;
     uint32_t can_do_io;
     int32_t exception_index;
