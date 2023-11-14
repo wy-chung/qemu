@@ -5690,8 +5690,14 @@ bt_op:
             gen_update_eip_cur(s);
             if (b & 2) {
                 gen_helper_rdmsr(cpu_env);
+#if defined(WYC)
+                helper_rdmsr();
+#endif
             } else {
                 gen_helper_wrmsr(cpu_env);
+#if defined(WYC)
+                helper_wrmsr();
+#endif
                 s->base.is_jmp = DISAS_EOB_NEXT;
             }
         }

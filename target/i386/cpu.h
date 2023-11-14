@@ -517,6 +517,11 @@ typedef enum X86Seg {
 #define MSR_KERNELGSBASE                0xc0000102
 #define MSR_TSC_AUX                     0xc0000103
 #define MSR_AMD64_TSC_RATIO             0xc0000104
+//wyc
+#define MSR_CSBASE                      0xc000010c
+#define MSR_DSBASE                      0xc000010d
+#define MSR_ESBASE                      0xc000010e
+#define MSR_SSBASE                      0xc000010f
 
 #define MSR_AMD64_TSC_RATIO_DEFAULT     0x100000000ULL
 

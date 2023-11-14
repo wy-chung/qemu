@@ -213,6 +213,18 @@ void helper_wrmsr(CPUX86State *env)
     case MSR_FMASK:
         env->fmask = val;
         break;
+    case MSR_CSBASE:
+        env->segs[R_CS].base = val;
+        break;
+    case MSR_DSBASE:
+        env->segs[R_DS].base = val;
+        break;
+    case MSR_ESBASE:
+        env->segs[R_ES].base = val;
+        break;
+    case MSR_SSBASE:
+        env->segs[R_SS].base = val;
+        break;
     case MSR_FSBASE:
         env->segs[R_FS].base = val;
         break;
@@ -358,6 +370,18 @@ void helper_rdmsr(CPUX86State *env)
         break;
     case MSR_FMASK:
         val = env->fmask;
+        break;
+    case MSR_CSBASE:
+        val = env->segs[R_CS].base;
+        break;
+    case MSR_DSBASE:
+        val = env->segs[R_DS].base;
+        break;
+    case MSR_ESBASE:
+        val = env->segs[R_ES].base;
+        break;
+    case MSR_SSBASE:
+        val = env->segs[R_SS].base;
         break;
     case MSR_FSBASE:
         val = env->segs[R_FS].base;
