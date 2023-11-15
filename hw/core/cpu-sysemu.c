@@ -23,6 +23,12 @@
 #include "hw/core/cpu.h"
 #include "hw/core/sysemu-cpu-ops.h"
 
+/**
+ * cpu_paging_enabled:
+ * @cpu: The CPU whose state is to be inspected.
+ *
+ * Returns: %true if paging is enabled, %false otherwise.
+ */
 bool cpu_paging_enabled(const CPUState *cpu)
 {
     CPUClass *cc = CPU_GET_CLASS(cpu);
@@ -37,6 +43,12 @@ bool cpu_paging_enabled(const CPUState *cpu)
     return false;
 }
 
+/**
+ * cpu_get_memory_mapping:
+ * @cpu: The CPU whose memory mappings are to be obtained.
+ * @list: Where to write the memory mappings to.
+ * @errp: Pointer for reporting an #Error.
+ */
 void cpu_get_memory_mapping(CPUState *cpu, MemoryMappingList *list,
                             Error **errp)
 {
@@ -53,6 +65,19 @@ void cpu_get_memory_mapping(CPUState *cpu, MemoryMappingList *list,
     error_setg(errp, "Obtaining memory mappings is unsupported on this CPU.");
 }
 
+/**
+ * cpu_get_phys_page_attrs_debug:
+ * @cpu: The CPU to obtain the physical page address for.
+ * @addr: The virtual address.
+ * @attrs: Updated on return with the memory transaction attributes to use
+ *         for this access.
+ *
+ * Obtains the physical page corresponding to a virtual one, together
+ * with the corresponding memory transaction attributes to use for the access.
+ * Use it only for debugging because no protection checks are done.
+ *
+ * Returns: Corresponding physical page address or -1 if no page found.
+ */
 hwaddr cpu_get_phys_page_attrs_debug(CPUState *cpu, vaddr addr,
                                      MemTxAttrs *attrs)
 {
@@ -69,6 +94,16 @@ hwaddr cpu_get_phys_page_attrs_debug(CPUState *cpu, vaddr addr,
     return cc->sysemu_ops->get_phys_page_debug(cpu, addr); // get_phys_page_debug is null
 }
 
+/**
+ * cpu_get_phys_page_debug:
+ * @cpu: The CPU to obtain the physical page address for.
+ * @addr: The virtual address.
+ *
+ * Obtains the physical page corresponding to a virtual one.
+ * Use it only for debugging because no protection checks are done.
+ *
+ * Returns: Corresponding physical page address or -1 if no page found.
+ */
 hwaddr cpu_get_phys_page_debug(CPUState *cpu, vaddr addr)
 {
     MemTxAttrs attrs = {};
@@ -76,6 +111,13 @@ hwaddr cpu_get_phys_page_debug(CPUState *cpu, vaddr addr)
     return cpu_get_phys_page_attrs_debug(cpu, addr, &attrs);
 }
 
+/** cpu_asidx_from_attrs:
+ * @cpu: CPU
+ * @attrs: memory transaction attributes
+ *
+ * Returns the address space index specifying the CPU AddressSpace
+ * to use for a memory access with the given transaction attributes.
+ */
 int cpu_asidx_from_attrs(CPUState *cpu, MemTxAttrs attrs)
 {
     int ret = 0;
@@ -90,6 +132,13 @@ int cpu_asidx_from_attrs(CPUState *cpu, MemTxAttrs attrs)
     return ret;
 }
 
+/**
+ * cpu_write_elf32_qemunote:
+ * @f: pointer to a function that writes memory to a file
+ * @cpu: The CPU whose memory is to be dumped
+ * @cpuid: ID number of the CPU
+ * @opaque: pointer to the CPUState struct
+ */
 int cpu_write_elf32_qemunote(WriteCoreDumpFunction f, CPUState *cpu,
                              void *opaque)
 {
@@ -104,6 +153,13 @@ int cpu_write_elf32_qemunote(WriteCoreDumpFunction f, CPUState *cpu,
 #endif
 }
 
+/**
+ * cpu_write_elf32_note:
+ * @f: pointer to a function that writes memory to a file
+ * @cpu: The CPU whose memory is to be dumped
+ * @cpuid: ID number of the CPU
+ * @opaque: pointer to the CPUState struct
+ */
 int cpu_write_elf32_note(WriteCoreDumpFunction f, CPUState *cpu,
                          int cpuid, void *opaque)
 {
@@ -118,6 +174,13 @@ int cpu_write_elf32_note(WriteCoreDumpFunction f, CPUState *cpu,
 #endif
 }
 
+/**
+ * cpu_write_elf64_qemunote:
+ * @f: pointer to a function that writes memory to a file
+ * @cpu: The CPU whose memory is to be dumped
+ * @cpuid: ID number of the CPU
+ * @opaque: pointer to the CPUState struct
+ */
 int cpu_write_elf64_qemunote(WriteCoreDumpFunction f, CPUState *cpu,
                              void *opaque)
 {
@@ -132,6 +195,13 @@ int cpu_write_elf64_qemunote(WriteCoreDumpFunction f, CPUState *cpu,
 #endif
 }
 
+/**
+ * cpu_write_elf64_note:
+ * @f: pointer to a function that writes memory to a file
+ * @cpu: The CPU whose memory is to be dumped
+ * @cpuid: ID number of the CPU
+ * @opaque: pointer to the CPUState struct
+ */
 int cpu_write_elf64_note(WriteCoreDumpFunction f, CPUState *cpu,
                          int cpuid, void *opaque)
 {
@@ -146,6 +216,13 @@ int cpu_write_elf64_note(WriteCoreDumpFunction f, CPUState *cpu,
 #endif
 }
 
+/**
+ * cpu_virtio_is_big_endian:
+ * @cpu: CPU
+
+ * Returns %true if a CPU which supports runtime configurable endianness
+ * is currently big-endian.
+ */
 bool cpu_virtio_is_big_endian(CPUState *cpu)
 {
     CPUClass *cc = CPU_GET_CLASS(cpu);
@@ -156,6 +233,13 @@ bool cpu_virtio_is_big_endian(CPUState *cpu)
     return target_words_bigendian();
 }
 
+/**
+ * cpu_get_crash_info:
+ * @cpu: The CPU to get crash information for
+ *
+ * Gets the previously saved crash information.
+ * Caller is responsible for freeing the data.
+ */
 GuestPanicInformation *cpu_get_crash_info(CPUState *cpu)
 {
     CPUClass *cc = CPU_GET_CLASS(cpu);

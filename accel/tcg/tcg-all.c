@@ -97,7 +97,7 @@ static void tcg_accel_instance_init(Object *obj)
 #endif
 }
 
-bool mttcg_enabled;
+bool mttcg_enabled;	// MultiThread TCG or not
 bool one_insn_per_tb;
 
 static int tcg_init_machine(MachineState *ms)

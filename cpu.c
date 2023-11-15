@@ -263,6 +263,15 @@ void cpu_exec_initfn(CPUState *cpu)
 #endif
 }
 
+/**
+ * parse_cpu_option:
+ * @cpu_option: The -cpu option including optional parameters.
+ *
+ * processes optional parameters and registers them as global properties
+ *
+ * Returns: type of CPU to create or prints error and terminates process
+ *          if an error occurred.
+ */
 const char *parse_cpu_option(const char *cpu_option)
 {
     ObjectClass *oc;

@@ -798,7 +798,6 @@ CPUState *cpu_by_arch_id(int64_t id);
  *
  * Invokes the interrupt handler.
  */
-
 void cpu_interrupt(CPUState *cpu, int mask);
 
 /**
