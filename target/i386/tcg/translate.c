@@ -2568,6 +2568,9 @@ static void gen_svm_check_intercept(DisasContext *s, uint32_t type)
         return;
     }
     gen_helper_svm_check_intercept(cpu_env, tcg_constant_i32(type));
+#if defined(WYC)
+    helper_svm_check_intercept();
+#endif
 }
 
 static inline void gen_stack_update(DisasContext *s, int addend)
@@ -2739,6 +2742,9 @@ static void gen_interrupt(DisasContext *s, int intno)
     gen_update_eip_cur(s);
     gen_helper_raise_interrupt(cpu_env, tcg_constant_i32(intno),
                                cur_insn_len_i32(s));
+#if defined(WYC)
+    helper_raise_interrupt();
+#endif
     s->base.is_jmp = DISAS_NORETURN;
 }
 
@@ -4109,9 +4115,12 @@ do_rdrand:
         gen_op_mov_reg_v(s, ot, reg, s->T0);
         break;
     case 0x8e: /* mov seg, Gv */
-        //if (CODE64(s)) goto illegal_op;	//wyctest fail
         modrm = x86_ldub_code(env, s);
         reg = (modrm >> 3) & 7;
+        if (CODE64(s)) {//wyctest, except cs, all seg regs are accessed
+            char const *sn = "ecsdfg";
+            printf("%d %c\n", s->cpl, sn[reg]); /* code priv level */
+        }
         if (reg >= 6 || reg == R_CS)
             goto illegal_op;
         gen_ldst_modrm(env, s, modrm, MO_16, OR_TMP0, 0/* load */); // load to OR_TMP0
