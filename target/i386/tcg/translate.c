@@ -4117,15 +4117,17 @@ do_rdrand:
     case 0x8e: /* mov seg, Gv */
         modrm = x86_ldub_code(env, s);
         reg = (modrm >> 3) & 7;
-        if (CODE64(s)) {//wyctest, except cs, all seg regs are accessed
+        if (CODE64(s)) { //wyctest, except cs, all seg regs are accessed
+            // s->cpl (code priv level) is always 0
             char const *sn = "ecsdfg";
-            printf("%d %c\n", s->cpl, sn[reg]); /* code priv level */
+            printf("seg %c\n", sn[reg]);
+            //b = cpu_breakpoint_insert(cpu, s->pc, BP_GDB, NULL);
         }
         if (reg >= 6 || reg == R_CS)
             goto illegal_op;
         gen_ldst_modrm(env, s, modrm, MO_16, OR_TMP0, 0/* load */); // load to OR_TMP0
         gen_movl_seg_T0(s, reg); // seg = T0
-        break;
+        break; // 6862
     case 0x8c: /* mov Gv, seg */
         modrm = x86_ldub_code(env, s);
         reg = (modrm >> 3) & 7;
