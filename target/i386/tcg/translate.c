@@ -3101,7 +3101,8 @@ static bool disas_insn(DisasContext *s, CPUState *cpu)
     int b, prefixes;
     int shift;
     MemOp ot, aflag, dflag;
-    int modrm, reg, rm, mod, op, opreg, val;
+    int modrm, rm, mod, op, opreg, val;
+    int reg; // gp, control, x87, mmx, xmm, ymm registers
 
     CPUX86State *env = cpu->env_ptr;
     bool orig_cc_op_dirty = s->cc_op_dirty;
@@ -4114,30 +4115,35 @@ do_rdrand:
         gen_ldst_modrm(env, s, modrm, ot, OR_TMP0, 0/* load */);
         gen_op_mov_reg_v(s, ot, reg, s->T0);
         break;
-    case 0x8e: /* mov seg, Gv */
+    case 0x8e: {/* mov seg, Gv */ // OP dst, src
+        int seg;
         modrm = x86_ldub_code(env, s);
-        reg = (modrm >> 3) & 7;
+        seg = (modrm >> 3) & 7;
         if (CODE64(s)) { //wyctest, except cs, all seg regs are accessed
             // s->cpl (code priv level) is always 0
             char const *sn = "ecsdfg";
-            printf("seg %c\n", sn[reg]);
+            printf("seg %c\n", sn[seg]);
             //b = cpu_breakpoint_insert(cpu, s->pc, BP_GDB, NULL);
+            //if (reg == 4 || reg == 5)
+                //goto next_byte; //wyctest failed
+                //break; //wyctest failed
         }
-        if (reg >= 6 || reg == R_CS)
+        if (seg >= 6 || seg == R_CS)
             goto illegal_op;
         gen_ldst_modrm(env, s, modrm, MO_16, OR_TMP0, 0/* load */); // load to OR_TMP0
-        gen_movl_seg_T0(s, reg); // seg = T0
-        break; // 6862
-    case 0x8c: /* mov Gv, seg */
+        gen_movl_seg_T0(s, seg); // seg = T0
+        break; }// 6862
+    case 0x8c: { /* mov Gv, seg */
+        int seg;
         modrm = x86_ldub_code(env, s);
-        reg = (modrm >> 3) & 7;
+        seg = (modrm >> 3) & 7;
         mod = (modrm >> 6) & 3;
-        if (reg >= 6)
+        if (seg >= 6)
             goto illegal_op;
-        gen_op_movl_T0_seg(s, reg); // T0 = seg
+        gen_op_movl_T0_seg(s, seg); // T0 = seg
         ot = mod == 3 ? dflag : MO_16;
         gen_ldst_modrm(env, s, modrm, ot, OR_TMP0, 1/* store */);
-        break;
+        break; }
 
     case 0x1b6: /* movzbS Gv, Eb */
     case 0x1b7: /* movzwS Gv, Eb */
@@ -6553,10 +6559,12 @@ bt_op:
             gen_op_mov_reg_v(s, ot, rm, s->T0);
         }
         break;
-
-    case 0x121: /* mov reg, drN */
-    case 0x123: /* mov drN, reg */
+                // OP dst, src
+    case 0x121: /* mov reg, drN */ // load from dr
+    case 0x123: /* mov drN, reg */ // store to dr
         if (check_cpl0(s)) {
+            int dr;
+
             modrm = x86_ldub_code(env, s);
             /* Ignore the mod bits (assume (modrm&0xc0)==0xc0).
              * AMD documentation (24594.pdf) and testing of
@@ -6564,28 +6572,34 @@ bt_op:
              * are assumed to be 1's, regardless of actual values.
              */
             rm = (modrm & 7) | REX_B(s);
-            reg = ((modrm >> 3) & 7) | REX_R(s);
+            dr = ((modrm >> 3) & 7) | REX_R(s);
             if (CODE64(s))
                 ot = MO_64;
             else
                 ot = MO_32;
-            if (reg >= 8) {
+            if (dr >= 8) {
                 goto illegal_op;
             }
-            if (b & 2) {
-                gen_svm_check_intercept(s, SVM_EXIT_WRITE_DR0 + reg);
-                gen_op_mov_v_reg(s, ot, s->T0, rm);
-                tcg_gen_movi_i32(s->tmp2_i32, reg);
+            if (b & 2) { // store to dr
+                gen_svm_check_intercept(s, SVM_EXIT_WRITE_DR0 + dr);
+                gen_op_mov_v_reg(s, ot, s->T0, rm); // rm == reg
+                tcg_gen_movi_i32(s->tmp2_i32, dr);
                 gen_helper_set_dr(cpu_env, s->tmp2_i32, s->T0);
+#if defined(WYC)
+                helper_set_dr();
+#endif
                 s->base.is_jmp = DISAS_EOB_NEXT;
-            } else {
-                gen_svm_check_intercept(s, SVM_EXIT_READ_DR0 + reg);
-                tcg_gen_movi_i32(s->tmp2_i32, reg);
+            } else { // load from dr
+                gen_svm_check_intercept(s, SVM_EXIT_READ_DR0 + dr);
+                tcg_gen_movi_i32(s->tmp2_i32, dr);
                 gen_helper_get_dr(s->T0, cpu_env, s->tmp2_i32);
-                gen_op_mov_reg_v(s, ot, rm, s->T0);
+#if defined(WYC)
+                helper_get_dr();
+#endif
+                gen_op_mov_reg_v(s, ot, rm, s->T0); // rm == reg
             }
         }
-        break;
+        break; // 6871
     case 0x106: /* clts */
         if (check_cpl0(s)) {
             gen_svm_check_intercept(s, SVM_EXIT_WRITE_CR0);

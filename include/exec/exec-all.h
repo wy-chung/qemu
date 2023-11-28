@@ -689,7 +689,7 @@ G_NORETURN void cpu_loop_exit_sigbus(CPUState *cpu, target_ulong addr,
                                      MMUAccessType access_type,
                                      uintptr_t ra);
 
-#else
+#else // !defined(CONFIG_USER_ONLY)
 static inline void mmap_lock(void) {}
 static inline void mmap_unlock(void) {}
 #define WITH_MMAP_LOCK_GUARD()
