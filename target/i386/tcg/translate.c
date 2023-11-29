@@ -4123,7 +4123,8 @@ do_rdrand:
             // s->cpl (code priv level) is always 0
             char const *sn = "ecsdfg";
             printf("seg %c\n", sn[seg]);
-            //b = cpu_breakpoint_insert(cpu, s->pc, BP_GDB, NULL);
+            //if (seg != R_SS)
+            //    cpu_breakpoint_insert(cpu, s->pc, BP_GDB, NULL);
             //if (reg == 4 || reg == 5)
                 //goto next_byte; //wyctest failed
                 //break; //wyctest failed
