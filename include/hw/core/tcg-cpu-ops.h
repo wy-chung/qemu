@@ -18,7 +18,7 @@ struct TCGCPUOps {
      *
      * Called when the first CPU is realized.
      */
-    void (*initialize)(void);
+    void (*initialize)(void);  // tcg_x86_init
     /**
      * @synchronize_from_tb: Synchronize state from a TCG #TranslationBlock
      *
@@ -30,7 +30,7 @@ struct TCGCPUOps {
      * If more state needs to be restored, the target must implement a
      * function to restore all the state, and register it here.
      */
-    void (*synchronize_from_tb)(CPUState *cpu, const TranslationBlock *tb);
+    void (*synchronize_from_tb)(CPUState *cpu, const TranslationBlock *tb); // x86_cpu_synchronize_from_tb
     /**
      * @restore_state_to_opc: Synchronize state from INDEX_op_start_insn
      *
@@ -39,15 +39,15 @@ struct TCGCPUOps {
      * state which are tracked insn-by-insn in the target-specific
      * arguments to start_insn, passed as @data.
      */
-    void (*restore_state_to_opc)(CPUState *cpu, const TranslationBlock *tb,
+    void (*restore_state_to_opc)(CPUState *cpu, const TranslationBlock *tb, // x86_restore_state_to_opc
                                  const uint64_t *data);
 
     /** @cpu_exec_enter: Callback for cpu_exec preparation */
-    void (*cpu_exec_enter)(CPUState *cpu);
+    void (*cpu_exec_enter)(CPUState *cpu); // x86_cpu_exec_enter
     /** @cpu_exec_exit: Callback for cpu_exec cleanup */
-    void (*cpu_exec_exit)(CPUState *cpu);
+    void (*cpu_exec_exit)(CPUState *cpu); // x86_cpu_exec_exit
     /** @debug_excp_handler: Callback for handling debug exceptions */
-    void (*debug_excp_handler)(CPUState *cpu);
+    void (*debug_excp_handler)(CPUState *cpu); // breakpoint_handler
 
 #ifdef NEED_CPU_H
 #if defined(CONFIG_USER_ONLY) && defined(TARGET_I386)
@@ -62,7 +62,7 @@ struct TCGCPUOps {
     /**
      * @do_interrupt: Callback for interrupt handling.
      */
-    void (*do_interrupt)(CPUState *cpu);
+    void (*do_interrupt)(CPUState *cpu); // x86_cpu_do_interrupt
 #endif /* !CONFIG_USER_ONLY || !TARGET_I386 */
 #ifdef CONFIG_USER_ONLY
     /**
@@ -115,7 +115,7 @@ struct TCGCPUOps {
                           MMUAccessType access_type, uintptr_t ra);
 #else
     /** @cpu_exec_interrupt: Callback for processing interrupts in cpu_exec */
-    bool (*cpu_exec_interrupt)(CPUState *cpu, int interrupt_request);
+    bool (*cpu_exec_interrupt)(CPUState *cpu, int interrupt_request); // x86_cpu_exec_interrupt
     /**
      * @tlb_fill: Handle a softmmu tlb miss
      *
@@ -123,14 +123,14 @@ struct TCGCPUOps {
      * if the access is invalid and probe is true, return false;
      * otherwise raise an exception and do not return.
      */
-    bool (*tlb_fill)(CPUState *cpu, vaddr address, int size,
+    bool (*tlb_fill)(CPUState *cpu, vaddr address, int size, // x86_cpu_tlb_fill
                      MMUAccessType access_type, int mmu_idx,
                      bool probe, uintptr_t retaddr);
     /**
      * @do_transaction_failed: Callback for handling failed memory transactions
      * (ie bus faults or external aborts; not MMU faults)
      */
-    void (*do_transaction_failed)(CPUState *cpu, hwaddr physaddr, vaddr addr,
+    void (*do_transaction_failed)(CPUState *cpu, hwaddr physaddr, vaddr addr, // NULL
                                   unsigned size, MMUAccessType access_type,
                                   int mmu_idx, MemTxAttrs attrs,
                                   MemTxResult response, uintptr_t retaddr);
@@ -138,27 +138,27 @@ struct TCGCPUOps {
      * @do_unaligned_access: Callback for unaligned access handling
      * The callback must exit via raising an exception.
      */
-    G_NORETURN void (*do_unaligned_access)(CPUState *cpu, vaddr addr,
+    G_NORETURN void (*do_unaligned_access)(CPUState *cpu, vaddr addr, // x86_cpu_do_unaligned_access
                                            MMUAccessType access_type,
                                            int mmu_idx, uintptr_t retaddr);
 
     /**
      * @adjust_watchpoint_address: hack for cpu_check_watchpoint used by ARM
      */
-    vaddr (*adjust_watchpoint_address)(CPUState *cpu, vaddr addr, int len);
+    vaddr (*adjust_watchpoint_address)(CPUState *cpu, vaddr addr, int len); // NULL
 
     /**
      * @debug_check_watchpoint: return true if the architectural
      * watchpoint whose address has matched should really fire, used by ARM
      * and RISC-V
      */
-    bool (*debug_check_watchpoint)(CPUState *cpu, CPUWatchpoint *wp);
+    bool (*debug_check_watchpoint)(CPUState *cpu, CPUWatchpoint *wp); // NULL
 
     /**
      * @debug_check_breakpoint: return true if the architectural
      * breakpoint whose PC has matched should really fire.
      */
-    bool (*debug_check_breakpoint)(CPUState *cpu);
+    bool (*debug_check_breakpoint)(CPUState *cpu); // x86_debug_check_breakpoint
 
     /**
      * @io_recompile_replay_branch: Callback for cpu_io_recompile.
@@ -168,7 +168,7 @@ struct TCGCPUOps {
      * target architecture requires re-execution of the branch, then
      * adjust the cpu state as required and return true.
      */
-    bool (*io_recompile_replay_branch)(CPUState *cpu,
+    bool (*io_recompile_replay_branch)(CPUState *cpu, // NULL
                                        const TranslationBlock *tb);
 #endif /* !CONFIG_USER_ONLY */
 #endif /* NEED_CPU_H */

@@ -92,6 +92,7 @@ void x86_cpu_do_interrupt(CPUState *cs)
     env->old_exception = -1;
 }
 
+//wyc only usable in user mode simulation
 void cpu_x86_load_seg(CPUX86State *env, X86Seg seg_reg, int selector)
 {
     if (!(env->cr[0] & CR0_PE_MASK) || (env->eflags & VM_MASK)) { // 8086 mode

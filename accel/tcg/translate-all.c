@@ -645,7 +645,7 @@ void cpu_io_recompile(CPUState *cpu, uintptr_t retaddr)
      */
     n = 1;
     cc = CPU_GET_CLASS(cpu);
-    if (cc->tcg_ops->io_recompile_replay_branch &&
+    if (cc->tcg_ops->io_recompile_replay_branch && // NULL
         cc->tcg_ops->io_recompile_replay_branch(cpu, tb)) {
         cpu_neg(cpu)->icount_decr.u16.low++;
         n = 2;

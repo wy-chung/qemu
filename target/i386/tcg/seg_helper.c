@@ -1349,7 +1349,7 @@ void helper_load_seg(CPUX86State *env, int seg_reg, int selector)
             }
         }
 
-        if (!(e2 & DESC_P_MASK)) {
+        if (!(e2 & DESC_P_MASK)) { // segment not present
             if (seg_reg == R_SS) {
                 raise_exception_err_ra(env, EXCP0C_STACK, selector & 0xfffc, GETPC());
             } else {

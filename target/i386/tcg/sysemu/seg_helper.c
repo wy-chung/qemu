@@ -109,6 +109,9 @@ void handle_even_inj(CPUX86State *env, int intno, int is_int,
     }
 }
 
+/**
+ * @do_interrupt: Callback for interrupt handling.
+ */
 void x86_cpu_do_interrupt(CPUState *cs)
 {
     X86CPU *cpu = X86_CPU(cs);
@@ -127,6 +130,7 @@ void x86_cpu_do_interrupt(CPUState *cs)
     }
 }
 
+/** @cpu_exec_interrupt: Callback for processing interrupts in cpu_exec */
 bool x86_cpu_exec_interrupt(CPUState *cs, int interrupt_request)
 {
     X86CPU *cpu = X86_CPU(cs);

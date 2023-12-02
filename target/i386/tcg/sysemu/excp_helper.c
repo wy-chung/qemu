@@ -592,6 +592,13 @@ static bool get_physical_address(CPUX86State *env, vaddr addr,
     return true;
 }
 
+/**
+ * @tlb_fill: Handle a softmmu tlb miss
+ *
+ * If the access is valid, call tlb_set_page and return true;
+ * if the access is invalid and probe is true, return false;
+ * otherwise raise an exception and do not return.
+ */
 bool x86_cpu_tlb_fill(CPUState *cs, vaddr addr, int size,
                       MMUAccessType access_type, int mmu_idx,
                       bool probe, uintptr_t retaddr)
@@ -634,6 +641,10 @@ bool x86_cpu_tlb_fill(CPUState *cs, vaddr addr, int size,
     raise_exception_err_ra(env, err.exception_index, err.error_code, retaddr);
 }
 
+/**
+ * @do_unaligned_access: Callback for unaligned access handling
+ * The callback must exit via raising an exception.
+ */
 G_NORETURN void x86_cpu_do_unaligned_access(CPUState *cs, vaddr vaddr,
                                             MMUAccessType access_type,
                                             int mmu_idx, uintptr_t retaddr)

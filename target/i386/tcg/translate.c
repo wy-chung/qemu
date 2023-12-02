@@ -6886,6 +6886,11 @@ bt_op:
     return true;
 }
 
+/**
+ * @initialize: Initalize TCG state
+ *
+ * Called when the first CPU is realized.
+ */
 void tcg_x86_init(void)
 {
     static const char reg_names[CPU_NB_REGS][4] = {
