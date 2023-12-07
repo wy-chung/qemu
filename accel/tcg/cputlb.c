@@ -47,15 +47,15 @@
 /* #define DEBUG_TLB_LOG */
 
 #ifdef DEBUG_TLB
-# define DEBUG_TLB_GATE 1
-# ifdef DEBUG_TLB_LOG
-#  define DEBUG_TLB_LOG_GATE 1
-# else
-#  define DEBUG_TLB_LOG_GATE 0
-# endif
+ #define DEBUG_TLB_GATE 1
+ #ifdef DEBUG_TLB_LOG
+  #define DEBUG_TLB_LOG_GATE 1
+ #else
+  #define DEBUG_TLB_LOG_GATE 0
+ #endif
 #else
-# define DEBUG_TLB_GATE 0
-# define DEBUG_TLB_LOG_GATE 0
+ #define DEBUG_TLB_GATE 0
+ #define DEBUG_TLB_LOG_GATE 0
 #endif
 
 #define tlb_debug(fmt, ...) do { \
