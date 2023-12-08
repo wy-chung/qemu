@@ -336,6 +336,13 @@ void tb_invalidate_phys_addr(AddressSpace *as, hwaddr addr, MemTxAttrs attrs)
 }
 #endif
 
+/**
+ * cpu_single_step:
+ * @cpu: CPU to the flags for.
+ * @enabled: Flags to enable.
+ *
+ * Enables or disables single-stepping for @cpu.
+ */
 /* enable or disable single step mode. EXCP_DEBUG is returned by the
    CPU loop after each instruction */
 void cpu_single_step(CPUState *cpu, int enabled)

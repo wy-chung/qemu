@@ -483,7 +483,7 @@ cpu_tb_exec(CPUState *cpu, TranslationBlock *itb, int *tb_exit)
          * counter hit zero); we must restore the guest PC to the address
          * of the start of the TB.
          */
-        CPUClass *cc = CPU_GET_CLASS(cpu);
+        CPUClass *cc = CPU_GET_CLASS(cpu); // cpu.h:64 DECLARE_CLASS_CHECKERS(CPUClass, CPU, TYPE_CPU)
 
         if (cc->tcg_ops->synchronize_from_tb) {
             cc->tcg_ops->synchronize_from_tb(cpu, last_tb);
