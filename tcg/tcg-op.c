@@ -2888,6 +2888,6 @@ void tcg_gen_lookup_and_goto_ptr(void)
 #if defined(WYC)
     helper_lookup_tb_ptr(CPUArchState *env);
 #endif
-    tcg_gen_op1i(INDEX_op_goto_ptr, tcgv_ptr_arg(ptr));
+    tcg_gen_op1i(INDEX_op_goto_ptr, tcgv_ptr_arg(ptr)); // for the definition of INDEX_op_xxx see TCGOpcode
     tcg_temp_free_ptr(ptr);
 }

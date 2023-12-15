@@ -420,7 +420,7 @@ const void *helper_lookup_tb_ptr(CPUArchState *env)
     uint64_t cs_base;
     uint32_t flags, cflags;
 
-    cpu_get_tb_cpu_state(env, &pc, &cs_base, &flags);
+    cpu_get_tb_cpu_state(env, &pc, &cs_base, &flags); // pc == cs_base + eip
 
     cflags = curr_cflags(cpu);
     if (check_for_breakpoints(cpu, pc, &cflags)) {

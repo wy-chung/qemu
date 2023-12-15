@@ -1925,6 +1925,7 @@ void *probe_access(CPUArchState *env, vaddr addr, int size,
     return host;
 }
 
+// not used by i386
 void *tlb_vaddr_to_host(CPUArchState *env, abi_ptr addr,
                         MMUAccessType access_type, int mmu_idx)
 {
@@ -2153,12 +2154,12 @@ static void mmu_watch_or_dirty(CPUArchState *env, MMULookupPageData *data,
 static bool mmu_lookup(CPUArchState *env, vaddr addr, MemOpIdx oi,
                        uintptr_t ra, MMUAccessType type, MMULookupLocals *l /* OUT */)
 {
-    unsigned a_bits;
+    unsigned a_bits; // alignment in bits
     bool crosspage;
     int flags;
 
     l->memop = get_memop(oi);
-    l->mmu_idx = get_mmuidx(oi);
+    l->mmu_idx = get_mmuidx(oi); // 4 bits
 
     tcg_debug_assert(l->mmu_idx < NB_MMU_MODES);
 

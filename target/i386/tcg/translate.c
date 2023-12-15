@@ -5764,6 +5764,9 @@ bt_op:
         gen_update_cc_op(s);
         gen_update_eip_cur(s);
         gen_helper_syscall(cpu_env, cur_insn_len_i32(s));
+#if defined(WYC)
+        helper_syscall();
+#endif
         /* TF handling for the syscall insn is different. The TF bit is  checked
            after the syscall insn completes. This allows #DB to not be
            generated after one has entered CPL0 if TF is set in FMASK.  */

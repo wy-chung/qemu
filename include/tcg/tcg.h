@@ -205,8 +205,10 @@ struct TCGRelocation {
     int type;
 };
 
+#if !defined(WYC)
 typedef struct TCGOp TCGOp;
 typedef struct TCGLabelUse TCGLabelUse;
+#endif
 struct TCGLabelUse {
     QSIMPLEQ_ENTRY(TCGLabelUse) next;
     TCGOp *op;
