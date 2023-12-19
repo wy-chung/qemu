@@ -19,7 +19,7 @@
 #ifndef EXEC_TLB_COMMON_H
 #define EXEC_TLB_COMMON_H 1
 
-#define CPU_TLB_ENTRY_BITS 5
+#define CPU_TLB_ENTRY_BITS 5 // tlb entry size in bits
 
 /* Minimalized TLB entry for use by TCG fast path. */
 typedef union CPUTLBEntry {

@@ -494,7 +494,7 @@ struct TCGContext {
 #ifdef CONFIG_SOFTMMU
     int tlb_fast_offset;
     int page_mask;
-    uint8_t page_bits;
+    uint8_t page_bits; // page size in bits
     uint8_t tlb_dyn_max_bits;
 #endif
     uint8_t insn_start_words;

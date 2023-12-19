@@ -7732,7 +7732,11 @@ static void x86_disas_set_info(CPUState *cs, disassemble_info *info)
     info->cap_insn_split = 8;
 }
 
-// only called by kvm_get_sregs and kvm_get_sregs2
+// only called by
+// hvf(mac Hypervisor Framework),
+// nvmm(NetBSD Virtual Machine Monitor),
+// kvm(Linux Kernel-based Virtual Machine) and
+// whpx(Windows Hypervisor Platform)
 void x86_update_hflags(CPUX86State *env)
 {
    uint32_t hflags;

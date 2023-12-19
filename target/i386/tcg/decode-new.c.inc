@@ -1044,7 +1044,7 @@ static int decode_modrm(DisasContext *s, CPUX86State *env, X86DecodedInsn *decod
     } else {
         op->has_ea = true;
         op->n = -1;
-        decode->mem = gen_lea_modrm_0(env, s, get_modrm(s, env));
+        gen_lea_modrm_0(&decode->mem, env, s, get_modrm(s, env));
     }
     return modrm;
 }

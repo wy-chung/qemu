@@ -2176,7 +2176,7 @@ typedef struct AddressParts {
 } AddressParts;
 
 // get { def_seg, base, index, scale, disp} from modrm
-static AddressParts gen_lea_modrm_0(CPUX86State *env, DisasContext *s,
+static void gen_lea_modrm_0(AddressParts *a, CPUX86State *env, DisasContext *s,
                                     int modrm)
 {
     int def_seg, base, index, scale, mod, rm;
@@ -2296,38 +2296,42 @@ static AddressParts gen_lea_modrm_0(CPUX86State *env, DisasContext *s,
     }
 
  done:
-    return (AddressParts){ def_seg, base, index, scale, disp };
+    a->def_seg = def_seg;
+    a->base = base;
+    a->index = index;
+    a->scale = scale;
+    a->disp = disp;
 }
 
 /* Compute the address, with a minimum number of TCG ops.  */
-static TCGv gen_lea_modrm_1(DisasContext *s, AddressParts a, bool is_vsib/* has a VSIB byte */)
+static TCGv gen_lea_modrm_1(DisasContext *s, AddressParts const *a, bool is_vsib/* has a VSIB byte */)
 {
     TCGv ea = NULL;
 
-    if (a.index >= 0 && !is_vsib) { // v(vex), sib(scale, index, base)
-        if (a.scale == 0) {
-            ea = cpu_regs[a.index];
+    if (a->index >= 0 && !is_vsib) { // v(vex), sib(scale, index, base)
+        if (a->scale == 0) {
+            ea = cpu_regs[a->index];
         } else {
-            tcg_gen_shli_tl(s->A0, cpu_regs[a.index], a.scale);
+            tcg_gen_shli_tl(s->A0, cpu_regs[a->index], a->scale);
             ea = s->A0;
         }
-        if (a.base >= 0) {
-            tcg_gen_add_tl(s->A0, ea, cpu_regs[a.base]);
+        if (a->base >= 0) {
+            tcg_gen_add_tl(s->A0, ea, cpu_regs[a->base]);
             ea = s->A0;
         }
-    } else if (a.base >= 0) {
-        ea = cpu_regs[a.base];
+    } else if (a->base >= 0) {
+        ea = cpu_regs[a->base];
     }
     if (!ea) {
-        if (tb_cflags(s->base.tb) & CF_PCREL && a.base == -2) {
+        if (tb_cflags(s->base.tb) & CF_PCREL && a->base == -2) {
             /* With cpu_eip ~= pc_save, the expression is pc-relative. */
-            tcg_gen_addi_tl(s->A0, cpu_eip, a.disp - s->pc_save);
+            tcg_gen_addi_tl(s->A0, cpu_eip, a->disp - s->pc_save);
         } else {
-            tcg_gen_movi_tl(s->A0, a.disp);
+            tcg_gen_movi_tl(s->A0, a->disp);
         }
         ea = s->A0;
-    } else if (a.disp != 0) {
-        tcg_gen_addi_tl(s->A0, ea, a.disp);
+    } else if (a->disp != 0) {
+        tcg_gen_addi_tl(s->A0, ea, a->disp);
         ea = s->A0;
     }
 
@@ -2338,23 +2342,27 @@ static TCGv gen_lea_modrm_1(DisasContext *s, AddressParts a, bool is_vsib/* has 
 // will only be called during code translation
 static void gen_lea_modrm(CPUX86State *env, DisasContext *s, int modrm)
 {
-    AddressParts a = gen_lea_modrm_0(env, s, modrm);
-    TCGv ea = gen_lea_modrm_1(s, a, false/* is_vsib */);
+    AddressParts a;
+    gen_lea_modrm_0(&a, env, s, modrm);
+    TCGv ea = gen_lea_modrm_1(s, &a, false/* is_vsib */);
     // load effective address of v(ea) and seg(def_seg or s->override) to A0
     gen_lea_v_seg(s, s->aflag, ea, a.def_seg, s->override);
 }
 
 static void gen_nop_modrm(CPUX86State *env, DisasContext *s, int modrm)
 {
-    (void)gen_lea_modrm_0(env, s, modrm);
+    AddressParts a;
+
+    gen_lea_modrm_0(&a, env, s, modrm);
 }
 
 /* Used for BNDCL, BNDCU, BNDCN.  */
 static void gen_bndck(CPUX86State *env, DisasContext *s, int modrm,
                       TCGCond cond, TCGv_i64 bndv)
 {
-    AddressParts a = gen_lea_modrm_0(env, s, modrm);
-    TCGv ea = gen_lea_modrm_1(s, a, false);
+    AddressParts a;
+    gen_lea_modrm_0(&a, env, s, modrm);
+    TCGv ea = gen_lea_modrm_1(s, &a, false);
 
     tcg_gen_extu_tl_i64(s->tmp1_i64, ea);
     if (!CODE64(s)) {
@@ -4203,8 +4211,9 @@ do_rdrand:
             goto illegal_op;
         reg = ((modrm >> 3) & 7) | REX_R(s);
         {
-            AddressParts a = gen_lea_modrm_0(env, s, modrm);
-            TCGv ea = gen_lea_modrm_1(s, a, false);
+            AddressParts a;
+	    gen_lea_modrm_0(&a, env, s, modrm);
+            TCGv ea = gen_lea_modrm_1(s, &a, false);
             gen_lea_v_seg(s, s->aflag, ea, -1, -1);
             gen_op_mov_reg_v(s, dflag, reg, s->A0);
         }
@@ -4292,7 +4301,7 @@ do_rdrand:
             gen_op_mov_reg_v(s, ot, reg, s->T1);
         }
         break;
-    case 0xc4: /* les Gv */
+    case 0xc4: /* les Gv */ // load es and Gv from memory
         /* In CODE64 this is VEX3; see above.  */
         op = R_ES;
         goto do_lxx;
@@ -4306,7 +4315,7 @@ do_rdrand:
     case 0x1b4: /* lfs Gv */
         op = R_FS;
         goto do_lxx;
-    case 0x1b5: /* lgs Gv */
+    case 0x1b5: /* lgs Gv */ // load gs and Gv from memory
         op = R_GS;
 do_lxx:
         if (CODE64(s)) goto illegal_op;	//wyctest success
@@ -4426,8 +4435,9 @@ grp2:
             op = ((b & 7) << 3) | ((modrm >> 3) & 7);
             if (mod != 3) {
                 /* memory op */
-                AddressParts a = gen_lea_modrm_0(env, s, modrm);
-                TCGv ea = gen_lea_modrm_1(s, a, false);
+                AddressParts a;
+		gen_lea_modrm_0(&a, env, s, modrm);
+                TCGv ea = gen_lea_modrm_1(s, &a, false);
                 TCGv last_addr = tcg_temp_new();
                 bool update_fdp = true;
 
@@ -5373,12 +5383,13 @@ do_btx:
         rm = (modrm & 7) | REX_B(s);
         gen_op_mov_v_reg(s, MO_32, s->T1, reg);
         if (mod != 3) {
-            AddressParts a = gen_lea_modrm_0(env, s, modrm);
+            AddressParts a;
+	    gen_lea_modrm_0(&a, env, s, modrm);
             /* specific case: we need to add a displacement */
             gen_exts(ot, s->T1);
             tcg_gen_sari_tl(s->tmp0, s->T1, 3 + ot);
             tcg_gen_shli_tl(s->tmp0, s->tmp0, ot);
-            tcg_gen_add_tl(s->A0, gen_lea_modrm_1(s, a, false), s->tmp0);
+            tcg_gen_add_tl(s->A0, gen_lea_modrm_1(s, &a, false), s->tmp0);
             gen_lea_v_seg(s, s->aflag, s->A0, a.def_seg, s->override);
             if (!(s->prefix & PREFIX_LOCK)) {
                 gen_op_ld_v(s, ot, s->T0, s->A0);
@@ -6078,6 +6089,9 @@ bt_op:
                 tcg_gen_ext32u_tl(s->A0, cpu_regs[R_EAX]);
             }
             gen_helper_flush_page(cpu_env, s->A0);
+#if defined(WYC)
+            helper_flush_page();
+#endif
             s->base.is_jmp = DISAS_EOB_NEXT;
             break;
 
@@ -6171,6 +6185,9 @@ bt_op:
             gen_svm_check_intercept(s, SVM_EXIT_INVLPG);
             gen_lea_modrm(env, s, modrm);
             gen_helper_flush_page(cpu_env, s->A0);
+#if defined(WYC)
+            helper_flush_page();
+#endif
             s->base.is_jmp = DISAS_EOB_NEXT;
             break;
 
@@ -6381,7 +6398,8 @@ bt_op:
                 }
             } else if (mod != 3) {
                 /* bndldx */
-                AddressParts a = gen_lea_modrm_0(env, s, modrm);
+                AddressParts a;
+		gen_lea_modrm_0(&a, env, s, modrm);
                 if (reg >= 4
                     || (prefixes & PREFIX_LOCK)
                     || s->aflag == MO_16
@@ -6425,7 +6443,8 @@ bt_op:
                     || s->aflag == MO_16) {
                     goto illegal_op;
                 }
-                AddressParts a = gen_lea_modrm_0(env, s, modrm);
+                AddressParts a;
+		gen_lea_modrm_0(&a, env, s, modrm);
                 if (a.base >= 0) {
                     tcg_gen_extu_tl_i64(cpu_bndl[reg], cpu_regs[a.base]);
                     if (!CODE64(s)) {
@@ -6438,7 +6457,7 @@ bt_op:
                     /* rip-relative generates #ud */
                     goto illegal_op;
                 }
-                tcg_gen_not_tl(s->A0, gen_lea_modrm_1(s, a, false));
+                tcg_gen_not_tl(s->A0, gen_lea_modrm_1(s, &a, false));
                 if (!CODE64(s)) {
                     tcg_gen_ext32u_tl(s->A0, s->A0);
                 }
@@ -6486,7 +6505,8 @@ bt_op:
                 }
             } else if (mod != 3) {
                 /* bndstx */
-                AddressParts a = gen_lea_modrm_0(env, s, modrm);
+                AddressParts a;
+		gen_lea_modrm_0(&a, env, s, modrm);
                 if (reg >= 4
                     || (prefixes & PREFIX_LOCK)
                     || s->aflag == MO_16

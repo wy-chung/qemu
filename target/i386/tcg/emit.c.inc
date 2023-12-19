@@ -63,7 +63,7 @@ static void gen_illegal(DisasContext *s, CPUX86State *env, X86DecodedInsn *decod
 
 static void gen_load_ea(DisasContext *s, AddressParts *mem, bool is_vsib)
 {
-    TCGv ea = gen_lea_modrm_1(s, *mem, is_vsib);
+    TCGv ea = gen_lea_modrm_1(s, mem, is_vsib);
     gen_lea_v_seg(s, s->aflag, ea, mem->def_seg, s->override);
 }
 
