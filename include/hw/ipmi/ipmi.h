@@ -112,8 +112,7 @@ uint32_t ipmi_next_uuid(void);
 #define IPMI_INTERFACE(obj) \
      INTERFACE_CHECK(IPMIInterface, (obj), TYPE_IPMI_INTERFACE)
 typedef struct IPMIInterfaceClass IPMIInterfaceClass;
-DECLARE_CLASS_CHECKERS(IPMIInterfaceClass, IPMI_INTERFACE,
-                       TYPE_IPMI_INTERFACE)
+DECLARE_CLASS_CHECKERS(IPMIInterfaceClass, IPMI_INTERFACE, TYPE_IPMI_INTERFACE);
 
 typedef struct IPMIInterface IPMIInterface;
 
@@ -176,8 +175,7 @@ struct IPMIInterfaceClass {
  * Define a BMC simulator (or perhaps a connection to a real BMC)
  */
 #define TYPE_IPMI_BMC "ipmi-bmc"
-OBJECT_DECLARE_TYPE(IPMIBmc, IPMIBmcClass,
-                    IPMI_BMC)
+OBJECT_DECLARE_TYPE(IPMIBmc, IPMIBmcClass, IPMI_BMC);
 
 struct IPMIBmc {
     DeviceState parent;

@@ -1285,8 +1285,9 @@ void tcg_gen_mul_i64(TCGv_i64 ret, TCGv_i64 arg1, TCGv_i64 arg2)
     tcg_temp_free_i32(t1);
 }
 
-#else
+#else // TCG_TARGET_REG_BITS != 32
 
+// mov imm. arg is imm
 void tcg_gen_movi_i64(TCGv_i64 ret, int64_t arg)
 {
     tcg_gen_mov_i64(ret, tcg_constant_i64(arg));
@@ -1294,6 +1295,7 @@ void tcg_gen_movi_i64(TCGv_i64 ret, int64_t arg)
 
 #endif /* TCG_TARGET_REG_SIZE == 32 */
 
+// add imm. arg2 is imm
 void tcg_gen_addi_i64(TCGv_i64 ret, TCGv_i64 arg1, int64_t arg2)
 {
     /* some cases can be optimized here */
@@ -2791,6 +2793,18 @@ void tcg_gen_mov_i128(TCGv_i128 dst, TCGv_i128 src)
 
 /* QEMU specific operations.  */
 
+/**
+ * tcg_gen_exit_tb() - output exit_tb TCG operation
+ * @tb: The TranslationBlock from which we are exiting
+ * @idx: Direct jump slot index, or exit request
+ *
+ * See tcg/README for more info about this TCG operation.
+ * See also tcg.h and the block comment above TB_EXIT_MASK.
+ *
+ * For a normal exit from the TB, back to the main loop, @tb should
+ * be NULL and @idx should be 0.  Otherwise, @tb should be valid and
+ * @idx should be one of the TB_EXIT_ values.
+ */
 void tcg_gen_exit_tb(const TranslationBlock *tb, unsigned idx)
 {
     /*
@@ -2822,6 +2836,19 @@ void tcg_gen_exit_tb(const TranslationBlock *tb, unsigned idx)
     tcg_gen_op1i(INDEX_op_exit_tb, val);
 }
 
+/**
+ * tcg_gen_goto_tb() - output goto_tb TCG operation
+ * @idx: Direct jump slot index (0 or 1)
+ *
+ * See tcg/README for more info about this TCG operation.
+ *
+ * NOTE: In softmmu emulation, direct jumps with goto_tb are only safe within
+ * the pages this TB resides in because we don't take care of direct jumps when
+ * address mapping changes, e.g. in tlb_flush(). In user mode, there's only a
+ * static address translation, so the destination address is always valid, TBs
+ * are always invalidated properly, and direct jumps are reset when mapping
+ * changes.
+ */
 void tcg_gen_goto_tb(unsigned idx)
 {
     /* We tested CF_NO_GOTO_TB in translator_use_goto_tb. */
@@ -2837,6 +2864,15 @@ void tcg_gen_goto_tb(unsigned idx)
     tcg_gen_op1i(INDEX_op_goto_tb, idx);
 }
 
+/**
+ * tcg_gen_lookup_and_goto_ptr() - look up the current TB, jump to it if valid
+ * @addr: Guest address of the target TB
+ *
+ * If the TB is not valid, jump to the epilogue.
+ *
+ * This operation is optional. If the TCG backend does not implement goto_ptr,
+ * this op is equivalent to calling tcg_gen_exit_tb() with 0 as the argument.
+ */
 void tcg_gen_lookup_and_goto_ptr(void)
 {
     TCGv_ptr ptr;
@@ -2849,6 +2885,9 @@ void tcg_gen_lookup_and_goto_ptr(void)
     plugin_gen_disable_mem_helpers();
     ptr = tcg_temp_ebb_new_ptr();
     gen_helper_lookup_tb_ptr(ptr, cpu_env);
-    tcg_gen_op1i(INDEX_op_goto_ptr, tcgv_ptr_arg(ptr));
+#if defined(WYC)
+    helper_lookup_tb_ptr(CPUArchState *env);
+#endif
+    tcg_gen_op1i(INDEX_op_goto_ptr, tcgv_ptr_arg(ptr)); // for the definition of INDEX_op_xxx see TCGOpcode
     tcg_temp_free_ptr(ptr);
 }

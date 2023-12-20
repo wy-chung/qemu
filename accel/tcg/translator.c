@@ -142,11 +142,17 @@ void translator_loop(CPUState *cpu, TranslationBlock *tb, int *max_insns,
     db->host_addr[1] = NULL;
 
     ops->init_disas_context(db, cpu);
+#if defined(WYC)
+    i386_tr_init_disas_context(db, cpu/* IN */); // initialize container_of db, i.e. DisasContext
+#endif
     tcg_debug_assert(db->is_jmp == DISAS_NEXT);  /* no early exit */
 
     /* Start translating.  */
     icount_start_insn = gen_tb_start(db, cflags);
     ops->tb_start(db, cpu);
+#if defined(WYC)
+    i386_tr_tb_start(db, cpu);
+#endif
     tcg_debug_assert(db->is_jmp == DISAS_NEXT);  /* no early exit */
 
     if (cflags & CF_MEMI_ONLY) {
@@ -160,6 +166,9 @@ void translator_loop(CPUState *cpu, TranslationBlock *tb, int *max_insns,
     while (true) {
         *max_insns = ++db->num_insns;
         ops->insn_start(db, cpu);
+#if defined(WYC)
+        i386_tr_insn_start(db, cpu);
+#endif
         tcg_debug_assert(db->is_jmp == DISAS_NEXT);  /* no early exit */
 
         if (plugin_enabled) {
@@ -175,6 +184,9 @@ void translator_loop(CPUState *cpu, TranslationBlock *tb, int *max_insns,
             set_can_do_io(db, true);
         }
         ops->translate_insn(db, cpu);
+#if defined(WYC)
+        i386_tr_translate_insn(db, cpu);
+#endif
 
         /*
          * We can't instrument after instructions that change control
@@ -204,6 +216,9 @@ void translator_loop(CPUState *cpu, TranslationBlock *tb, int *max_insns,
 
     /* Emit code to exit the TB, as indicated by db->is_jmp.  */
     ops->tb_stop(db, cpu);
+#if defined(WYC)
+    i386_tr_tb_stop(db, cpu);
+#endif
     gen_tb_end(tb, cflags, icount_start_insn, db->num_insns);
 
     if (plugin_enabled) {
@@ -220,6 +235,9 @@ void translator_loop(CPUState *cpu, TranslationBlock *tb, int *max_insns,
         if (logfile) {
             fprintf(logfile, "----------------\n");
             ops->disas_log(db, cpu, logfile);
+#if defined(WYC)
+            i386_tr_disas_log(db, cpu, logfile);
+#endif
             fprintf(logfile, "\n");
             qemu_log_unlock(logfile);
         }
@@ -244,7 +262,7 @@ static void *translator_access(CPUArchState *env, DisasContextBase *db,
     if (likely(is_same_page(db, end))) {
         host = db->host_addr[0];
         base = db->pc_first;
-    } else {
+    } else { // not same page
         host = db->host_addr[1];
         base = TARGET_PAGE_ALIGN(db->pc_first);
         if (host == NULL) {
@@ -285,7 +303,7 @@ static void *translator_access(CPUArchState *env, DisasContextBase *db,
         if (is_same_page(db, pc)) {
             return NULL;
         }
-    }
+    } // else not_same_page
 
     tcg_debug_assert(pc >= base);
     return host + (pc - base);
@@ -318,11 +336,11 @@ uint8_t translator_ldub(CPUArchState *env, DisasContextBase *db, abi_ptr pc)
     void *p = translator_access(env, db, pc, sizeof(ret));
 
     if (p) {
-        plugin_insn_append(pc, p, sizeof(ret));
+        plugin_insn_append(pc, p, sizeof(ret)); // ignore plugin
         return ldub_p(p);
     }
     ret = cpu_ldub_code(env, pc);
-    plugin_insn_append(pc, &ret, sizeof(ret));
+    plugin_insn_append(pc, &ret, sizeof(ret)); // ignore plugin
     return ret;
 }
 
@@ -332,12 +350,12 @@ uint16_t translator_lduw(CPUArchState *env, DisasContextBase *db, abi_ptr pc)
     void *p = translator_access(env, db, pc, sizeof(ret));
 
     if (p) {
-        plugin_insn_append(pc, p, sizeof(ret));
+        plugin_insn_append(pc, p, sizeof(ret)); // ignore plugin
         return lduw_p(p);
     }
     ret = cpu_lduw_code(env, pc);
     plug = tswap16(ret);
-    plugin_insn_append(pc, &plug, sizeof(ret));
+    plugin_insn_append(pc, &plug, sizeof(ret)); // ignore plugin
     return ret;
 }
 
@@ -347,12 +365,12 @@ uint32_t translator_ldl(CPUArchState *env, DisasContextBase *db, abi_ptr pc)
     void *p = translator_access(env, db, pc, sizeof(ret));
 
     if (p) {
-        plugin_insn_append(pc, p, sizeof(ret));
+        plugin_insn_append(pc, p, sizeof(ret)); // ignore plugin
         return ldl_p(p);
     }
     ret = cpu_ldl_code(env, pc);
     plug = tswap32(ret);
-    plugin_insn_append(pc, &plug, sizeof(ret));
+    plugin_insn_append(pc, &plug, sizeof(ret)); // ignore plugin
     return ret;
 }
 
@@ -362,16 +380,16 @@ uint64_t translator_ldq(CPUArchState *env, DisasContextBase *db, abi_ptr pc)
     void *p = translator_access(env, db, pc, sizeof(ret));
 
     if (p) {
-        plugin_insn_append(pc, p, sizeof(ret));
+        plugin_insn_append(pc, p, sizeof(ret)); // ignore plugin
         return ldq_p(p);
     }
     ret = cpu_ldq_code(env, pc);
     plug = tswap64(ret);
-    plugin_insn_append(pc, &plug, sizeof(ret));
+    plugin_insn_append(pc, &plug, sizeof(ret)); // ignore plugin
     return ret;
 }
 
 void translator_fake_ldb(uint8_t insn8, abi_ptr pc)
 {
-    plugin_insn_append(pc, &insn8, sizeof(insn8));
+    plugin_insn_append(pc, &insn8, sizeof(insn8)); // ignore plugin
 }

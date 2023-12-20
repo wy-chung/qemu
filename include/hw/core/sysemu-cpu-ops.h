@@ -28,7 +28,7 @@ typedef struct SysemuCPUOps {
     /**
      * @get_phys_page_debug: Callback for obtaining a physical address.
      */
-    hwaddr (*get_phys_page_debug)(CPUState *cpu, vaddr addr);
+    hwaddr (*get_phys_page_debug)(CPUState *cpu, vaddr addr); // null
     /**
      * @get_phys_page_attrs_debug: Callback for obtaining a physical address
      *       and the associated memory transaction attributes to use for the
@@ -79,7 +79,7 @@ typedef struct SysemuCPUOps {
      * This method should not be used by any callers other than the pre-1.0
      * virtio devices.
      */
-    bool (*virtio_is_big_endian)(CPUState *cpu);
+    bool (*virtio_is_big_endian)(CPUState *cpu); // null
 
     /**
      * @legacy_vmsd: Legacy state for migration.

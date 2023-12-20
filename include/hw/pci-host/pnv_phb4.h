@@ -165,7 +165,7 @@ extern const MemoryRegionOps pnv_phb4_xscom_ops;
  * PHB4 PEC (PCI Express Controller)
  */
 #define TYPE_PNV_PHB4_PEC "pnv-phb4-pec"
-OBJECT_DECLARE_TYPE(PnvPhb4PecState, PnvPhb4PecClass, PNV_PHB4_PEC)
+OBJECT_DECLARE_TYPE(PnvPhb4PecState, PnvPhb4PecClass, PNV_PHB4_PEC);
 
 struct PnvPhb4PecState {
     DeviceState parent;

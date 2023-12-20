@@ -16,7 +16,7 @@
 typedef struct CCIDCardInfo CCIDCardInfo;
 
 #define TYPE_CCID_CARD "ccid-card"
-OBJECT_DECLARE_TYPE(CCIDCardState, CCIDCardClass, CCID_CARD)
+OBJECT_DECLARE_TYPE(CCIDCardState, CCIDCardClass, CCID_CARD);
 
 /*
  * callbacks to be used by the CCID device (hw/usb-ccid.c) to call

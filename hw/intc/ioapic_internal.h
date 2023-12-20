@@ -85,7 +85,7 @@
 
 
 #define TYPE_IOAPIC_COMMON "ioapic-common"
-OBJECT_DECLARE_TYPE(IOAPICCommonState, IOAPICCommonClass, IOAPIC_COMMON)
+OBJECT_DECLARE_TYPE(IOAPICCommonState, IOAPICCommonClass, IOAPIC_COMMON);
 
 struct IOAPICCommonClass {
     SysBusDeviceClass parent_class;

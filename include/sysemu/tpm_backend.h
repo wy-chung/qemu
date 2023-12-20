@@ -21,8 +21,7 @@
 #ifdef CONFIG_TPM
 
 #define TYPE_TPM_BACKEND "tpm-backend"
-OBJECT_DECLARE_TYPE(TPMBackend, TPMBackendClass,
-                    TPM_BACKEND)
+OBJECT_DECLARE_TYPE(TPMBackend, TPMBackendClass, TPM_BACKEND);
 
 
 typedef struct TPMBackendCmd {

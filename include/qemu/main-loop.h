@@ -32,7 +32,7 @@
 #define SIG_IPI SIGUSR1
 
 #define TYPE_MAIN_LOOP  "main-loop"
-OBJECT_DECLARE_TYPE(MainLoop, MainLoopClass, MAIN_LOOP)
+OBJECT_DECLARE_TYPE(MainLoop, MainLoopClass, MAIN_LOOP);
 
 struct MainLoop {
     EventLoopBase parent_obj;

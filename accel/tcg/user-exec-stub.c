@@ -4,6 +4,7 @@
 
 bool enable_cpu_pm = false;
 
+#if !defined(WYC)
 void cpu_resume(CPUState *cpu)
 {
 }
@@ -37,3 +38,4 @@ bool replay_has_interrupt(void)
 {
     return false;
 }
+#endif

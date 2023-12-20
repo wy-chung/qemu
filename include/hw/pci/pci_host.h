@@ -34,7 +34,7 @@
 #define PCI_HOST_BYPASS_IOMMU "bypass-iommu"
 
 #define TYPE_PCI_HOST_BRIDGE "pci-host-bridge"
-OBJECT_DECLARE_TYPE(PCIHostState, PCIHostBridgeClass, PCI_HOST_BRIDGE)
+OBJECT_DECLARE_TYPE(PCIHostState, PCIHostBridgeClass, PCI_HOST_BRIDGE);
 
 struct PCIHostState {
     SysBusDevice busdev;

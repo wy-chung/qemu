@@ -30,6 +30,7 @@
 #include "plugin.h"
 #include "qemu/compiler.h"
 
+#if !defined(WYC) // don't trace plugin
 struct qemu_plugin_cb {
     struct qemu_plugin_ctx *ctx;
     union qemu_plugin_cb_sig f;
@@ -572,3 +573,4 @@ static void __attribute__((__constructor__)) plugin_init(void)
              QHT_MODE_AUTO_RESIZE);
     atexit(qemu_plugin_atexit_cb);
 }
+#endif // !defined(WYC), don't trace plugin

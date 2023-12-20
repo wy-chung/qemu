@@ -18,6 +18,7 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
+// included by translate.c
 
 #define ZMM_OFFSET(reg) offsetof(CPUX86State, xmm_regs[reg])
 
@@ -62,7 +63,7 @@ static void gen_illegal(DisasContext *s, CPUX86State *env, X86DecodedInsn *decod
 
 static void gen_load_ea(DisasContext *s, AddressParts *mem, bool is_vsib)
 {
-    TCGv ea = gen_lea_modrm_1(s, *mem, is_vsib);
+    TCGv ea = gen_lea_modrm_1(s, mem, is_vsib);
     gen_lea_v_seg(s, s->aflag, ea, mem->def_seg, s->override);
 }
 
@@ -228,6 +229,9 @@ static void gen_load(DisasContext *s, X86DecodedInsn *decode, int opn, TCGv v)
     case X86_OP_SEG:
         tcg_gen_ld32u_tl(v, cpu_env,
                          offsetof(CPUX86State,segs[op->n].selector));
+#if defined(WYC)
+        tcg_gen_ld32u_i64();
+#endif
         break;
     case X86_OP_CR:
         tcg_gen_ld_tl(v, cpu_env, offsetof(CPUX86State, cr[op->n]));

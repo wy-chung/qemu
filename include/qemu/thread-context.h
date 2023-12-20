@@ -18,8 +18,7 @@
 #include "qom/object.h"
 
 #define TYPE_THREAD_CONTEXT "thread-context"
-OBJECT_DECLARE_TYPE(ThreadContext, ThreadContextClass,
-                    THREAD_CONTEXT)
+OBJECT_DECLARE_TYPE(ThreadContext, ThreadContextClass, THREAD_CONTEXT);
 
 struct ThreadContextClass {
     ObjectClass parent_class;

@@ -162,6 +162,9 @@ void cpu_exec_realizefn(CPUState *cpu, Error **errp)
     }
     if (cpu->cc->sysemu_ops->legacy_vmsd != NULL) {
         vmstate_register(NULL, cpu->cpu_index, cpu->cc->sysemu_ops->legacy_vmsd, cpu);
+#if defined(WYC)
+        vmstate_register(NULL, cpu->cpu_index, &vmstate_x86_cpu, cpu);
+#endif
     }
 #endif /* CONFIG_USER_ONLY */
 }
@@ -173,6 +176,9 @@ void cpu_exec_unrealizefn(CPUState *cpu)
 
     if (cc->sysemu_ops->legacy_vmsd != NULL) {
         vmstate_unregister(NULL, cc->sysemu_ops->legacy_vmsd, cpu);
+#if defined(WYC)
+        vmstate_unregister(NULL, &vmstate_x86_cpu, cpu);
+#endif
     }
     if (qdev_get_vmsd(DEVICE(cpu)) == NULL) {
         vmstate_unregister(NULL, &vmstate_cpu_common, cpu);
@@ -257,6 +263,15 @@ void cpu_exec_initfn(CPUState *cpu)
 #endif
 }
 
+/**
+ * parse_cpu_option:
+ * @cpu_option: The -cpu option including optional parameters.
+ *
+ * processes optional parameters and registers them as global properties
+ *
+ * Returns: type of CPU to create or prints error and terminates process
+ *          if an error occurred.
+ */
 const char *parse_cpu_option(const char *cpu_option)
 {
     ObjectClass *oc;
@@ -321,6 +336,13 @@ void tb_invalidate_phys_addr(AddressSpace *as, hwaddr addr, MemTxAttrs attrs)
 }
 #endif
 
+/**
+ * cpu_single_step:
+ * @cpu: CPU to the flags for.
+ * @enabled: Flags to enable.
+ *
+ * Enables or disables single-stepping for @cpu.
+ */
 /* enable or disable single step mode. EXCP_DEBUG is returned by the
    CPU loop after each instruction */
 void cpu_single_step(CPUState *cpu, int enabled)

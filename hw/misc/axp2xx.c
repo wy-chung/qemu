@@ -38,7 +38,7 @@
 #define TYPE_AXP209_PMU "axp209_pmu"
 #define TYPE_AXP221_PMU "axp221_pmu"
 
-OBJECT_DECLARE_TYPE(AXP2xxI2CState, AXP2xxClass, AXP2XX)
+OBJECT_DECLARE_TYPE(AXP2xxI2CState, AXP2xxClass, AXP2XX);
 
 #define NR_REGS                            (0xff)
 

@@ -268,27 +268,27 @@ TYPE cpu_atomic_ ## NAME ## SUFFIX ## _mmu            \
     GEN_ATOMIC_HELPER(NAME, uint32_t, l_be)
 #endif
 
-GEN_ATOMIC_HELPER_ALL(fetch_add)
-GEN_ATOMIC_HELPER_ALL(fetch_sub)
-GEN_ATOMIC_HELPER_ALL(fetch_and)
-GEN_ATOMIC_HELPER_ALL(fetch_or)
-GEN_ATOMIC_HELPER_ALL(fetch_xor)
-GEN_ATOMIC_HELPER_ALL(fetch_smin)
-GEN_ATOMIC_HELPER_ALL(fetch_umin)
-GEN_ATOMIC_HELPER_ALL(fetch_smax)
-GEN_ATOMIC_HELPER_ALL(fetch_umax)
+GEN_ATOMIC_HELPER_ALL(fetch_add);
+GEN_ATOMIC_HELPER_ALL(fetch_sub);
+GEN_ATOMIC_HELPER_ALL(fetch_and);
+GEN_ATOMIC_HELPER_ALL(fetch_or);
+GEN_ATOMIC_HELPER_ALL(fetch_xor);
+GEN_ATOMIC_HELPER_ALL(fetch_smin);
+GEN_ATOMIC_HELPER_ALL(fetch_umin);
+GEN_ATOMIC_HELPER_ALL(fetch_smax);
+GEN_ATOMIC_HELPER_ALL(fetch_umax);
 
-GEN_ATOMIC_HELPER_ALL(add_fetch)
-GEN_ATOMIC_HELPER_ALL(sub_fetch)
-GEN_ATOMIC_HELPER_ALL(and_fetch)
-GEN_ATOMIC_HELPER_ALL(or_fetch)
-GEN_ATOMIC_HELPER_ALL(xor_fetch)
-GEN_ATOMIC_HELPER_ALL(smin_fetch)
-GEN_ATOMIC_HELPER_ALL(umin_fetch)
-GEN_ATOMIC_HELPER_ALL(smax_fetch)
-GEN_ATOMIC_HELPER_ALL(umax_fetch)
+GEN_ATOMIC_HELPER_ALL(add_fetch);
+GEN_ATOMIC_HELPER_ALL(sub_fetch);
+GEN_ATOMIC_HELPER_ALL(and_fetch);
+GEN_ATOMIC_HELPER_ALL(or_fetch);
+GEN_ATOMIC_HELPER_ALL(xor_fetch);
+GEN_ATOMIC_HELPER_ALL(smin_fetch);
+GEN_ATOMIC_HELPER_ALL(umin_fetch);
+GEN_ATOMIC_HELPER_ALL(smax_fetch);
+GEN_ATOMIC_HELPER_ALL(umax_fetch);
 
-GEN_ATOMIC_HELPER_ALL(xchg)
+GEN_ATOMIC_HELPER_ALL(xchg);
 
 #undef GEN_ATOMIC_HELPER_ALL
 #undef GEN_ATOMIC_HELPER
@@ -379,49 +379,49 @@ static inline CPUTLBEntry *tlb_entry(CPUArchState *env, uintptr_t mmu_idx,
 #endif /* defined(CONFIG_USER_ONLY) */
 
 #if TARGET_BIG_ENDIAN
-# define cpu_lduw_data        cpu_lduw_be_data
-# define cpu_ldsw_data        cpu_ldsw_be_data
-# define cpu_ldl_data         cpu_ldl_be_data
-# define cpu_ldq_data         cpu_ldq_be_data
-# define cpu_lduw_data_ra     cpu_lduw_be_data_ra
-# define cpu_ldsw_data_ra     cpu_ldsw_be_data_ra
-# define cpu_ldl_data_ra      cpu_ldl_be_data_ra
-# define cpu_ldq_data_ra      cpu_ldq_be_data_ra
-# define cpu_lduw_mmuidx_ra   cpu_lduw_be_mmuidx_ra
-# define cpu_ldsw_mmuidx_ra   cpu_ldsw_be_mmuidx_ra
-# define cpu_ldl_mmuidx_ra    cpu_ldl_be_mmuidx_ra
-# define cpu_ldq_mmuidx_ra    cpu_ldq_be_mmuidx_ra
-# define cpu_stw_data         cpu_stw_be_data
-# define cpu_stl_data         cpu_stl_be_data
-# define cpu_stq_data         cpu_stq_be_data
-# define cpu_stw_data_ra      cpu_stw_be_data_ra
-# define cpu_stl_data_ra      cpu_stl_be_data_ra
-# define cpu_stq_data_ra      cpu_stq_be_data_ra
-# define cpu_stw_mmuidx_ra    cpu_stw_be_mmuidx_ra
-# define cpu_stl_mmuidx_ra    cpu_stl_be_mmuidx_ra
-# define cpu_stq_mmuidx_ra    cpu_stq_be_mmuidx_ra
+ #define cpu_lduw_data        cpu_lduw_be_data
+ #define cpu_ldsw_data        cpu_ldsw_be_data
+ #define cpu_ldl_data         cpu_ldl_be_data
+ #define cpu_ldq_data         cpu_ldq_be_data
+ #define cpu_lduw_data_ra     cpu_lduw_be_data_ra
+ #define cpu_ldsw_data_ra     cpu_ldsw_be_data_ra
+ #define cpu_ldl_data_ra      cpu_ldl_be_data_ra
+ #define cpu_ldq_data_ra      cpu_ldq_be_data_ra
+ #define cpu_lduw_mmuidx_ra   cpu_lduw_be_mmuidx_ra
+ #define cpu_ldsw_mmuidx_ra   cpu_ldsw_be_mmuidx_ra
+ #define cpu_ldl_mmuidx_ra    cpu_ldl_be_mmuidx_ra
+ #define cpu_ldq_mmuidx_ra    cpu_ldq_be_mmuidx_ra
+ #define cpu_stw_data         cpu_stw_be_data
+ #define cpu_stl_data         cpu_stl_be_data
+ #define cpu_stq_data         cpu_stq_be_data
+ #define cpu_stw_data_ra      cpu_stw_be_data_ra
+ #define cpu_stl_data_ra      cpu_stl_be_data_ra
+ #define cpu_stq_data_ra      cpu_stq_be_data_ra
+ #define cpu_stw_mmuidx_ra    cpu_stw_be_mmuidx_ra
+ #define cpu_stl_mmuidx_ra    cpu_stl_be_mmuidx_ra
+ #define cpu_stq_mmuidx_ra    cpu_stq_be_mmuidx_ra
 #else
-# define cpu_lduw_data        cpu_lduw_le_data
-# define cpu_ldsw_data        cpu_ldsw_le_data
-# define cpu_ldl_data         cpu_ldl_le_data
-# define cpu_ldq_data         cpu_ldq_le_data
-# define cpu_lduw_data_ra     cpu_lduw_le_data_ra
-# define cpu_ldsw_data_ra     cpu_ldsw_le_data_ra
-# define cpu_ldl_data_ra      cpu_ldl_le_data_ra
-# define cpu_ldq_data_ra      cpu_ldq_le_data_ra
-# define cpu_lduw_mmuidx_ra   cpu_lduw_le_mmuidx_ra
-# define cpu_ldsw_mmuidx_ra   cpu_ldsw_le_mmuidx_ra
-# define cpu_ldl_mmuidx_ra    cpu_ldl_le_mmuidx_ra
-# define cpu_ldq_mmuidx_ra    cpu_ldq_le_mmuidx_ra
-# define cpu_stw_data         cpu_stw_le_data
-# define cpu_stl_data         cpu_stl_le_data
-# define cpu_stq_data         cpu_stq_le_data
-# define cpu_stw_data_ra      cpu_stw_le_data_ra
-# define cpu_stl_data_ra      cpu_stl_le_data_ra
-# define cpu_stq_data_ra      cpu_stq_le_data_ra
-# define cpu_stw_mmuidx_ra    cpu_stw_le_mmuidx_ra
-# define cpu_stl_mmuidx_ra    cpu_stl_le_mmuidx_ra
-# define cpu_stq_mmuidx_ra    cpu_stq_le_mmuidx_ra
+ #define cpu_lduw_data        cpu_lduw_le_data
+ #define cpu_ldsw_data        cpu_ldsw_le_data
+ #define cpu_ldl_data         cpu_ldl_le_data
+ #define cpu_ldq_data         cpu_ldq_le_data
+ #define cpu_lduw_data_ra     cpu_lduw_le_data_ra
+ #define cpu_ldsw_data_ra     cpu_ldsw_le_data_ra
+ #define cpu_ldl_data_ra      cpu_ldl_le_data_ra
+ #define cpu_ldq_data_ra      cpu_ldq_le_data_ra
+ #define cpu_lduw_mmuidx_ra   cpu_lduw_le_mmuidx_ra
+ #define cpu_ldsw_mmuidx_ra   cpu_ldsw_le_mmuidx_ra
+ #define cpu_ldl_mmuidx_ra    cpu_ldl_le_mmuidx_ra
+ #define cpu_ldq_mmuidx_ra    cpu_ldq_le_mmuidx_ra
+ #define cpu_stw_data         cpu_stw_le_data
+ #define cpu_stl_data         cpu_stl_le_data
+ #define cpu_stq_data         cpu_stq_le_data
+ #define cpu_stw_data_ra      cpu_stw_le_data_ra
+ #define cpu_stl_data_ra      cpu_stl_le_data_ra
+ #define cpu_stq_data_ra      cpu_stq_le_data_ra
+ #define cpu_stw_mmuidx_ra    cpu_stw_le_mmuidx_ra
+ #define cpu_stl_mmuidx_ra    cpu_stl_le_mmuidx_ra
+ #define cpu_stq_mmuidx_ra    cpu_stq_le_mmuidx_ra
 #endif
 
 uint8_t cpu_ldb_code_mmu(CPUArchState *env, abi_ptr addr,

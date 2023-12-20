@@ -20,8 +20,7 @@
 
 #define TYPE_VIRTIO_PMEM "virtio-pmem"
 
-OBJECT_DECLARE_TYPE(VirtIOPMEM, VirtIOPMEMClass,
-                    VIRTIO_PMEM)
+OBJECT_DECLARE_TYPE(VirtIOPMEM, VirtIOPMEMClass, VIRTIO_PMEM);
 
 #define VIRTIO_PMEM_ADDR_PROP "memaddr"
 #define VIRTIO_PMEM_MEMDEV_PROP "memdev"

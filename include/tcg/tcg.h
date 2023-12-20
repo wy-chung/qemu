@@ -205,8 +205,10 @@ struct TCGRelocation {
     int type;
 };
 
+#if !defined(WYC)
 typedef struct TCGOp TCGOp;
 typedef struct TCGLabelUse TCGLabelUse;
+#endif
 struct TCGLabelUse {
     QSIMPLEQ_ENTRY(TCGLabelUse) next;
     TCGOp *op;
@@ -251,7 +253,8 @@ typedef enum TCGType {
     TCG_TYPE_V256,
 
     /* Number of different types (integer not enum) */
-#define TCG_TYPE_COUNT  (TCG_TYPE_V256 + 1)
+//#define TCG_TYPE_COUNT  (TCG_TYPE_V256 + 1)
+    TCG_TYPE_COUNT,
 
     /* An alias for the size of the host register.  */
 #if TCG_TARGET_REG_BITS == 32
@@ -427,9 +430,9 @@ typedef struct TCGTemp {
     uintptr_t state;
     void *state_ptr;
 } TCGTemp;
-
+#if !defined(WYC)
 typedef struct TCGContext TCGContext;
-
+#endif
 typedef struct TCGTempSet {
     unsigned long l[BITS_TO_LONGS(TCG_MAX_TEMPS)];
 } TCGTempSet;
@@ -491,7 +494,7 @@ struct TCGContext {
 #ifdef CONFIG_SOFTMMU
     int tlb_fast_offset;
     int page_mask;
-    uint8_t page_bits;
+    uint8_t page_bits; // page size in bits
     uint8_t tlb_dyn_max_bits;
 #endif
     uint8_t insn_start_words;
