@@ -7732,6 +7732,7 @@ static void x86_disas_set_info(CPUState *cs, disassemble_info *info)
     info->cap_insn_split = 8;
 }
 
+#if !defined(WYC)
 // only called by
 // hvf(mac Hypervisor Framework),
 // nvmm(NetBSD Virtual Machine Monitor),
@@ -7778,6 +7779,7 @@ void x86_update_hflags(CPUX86State *env)
     }
     env->hflags = hflags;
 }
+#endif // !defined(WYC)
 
 static Property x86_cpu_properties[] = {
 #ifdef CONFIG_USER_ONLY

@@ -85,8 +85,8 @@ typedef struct DisasContext {
     target_ulong cs_base;  /* base of CS segment */
     target_ulong pc_save;
 
-    MemOp aflag;
-    MemOp dflag;
+    MemOp aflag; // PREFIX_ADR  address prefix
+    MemOp dflag; // PREFIX_DATA data prefix
 
     int8_t override; /* -1 if no override, else R_CS, R_DS, etc */
     uint8_t prefix;
@@ -655,7 +655,7 @@ static void gen_lea_v_seg(DisasContext *s, MemOp aflag, TCGv a0,
 #endif
     case MO_32:
         /* 32 bit address */
-        if (ovr_seg < 0 && ADDSEG(s)) {
+        if (ovr_seg < 0 && 1/*ADDSEG(s)*/) {
             ovr_seg = def_seg;
         }
         if (ovr_seg < 0) {
@@ -668,7 +668,7 @@ static void gen_lea_v_seg(DisasContext *s, MemOp aflag, TCGv a0,
         tcg_gen_ext16u_tl(s->A0, a0);
         a0 = s->A0;
         if (ovr_seg < 0) {
-            if (ADDSEG(s)) {
+            if (1/*ADDSEG(s)*/) {
                 ovr_seg = def_seg;
             } else {
                 return;
@@ -2602,14 +2602,14 @@ static void gen_push_v(DisasContext *s, TCGv val)
     int size = 1 << d_ot;
     TCGv new_esp = s->A0;
 
-    tcg_gen_subi_tl(s->A0, cpu_regs[R_ESP], size); // s-A0 = R_ESP - size
+    tcg_gen_subi_tl(s->A0, cpu_regs[R_ESP], size); // s->A0 = R_ESP - size
 
     if (!CODE64(s)) {
-        if (ADDSEG(s)) {
+        if (1/*ADDSEG(s)*/) {
             new_esp = s->tmp4;
             tcg_gen_mov_tl(new_esp, s->A0);
         }
-        gen_lea_v_seg(s, a_ot, s->A0, R_SS, -1);
+        gen_lea_v_seg(s, a_ot, s->A0, R_SS /* def_reg */, -1 /* ovr_reg */);
     }
 
     gen_op_st_v(s, d_ot, val, s->A0);
@@ -7040,7 +7040,7 @@ static void i386_tr_init_disas_context(DisasContextBase *dcbase, CPUState *cpu/*
     g_assert(CODE64(dc) == ((flags & HF_CS64_MASK) != 0));
     g_assert(SS32(dc) == ((flags & HF_SS32_MASK) != 0));
     g_assert(LMA(dc) == ((flags & HF_LMA_MASK) != 0));
-    g_assert(ADDSEG(dc) == ((flags & HF_ADDSEG_MASK) != 0));
+    //g_assert(ADDSEG(dc) == ((flags & HF_ADDSEG_MASK) != 0));
     g_assert(SVME(dc) == ((flags & HF_SVME_MASK) != 0));
     g_assert(GUEST(dc) == ((flags & HF_GUEST_MASK) != 0));
 

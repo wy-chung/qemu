@@ -2137,7 +2137,7 @@ static inline void cpu_x86_load_seg_cache(CPUX86State *env,
                    (env->eflags & VM_MASK) ||
                    !(env->hflags & HF_CS32_MASK)) {
             /* XXX: try to avoid this test. The problem comes from the
-               fact that is real mode or vm86 mode we only modify the
+               fact that in real mode or vm86 mode we only modify the
                'base' and 'selector' fields of the segment cache to go
                faster. A solution may be to force addseg to one in
                translate-i386.c. */
