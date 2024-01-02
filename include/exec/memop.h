@@ -15,8 +15,8 @@
 #include "qemu/host-utils.h"
 
 typedef enum MemOp {
-    MO_8     = 0,
-    MO_16    = 1,
+    MO_8     = 0,	// 1 byte
+    MO_16    = 1,	// 2 bytes
     MO_32    = 2,
     MO_64    = 3,
     MO_128   = 4,

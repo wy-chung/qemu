@@ -34,22 +34,22 @@
 #include "cpu-param.h"
 
 #ifndef TARGET_LONG_BITS
-# error TARGET_LONG_BITS must be defined in cpu-param.h
+ #error TARGET_LONG_BITS must be defined in cpu-param.h
 #endif
 #ifndef TARGET_PHYS_ADDR_SPACE_BITS
-# error TARGET_PHYS_ADDR_SPACE_BITS must be defined in cpu-param.h
+ #error TARGET_PHYS_ADDR_SPACE_BITS must be defined in cpu-param.h
 #endif
 #ifndef TARGET_VIRT_ADDR_SPACE_BITS
-# error TARGET_VIRT_ADDR_SPACE_BITS must be defined in cpu-param.h
+ #error TARGET_VIRT_ADDR_SPACE_BITS must be defined in cpu-param.h
 #endif
 #ifndef TARGET_PAGE_BITS
-# ifdef TARGET_PAGE_BITS_VARY
-#  ifndef TARGET_PAGE_BITS_MIN
-#   error TARGET_PAGE_BITS_MIN must be defined in cpu-param.h
-#  endif
-# else
-#  error TARGET_PAGE_BITS must be defined in cpu-param.h
-# endif
+ #ifdef TARGET_PAGE_BITS_VARY
+  #ifndef TARGET_PAGE_BITS_MIN
+   #error TARGET_PAGE_BITS_MIN must be defined in cpu-param.h
+  #endif
+ #else
+  #error TARGET_PAGE_BITS must be defined in cpu-param.h
+ #endif
 #endif
 
 #include "exec/target_long.h"
@@ -122,7 +122,7 @@ typedef struct CPUTLBEntryFull {
     uint8_t prot;
 
     /* @lg_page_size contains the log2 of the page size. */
-    uint8_t lg_page_size;
+    uint8_t lg_page_size; // size in bits
 
     /*
      * Additional tlb flags for use by the slow path. If non-zero,
@@ -135,7 +135,7 @@ typedef struct CPUTLBEntryFull {
      * This may be used to cache items from the guest cpu
      * page tables for later use by the implementation.
      */
-#ifdef TARGET_PAGE_ENTRY_EXTRA
+#ifdef TARGET_PAGE_ENTRY_EXTRA // not defined for i386
     TARGET_PAGE_ENTRY_EXTRA
 #endif
 } CPUTLBEntryFull;

@@ -376,6 +376,13 @@ static inline CPUTLBEntry *tlb_entry(CPUArchState *env, uintptr_t mmu_idx,
     return &env_tlb(env)->f[mmu_idx].table[tlb_index(env, mmu_idx, addr)];
 }
 
+/* Find the TLB entry corresponding to the mmu_idx + address pair.  */
+static inline CPUTLBEntry *tlb_fentry(CPUArchState *env, uintptr_t mmu_idx,
+                                     uintptr_t index)
+{
+    return &env_tlb(env)->f[mmu_idx].table[index];
+}
+
 #endif /* defined(CONFIG_USER_ONLY) */
 
 #if TARGET_BIG_ENDIAN
