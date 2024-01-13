@@ -84,9 +84,9 @@ DECLARE_CLASS_CHECKERS(CPUClass, CPU, TYPE_CPU);
 typedef enum MMUAccessType {
     MMU_DATA_LOAD  = 0,
     MMU_DATA_STORE = 1,
-    MMU_INST_FETCH = 2
-#define MMU_ACCESS_COUNT 3
+    MMU_INST_FETCH = 2,
 } MMUAccessType;
+#define MMU_ACCESS_COUNT (MMU_INST_FETCH + 1)
 
 typedef struct CPUWatchpoint CPUWatchpoint;
 

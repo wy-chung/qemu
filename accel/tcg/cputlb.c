@@ -251,11 +251,11 @@ static void tlb_flush_one_mmuidx_locked(CPUArchState *env, int mmu_idx,
 
 static void tlb_mmu_init(CPUTLBDesc *desc, CPUTLBDescFast *fast, int64_t now)
 {
-    size_t n_entries = 1 << CPU_TLB_DYN_DEFAULT_BITS;
+    size_t n_entries = 1 << CPU_TLB_DYN_DEFAULT_BITS; // 8
 
     tlb_window_reset(desc, now, 0);
     desc->n_used_entries = 0;
-    fast->mask = (n_entries - 1) << CPU_TLB_ENTRY_BITS;
+    fast->mask = (n_entries - 1) << CPU_TLB_ENTRY_BITS; // 5
     fast->table = g_new(CPUTLBEntry, n_entries);
     desc->fulltlb = g_new(CPUTLBEntryFull, n_entries);
     tlb_mmu_flush_locked(desc, fast);
@@ -2056,7 +2056,7 @@ typedef struct MMULookupPageData {
 
 typedef struct MMULookupLocals {
     MMULookupPageData page[2];
-    MemOp memop;
+    enum MemOp memop;
     int mmu_idx;
 } MMULookupLocals;
 
@@ -2064,7 +2064,7 @@ typedef struct MMULookupLocals {
  * mmu_lookup1: translate one page
  * @env: cpu context
  * @data: lookup parameters
- * @mmu_idx: virtual address context
+ * @mmu_idx: virtual address context, MMU_KSMAP_IDX, MMU_USER_IDX, MMU_KNOSMAP_IDX, MMU_NESTED_IDX, MMU_PHYS_IDX
  * @access_type: load/store/code
  * @ra: return address into tcg generated code, or 0
  *
@@ -2161,7 +2161,7 @@ static bool mmu_lookup(CPUArchState *env, vaddr addr, MemOpIdx oi,
     bool crosspage;
     int flags;
 
-    l->memop = get_memop(oi);
+    l->memop = get_memop(oi);	// enum MemOp
     l->mmu_idx = get_mmuidx(oi); // 4 bits
 // end of using @oi
 

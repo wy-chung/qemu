@@ -6015,6 +6015,9 @@ bt_op:
             gen_update_eip_cur(s);
             gen_helper_vmrun(cpu_env, tcg_constant_i32(s->aflag - 1),
                              cur_insn_len_i32(s));
+#if defined(WYD)
+            helper_vmrun();
+#endif
             tcg_gen_exit_tb(NULL, 0);
             s->base.is_jmp = DISAS_NORETURN;
             break;
@@ -6050,6 +6053,9 @@ bt_op:
             gen_update_cc_op(s);
             gen_update_eip_cur(s);
             gen_helper_vmsave(cpu_env, tcg_constant_i32(s->aflag - 1));
+#if defined(WYC)
+            helper_vmsave();
+#endif
             break;
 
         case 0xdc: /* STGI */

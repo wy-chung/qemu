@@ -19,7 +19,7 @@
 #ifndef EXEC_TLB_COMMON_H
 #define EXEC_TLB_COMMON_H 1
 
-#define CPU_TLB_ENTRY_BITS 5 // tlb entry size in bits
+#define CPU_TLB_ENTRY_BITS 5 // tlb entry size in 2^n
 
 /* Minimalized TLB entry for use by TCG fast path. */
 typedef union CPUTLBEntry {
@@ -50,7 +50,7 @@ typedef struct CPUTLBDescFast {
     /* Contains (n_entries - 1) << CPU_TLB_ENTRY_BITS */
     uintptr_t mask;
     /* The array of tlb entries itself. */
-    CPUTLBEntry *table;
+    CPUTLBEntry *table; // 256 entries
 } CPUTLBDescFast QEMU_ALIGNED(2 * sizeof(void *));
 
 #endif /* EXEC_TLB_COMMON_H */

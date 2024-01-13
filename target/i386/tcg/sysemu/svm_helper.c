@@ -25,7 +25,7 @@
 #include "exec/cpu_ldst.h"
 #include "tcg/helper-tcg.h"
 
-/* Secure Virtual Machine helpers */
+/* svm(Secure Virtual Machine) helpers */
 
 static void svm_save_seg(CPUX86State *env, int mmu_idx, hwaddr addr,
                          const SegmentCache *sc)
