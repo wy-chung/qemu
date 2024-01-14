@@ -614,9 +614,9 @@ bool x86_cpu_tlb_fill(CPUState *cs, vaddr addr, int size,
          */
         assert(out.prot & (1 << access_type));
         tlb_set_page_with_attrs(cs, addr & TARGET_PAGE_MASK,
-                                out.paddr & TARGET_PAGE_MASK,
+                                out.paddr & TARGET_PAGE_MASK, out.prot,
                                 cpu_get_mem_attrs(env),
-                                out.prot, mmu_idx, out.page_size);
+                                mmu_idx, out.page_size);
         return true;
     }
 

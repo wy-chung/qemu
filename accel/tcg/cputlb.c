@@ -1480,14 +1480,14 @@ void tlb_set_page_full(CPUState *cpu, int mmu_idx,
  * used by tlb_flush_page.
  */
 void tlb_set_page_with_attrs(CPUState *cpu, vaddr addr,
-                             hwaddr paddr, MemTxAttrs attrs, int prot,
+                             hwaddr paddr, int prot, MemTxAttrs attrs, //wyc change the order of the arguments
                              int mmu_idx, uint64_t size)
 {
     CPUTLBEntryFull full = {
         .phys_addr = paddr,
         .attrs = attrs,
         .prot = prot,
-        .lg_page_size = ctz64(size)
+        .lg_page_size = ctz64(size), // ctz: count trailing zeros
     };
 
     assert(is_power_of_2(size));
@@ -1504,8 +1504,9 @@ void tlb_set_page(CPUState *cpu, vaddr addr,
                   hwaddr paddr, int prot,
                   int mmu_idx, uint64_t size)
 {
-    tlb_set_page_with_attrs(cpu, addr, paddr, MEMTXATTRS_UNSPECIFIED,
-                            prot, mmu_idx, size);
+printf("%s called", __func__); //wyctest i386 will not call this function
+    tlb_set_page_with_attrs(cpu, addr, paddr, prot, MEMTXATTRS_UNSPECIFIED,
+                            mmu_idx, size);
 }
 
 /*
@@ -2073,7 +2074,7 @@ typedef struct MMULookupLocals {
  * tlb_fill will longjmp out.  Return true if the softmmu tlb for
  * @mmu_idx may have resized.
  */
-static bool mmu_lookup1(CPUArchState *env, MMULookupPageData *data,
+static bool mmu_lookup1(CPUArchState *env, MMULookupPageData *data /*IN/OUT*/,
                         int mmu_idx, MMUAccessType access_type, uintptr_t ra)
 {
     CPUTLBEntryFull *full;
