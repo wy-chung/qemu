@@ -108,34 +108,25 @@ typedef struct CPUTLBEntryFull {
      *     + the offset within the target MemoryRegion (otherwise)
      */
     hwaddr xlat_section;
-
     /*
      * @phys_addr contains the physical address in the address space
      * given by cpu_asidx_from_attrs(cpu, @attrs).
      */
     hwaddr phys_addr;
-
-    /* @attrs contains the memory transaction attributes for the page. */
-    MemTxAttrs attrs;
-
-    /* @prot contains the complete protections for the page. */
-    uint8_t prot;
-
-    /* @lg_page_size contains the log2 of the page size. */
-    uint8_t lg_page_size; // size in bits
-
+    MemTxAttrs attrs;	// the memory transaction attributes for the page.
+    uint8_t prot;	// the complete protections for the page
+    uint8_t lg_page_size; // the log2 of the page size
     /*
      * Additional tlb flags for use by the slow path. If non-zero,
      * the corresponding CPUTLBEntry comparator must have TLB_FORCE_SLOW.
      */
     uint8_t slow_flags[MMU_ACCESS_COUNT];
-
+#ifdef TARGET_PAGE_ENTRY_EXTRA // not defined for i386
     /*
      * Allow target-specific additions to this structure.
      * This may be used to cache items from the guest cpu
      * page tables for later use by the implementation.
      */
-#ifdef TARGET_PAGE_ENTRY_EXTRA // not defined for i386
     TARGET_PAGE_ENTRY_EXTRA
 #endif
 } CPUTLBEntryFull;
@@ -155,13 +146,11 @@ typedef struct CPUTLBDesc {
      */
     vaddr large_page_addr;
     vaddr large_page_mask;
-    /* host time (in ns) at the beginning of the time window */
-    int64_t window_begin_ns;
-    /* maximum number of entries observed in the window */
-    size_t window_max_entries;
+
+    int64_t window_begin_ns;	// host time (in ns) at the beginning of the time window
+    size_t window_max_entries;	// maximum number of entries observed in the window
     size_t n_used_entries;
-    /* The next index to use in the tlb victim table.  */
-    size_t vindex;
+    size_t vindex;	// The next index to use in the tlb victim table
     /* The tlb victim table, in two parts.  */
     CPUTLBEntry vtable[CPU_VTLB_SIZE];
     CPUTLBEntryFull vfulltlb[CPU_VTLB_SIZE];

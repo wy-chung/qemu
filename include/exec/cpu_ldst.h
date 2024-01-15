@@ -346,12 +346,12 @@ static inline uint64_t tlb_read_idx(const CPUTLBEntry *entry,
     return qatomic_read(ptr);
 #else
     const uint64_t *ptr = &entry->addr_idx[access_type];
-# if TCG_OVERSIZED_GUEST
+ #if TCG_OVERSIZED_GUEST
     return *ptr;
-# else
+ #else
     /* ofs might correspond to .addr_write, so use qatomic_read */
     return qatomic_read(ptr);
-# endif
+ #endif
 #endif
 }
 

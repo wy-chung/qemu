@@ -40,7 +40,7 @@ typedef union CPUTLBEntry {
     uint64_t addr_idx[(1 << CPU_TLB_ENTRY_BITS) / sizeof(uint64_t)];
 } CPUTLBEntry;
 
-QEMU_BUILD_BUG_ON(sizeof(CPUTLBEntry) != (1 << CPU_TLB_ENTRY_BITS));
+QEMU_BUILD_ASSERT(sizeof(CPUTLBEntry) == (1 << CPU_TLB_ENTRY_BITS));
 
 /*
  * Data elements that are per MMU mode, accessed by the fast path.
