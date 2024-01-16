@@ -152,8 +152,8 @@ typedef struct CPUTLBDesc {
     size_t n_used_entries;
     size_t vindex;	// The next index to use in the tlb victim table
     /* The tlb victim table, in two parts.  */
-    CPUTLBEntry vtable[CPU_VTLB_SIZE];
-    CPUTLBEntryFull vfulltlb[CPU_VTLB_SIZE];
+    CPUTLBEntry vtable[CPU_VTLB_SIZE];       // 8
+    CPUTLBEntryFull vfulltlb[CPU_VTLB_SIZE]; // 8
     CPUTLBEntryFull *fulltlb; // 256 entries
 } CPUTLBDesc;
 
@@ -185,7 +185,7 @@ typedef struct CPUTLBCommon {
  * Since this is placed within CPUNegativeOffsetState, the smallest
  * negative offsets are at the end of the struct.
  */
-
+// modes: MMU_KSMAP_IDX, MMU_USER_IDX, MMU_KNOSMAP_IDX, MMU_NESTED_IDX, MMU_PHYS_IDX
 typedef struct CPUTLB {
     CPUTLBCommon c;
     CPUTLBDesc d[NB_MMU_MODES];

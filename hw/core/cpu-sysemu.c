@@ -125,7 +125,7 @@ int cpu_asidx_from_attrs(CPUState *cpu, MemTxAttrs attrs)
     if (cpu->cc->sysemu_ops->asidx_from_attrs) {
         ret = cpu->cc->sysemu_ops->asidx_from_attrs(cpu, attrs);
 #if defined(WYC)
-        ret = x86_asidx_from_attrs();
+        ret = x86_asidx_from_attrs(cpu, attrs);
 #endif
         assert(ret < cpu->num_ases && ret >= 0);
     }

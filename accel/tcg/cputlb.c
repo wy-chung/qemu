@@ -828,7 +828,7 @@ static void tlb_flush_range_locked(CPUArchState *env, int midx,
                                    vaddr addr, vaddr len,
                                    unsigned bits)
 {
-    CPUTLBDesc *d = &env_tlb(env)->d[midx];
+    CPUTLBDesc     *d = &env_tlb(env)->d[midx];
     CPUTLBDescFast *f = &env_tlb(env)->f[midx];
     vaddr mask = MAKE_64BIT_MASK(0, bits);
 

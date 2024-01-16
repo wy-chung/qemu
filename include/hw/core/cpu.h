@@ -367,7 +367,7 @@ struct CPUState {
     QSIMPLEQ_HEAD(, qemu_work_item) work_list;
 
     CPUAddressSpace *cpu_ases;
-    int num_ases;
+    int num_ases;	// number of address spaces
     AddressSpace *as;
     MemoryRegion *memory;
 
