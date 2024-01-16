@@ -328,15 +328,15 @@ static inline void clear_helper_retaddr(void)
 
 #include "tcg/oversized-guest.h"
 
-static inline uint64_t tlb_read_idx(const CPUTLBEntry *entry,
+static inline uint64_t tlb_read_idx(const CPUTLBEntryFast *entry,
                                     MMUAccessType access_type)
 {
-    /* Do not rearrange the CPUTLBEntry structure members. */
-    QEMU_BUILD_BUG_ON(offsetof(CPUTLBEntry, addr_read) !=
+    /* Do not rearrange the CPUTLBEntryFast structure members. */
+    QEMU_BUILD_ASSERT(offsetof(CPUTLBEntryFast, addr_read) ==
                       MMU_DATA_LOAD * sizeof(uint64_t));
-    QEMU_BUILD_BUG_ON(offsetof(CPUTLBEntry, addr_write) !=
+    QEMU_BUILD_ASSERT(offsetof(CPUTLBEntryFast, addr_write) ==
                       MMU_DATA_STORE * sizeof(uint64_t));
-    QEMU_BUILD_BUG_ON(offsetof(CPUTLBEntry, addr_code) !=
+    QEMU_BUILD_ASSERT(offsetof(CPUTLBEntryFast, addr_code) ==
                       MMU_INST_FETCH * sizeof(uint64_t));
 
 #if TARGET_LONG_BITS == 32
@@ -355,7 +355,7 @@ static inline uint64_t tlb_read_idx(const CPUTLBEntry *entry,
 #endif
 }
 
-static inline uint64_t tlb_addr_write(const CPUTLBEntry *entry)
+static inline uint64_t tlb_addr_write(const CPUTLBEntryFast *entry)
 {
     return tlb_read_idx(entry, MMU_DATA_STORE);
 }
@@ -370,14 +370,14 @@ static inline uintptr_t tlb_index(CPUArchState *env, uintptr_t mmu_idx,
 }
 
 /* Find the TLB entry corresponding to the mmu_idx + address pair.  */
-static inline CPUTLBEntry *tlb_entry_del(CPUArchState *env, uintptr_t mmu_idx,
+static inline CPUTLBEntryFast *tlb_entry_del(CPUArchState *env, uintptr_t mmu_idx,
                                      vaddr addr)
 {
     return &env_tlb(env)->f[mmu_idx].table[tlb_index(env, mmu_idx, addr)];
 }
 
 /* Find the TLB fast entry corresponding to the mmu_idx and index.  */
-static inline CPUTLBEntry *tlb_fastentry(CPUArchState *env, uintptr_t mmu_idx,
+static inline CPUTLBEntryFast *tlb_fastentry(CPUArchState *env, uintptr_t mmu_idx,
                                      uintptr_t index)
 {
     return &env_tlb(env)->f[mmu_idx].table[index];

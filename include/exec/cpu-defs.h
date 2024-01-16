@@ -94,7 +94,7 @@
 #if defined(CONFIG_SOFTMMU)
 /*
  * The full TLB entry, which is not accessed by generated TCG code,
- * so the layout is not as critical as that of CPUTLBEntry. This is
+ * so the layout is not as critical as that of CPUTLBEntryFast. This is
  * also why we don't want to combine the two structs.
  */
 typedef struct CPUTLBEntryFull {
@@ -118,7 +118,7 @@ typedef struct CPUTLBEntryFull {
     uint8_t lg_page_size; // the log2 of the page size
     /*
      * Additional tlb flags for use by the slow path. If non-zero,
-     * the corresponding CPUTLBEntry comparator must have TLB_FORCE_SLOW.
+     * the corresponding CPUTLBEntryFast comparator must have TLB_FORCE_SLOW.
      */
     uint8_t slow_flags[MMU_ACCESS_COUNT];
 #ifdef TARGET_PAGE_ENTRY_EXTRA // not defined for i386
@@ -137,7 +137,7 @@ typedef struct CPUTLBEntryFull {
  * Data elements that are per MMU mode, minus the bits accessed by
  * the TCG fast path.
  */
-typedef struct CPUTLBDesc {
+typedef struct CPUTLBDescFull {
     /*
      * Describe a region covering all of the large pages allocated
      * into the tlb.  When any page within this region is flushed,
@@ -152,10 +152,10 @@ typedef struct CPUTLBDesc {
     size_t n_used_entries;
     size_t vindex;	// The next index to use in the tlb victim table
     /* The tlb victim table, in two parts.  */
-    CPUTLBEntry vtable[CPU_VTLB_SIZE];       // 8
-    CPUTLBEntryFull vfulltlb[CPU_VTLB_SIZE]; // 8
+    CPUTLBEntryFast vtable[CPU_VTLB_SIZE];	// 8
+    CPUTLBEntryFull vfulltlb[CPU_VTLB_SIZE];	// 8
     CPUTLBEntryFull *fulltlb; // 256 entries
-} CPUTLBDesc;
+} CPUTLBDescFull;
 
 /*
  * Data elements that are shared between all MMU modes.
@@ -188,7 +188,7 @@ typedef struct CPUTLBCommon {
 // modes: MMU_KSMAP_IDX, MMU_USER_IDX, MMU_KNOSMAP_IDX, MMU_NESTED_IDX, MMU_PHYS_IDX
 typedef struct CPUTLB {
     CPUTLBCommon c;
-    CPUTLBDesc d[NB_MMU_MODES];
+    CPUTLBDescFull d[NB_MMU_MODES];
     CPUTLBDescFast f[NB_MMU_MODES];
 } CPUTLB;
 

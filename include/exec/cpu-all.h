@@ -378,7 +378,7 @@ CPUArchState *cpu_copy(CPUArchState *env);
 
 /*
  * Flags stored in CPUTLBEntryFull.slow_flags[x].
- * TLB_FORCE_SLOW must be set in CPUTLBEntry.addr_idx[x].
+ * TLB_FORCE_SLOW must be set in CPUTLBEntryFast.addr_idx[x].
  */
 /* Set if TLB entry requires byte swap.  */
 #define TLB_BSWAP            (1 << 0)
@@ -395,7 +395,7 @@ QEMU_BUILD_BUG_ON(TLB_FLAGS_MASK & TLB_SLOW_FLAGS_MASK);
  * TLB entry @tlb_addr
  *
  * @addr: virtual address to test (must be page aligned)
- * @tlb_addr: TLB entry address (a CPUTLBEntry addr_read/write/code value)
+ * @tlb_addr: TLB entry address (a CPUTLBEntryFast addr_read/write/code value)
  */
 static inline bool tlb_hit_page(uint64_t tlb_addr, vaddr addr)
 {
@@ -406,7 +406,7 @@ static inline bool tlb_hit_page(uint64_t tlb_addr, vaddr addr)
  * tlb_hit: return true if @addr is a hit against the TLB entry @tlb_addr
  *
  * @addr: virtual address to test (need not be page aligned)
- * @tlb_addr: TLB entry address (a CPUTLBEntry addr_read/write/code value)
+ * @tlb_addr: TLB entry address (a CPUTLBEntryFast addr_read/write/code value)
  */
 static inline bool tlb_hit(uint64_t tlb_addr, vaddr addr)
 {

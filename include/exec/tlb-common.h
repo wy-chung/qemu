@@ -22,7 +22,7 @@
 #define CPU_TLB_ENTRY_BITS 5 // tlb entry size in 2^n
 
 /* Minimalized TLB entry for use by TCG fast path. */
-typedef union CPUTLBEntry {
+typedef union CPUTLBEntryFast {
     struct {
         uint64_t addr_read;
         uint64_t addr_write;
@@ -38,9 +38,9 @@ typedef union CPUTLBEntry {
      * access to addr_{read,write,code}.
      */
     uint64_t addr_idx[(1 << CPU_TLB_ENTRY_BITS) / sizeof(uint64_t)];
-} CPUTLBEntry;
+} CPUTLBEntryFast;
 
-QEMU_BUILD_ASSERT(sizeof(CPUTLBEntry) == (1 << CPU_TLB_ENTRY_BITS));
+QEMU_BUILD_ASSERT(sizeof(CPUTLBEntryFast) == (1 << CPU_TLB_ENTRY_BITS));
 
 /*
  * Data elements that are per MMU mode, accessed by the fast path.
@@ -49,7 +49,7 @@ QEMU_BUILD_ASSERT(sizeof(CPUTLBEntry) == (1 << CPU_TLB_ENTRY_BITS));
 typedef struct CPUTLBDescFast {
     uintptr_t mask; // Contains (n_entries - 1) << CPU_TLB_ENTRY_BITS
     /* The array of tlb entries itself. */
-    CPUTLBEntry *table; // 256 entries
+    CPUTLBEntryFast *table; // 256 entries
 } CPUTLBDescFast QEMU_ALIGNED(2 * sizeof(void *));
 
 #endif /* EXEC_TLB_COMMON_H */
