@@ -75,11 +75,11 @@
 
 /* run_on_cpu_data.target_ptr should always be big enough for a
  * target_ulong even on 32 bit builds */
-QEMU_BUILD_BUG_ON(sizeof(target_ulong) > sizeof(run_on_cpu_data));
+QEMU_BUILD_ASSERT(sizeof(target_ulong) <= sizeof(run_on_cpu_data));
 
 /* We currently can't handle more than 16 bits in the MMUIDX bitmask.
  */
-QEMU_BUILD_BUG_ON(NB_MMU_MODES > 16);
+QEMU_BUILD_ASSERT(NB_MMU_MODES <= 16);
 #define ALL_MMUIDX_BITS ((1 << NB_MMU_MODES) - 1)
 
 static inline size_t tlb_n_entries(CPUTLBDescFast *fast)

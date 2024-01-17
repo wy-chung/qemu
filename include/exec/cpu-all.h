@@ -388,7 +388,7 @@ CPUArchState *cpu_copy(CPUArchState *env);
 #define TLB_SLOW_FLAGS_MASK  (TLB_BSWAP | TLB_WATCHPOINT)
 
 /* The two sets of flags must not overlap. */
-QEMU_BUILD_BUG_ON(TLB_FLAGS_MASK & TLB_SLOW_FLAGS_MASK);
+QEMU_BUILD_ASSERT((TLB_FLAGS_MASK & TLB_SLOW_FLAGS_MASK) == 0);
 
 /**
  * tlb_hit_page: return true if page aligned @addr is a hit against the

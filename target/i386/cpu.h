@@ -1504,16 +1504,16 @@ typedef struct XSavesArchLBR {
     LBREntry lbr_records[ARCH_LBR_NR_ENTRIES];
 } XSavesArchLBR;
 
-QEMU_BUILD_BUG_ON(sizeof(XSaveAVX) != 0x100);
-QEMU_BUILD_BUG_ON(sizeof(XSaveBNDREG) != 0x40);
-QEMU_BUILD_BUG_ON(sizeof(XSaveBNDCSR) != 0x40);
-QEMU_BUILD_BUG_ON(sizeof(XSaveOpmask) != 0x40);
-QEMU_BUILD_BUG_ON(sizeof(XSaveZMM_Hi256) != 0x200);
-QEMU_BUILD_BUG_ON(sizeof(XSaveHi16_ZMM) != 0x400);
-QEMU_BUILD_BUG_ON(sizeof(XSavePKRU) != 0x8);
-QEMU_BUILD_BUG_ON(sizeof(XSaveXTILECFG) != 0x40);
-QEMU_BUILD_BUG_ON(sizeof(XSaveXTILEDATA) != 0x2000);
-QEMU_BUILD_BUG_ON(sizeof(XSavesArchLBR) != 0x328);
+QEMU_BUILD_ASSERT(sizeof(XSaveAVX) == 0x100);
+QEMU_BUILD_ASSERT(sizeof(XSaveBNDREG) == 0x40);
+QEMU_BUILD_ASSERT(sizeof(XSaveBNDCSR) == 0x40);
+QEMU_BUILD_ASSERT(sizeof(XSaveOpmask) == 0x40);
+QEMU_BUILD_ASSERT(sizeof(XSaveZMM_Hi256) == 0x200);
+QEMU_BUILD_ASSERT(sizeof(XSaveHi16_ZMM) == 0x400);
+QEMU_BUILD_ASSERT(sizeof(XSavePKRU) == 0x8);
+QEMU_BUILD_ASSERT(sizeof(XSaveXTILECFG) == 0x40);
+QEMU_BUILD_ASSERT(sizeof(XSaveXTILEDATA) == 0x2000);
+QEMU_BUILD_ASSERT(sizeof(XSavesArchLBR) == 0x328);
 
 typedef struct ExtSaveArea {
     uint32_t feature, bits;
