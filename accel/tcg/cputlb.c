@@ -157,8 +157,8 @@ static void tb_jmp_cache_clear_page(CPUState *cpu, vaddr page_addr)
 static void tlb_mmu_resize_locked(CPUTLBDescFull *desc, CPUTLBDescFast *fast,
                                   int64_t now)
 {
-    size_t old_size = tlb_n_entries(fast);
     size_t rate;
+    size_t old_size = tlb_n_entries(fast);
     size_t new_size = old_size;
     int64_t window_len_ms = 100;
     int64_t window_len_ns = window_len_ms * 1000 * 1000;
@@ -348,9 +348,9 @@ void tlb_flush_counts(size_t *pfull, size_t *ppart, size_t *pelide)
 
 static void tlb_flush_by_mmuidx_async_work(CPUState *cpu, run_on_cpu_data data)
 {
+    uint16_t all_dirty, work, to_clean;
     CPUArchState *env = cpu->env_ptr;
     uint16_t asked = data.host_int;
-    uint16_t all_dirty, work, to_clean;
     int64_t now = get_clock_realtime();
 
     assert_cpu_is_self(cpu);
@@ -365,7 +365,7 @@ static void tlb_flush_by_mmuidx_async_work(CPUState *cpu, run_on_cpu_data data)
     env_tlb(env)->c.dirty = all_dirty;
 
     for (work = to_clean; work != 0; work &= work - 1) {
-        int mmu_idx = ctz32(work);
+        int mmu_idx = ctz32(work); // count trailing zeros
         tlb_flush_one_mmuidx_locked(env, mmu_idx, now);
     }
 
@@ -1665,7 +1665,7 @@ static bool victim_tlb_hit(CPUArchState *env, size_t mmu_idx, size_t index,
     assert_cpu_is_self(env_cpu(env));
     for (vidx = 0; vidx < CPU_VTLB_SIZE; ++vidx) {
         CPUTLBEntryFast *vtlb = &env_tlb(env)->d[mmu_idx].vtable[vidx];
-        uint64_t cmp = tlb_read_idx(vtlb, access_type);
+        uint64_t cmp = tlb_read_type(vtlb, access_type);
 
         if (cmp == page) {
             /* Found entry in victim tlb, swap tlb and iotlb.  */
@@ -1719,7 +1719,7 @@ static int probe_access_internal(CPUArchState *env, vaddr addr,
 {
     uintptr_t index = tlb_index(env, mmu_idx, addr);
     CPUTLBEntryFast *entry = tlb_fastentry(env, mmu_idx, index);
-    uint64_t tlb_addr = tlb_read_idx(entry, access_type);
+    uint64_t tlb_addr = tlb_read_type(entry, access_type);
     vaddr page_addr = addr & TARGET_PAGE_MASK;
     int flags = TLB_FLAGS_MASK & ~TLB_FORCE_SLOW;
     bool force_mmio = check_mem_cbs && cpu_plugin_mem_cbs_enabled(env_cpu(env));
@@ -1751,7 +1751,7 @@ static int probe_access_internal(CPUArchState *env, vaddr addr,
              */
             flags &= ~TLB_INVALID_MASK;
         }
-        tlb_addr = tlb_read_idx(entry, access_type);
+        tlb_addr = tlb_read_type(entry, access_type);
     }
     flags &= tlb_addr;
 
@@ -2079,11 +2079,10 @@ static bool mmu_lookup1(CPUArchState *env, MMULookupPageData *data /*IN/OUT*/,
 {
     CPUTLBEntryFull *full;
     int flags;
-
     vaddr addr = data->addr;
     uintptr_t index = tlb_index(env, mmu_idx, addr);
-    CPUTLBEntryFast *entry = tlb_fastentry(env, mmu_idx, index);
-    uint64_t tlb_addr = tlb_read_idx(entry, access_type);
+    CPUTLBEntryFast *fast = tlb_fastentry(env, mmu_idx, index);
+    uint64_t tlb_addr = tlb_read_type(fast, access_type);
     bool maybe_resized = false;
 
     /* If the TLB entry is for a different page, reload and try again.  */
@@ -2093,9 +2092,9 @@ static bool mmu_lookup1(CPUArchState *env, MMULookupPageData *data /*IN/OUT*/,
             tlb_fill(env_cpu(env), addr, data->size, access_type, mmu_idx, ra);
             maybe_resized = true;
             index = tlb_index(env, mmu_idx, addr);
-            entry = tlb_fastentry(env, mmu_idx, index);
+            fast = tlb_fastentry(env, mmu_idx, index);
         }
-        tlb_addr = tlb_read_idx(entry, access_type) & ~TLB_INVALID_MASK;
+        tlb_addr = tlb_read_type(fast, access_type) & ~TLB_INVALID_MASK;
     }
 
     full = &env_tlb(env)->d[mmu_idx].fulltlb[index];
@@ -2105,7 +2104,7 @@ static bool mmu_lookup1(CPUArchState *env, MMULookupPageData *data /*IN/OUT*/,
     data->full = full;
     data->flags = flags;
     /* Compute haddr speculatively; depending on flags it might be invalid. */
-    data->haddr = (void *)((uintptr_t)addr + entry->addend);
+    data->haddr = (void *)((uintptr_t)addr + fast->addend);
 
     return maybe_resized;
 }
