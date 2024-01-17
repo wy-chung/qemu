@@ -760,14 +760,14 @@ struct MemoryRegion {
 
     /* The following fields should fit in a cache line */
     bool romd_mode;
+    bool rom_device;
     bool ram;
     bool subpage;
     bool readonly; /* For RAM regions */
     bool nonvolatile;
-    bool rom_device;
     bool flush_coalesced_mmio;
-    uint8_t dirty_log_mask;
     bool is_iommu;
+    uint8_t dirty_log_mask;
     RAMBlock *ram_block;
     Object *owner;
     /* owner as TYPE_DEVICE. Used for re-entrancy checks in MR access hotpath */

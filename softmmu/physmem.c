@@ -354,8 +354,8 @@ static MemoryRegionSection *address_space_lookup_region(AddressSpaceDispatch *d,
 
 /* Called from RCU critical section */
 static MemoryRegionSection *
-address_space_translate_internal(AddressSpaceDispatch *d, hwaddr addr, hwaddr *xlat,
-                                 hwaddr *plen, bool resolve_subpage)
+address_space_translate_internal(AddressSpaceDispatch *d, hwaddr addr, hwaddr *xlat/*OUT*/,
+                                 hwaddr *plen/*OUT*/, bool resolve_subpage)
 {
     MemoryRegionSection *section;
     MemoryRegion *mr;
@@ -671,8 +671,8 @@ void tcg_iommu_init_notifier_list(CPUState *cpu)
 /* Called from RCU critical section */
 MemoryRegionSection *
 address_space_translate_for_iotlb(CPUState *cpu, int asidx, hwaddr orig_addr,
-                                  hwaddr *xlat, hwaddr *plen,
-                                  MemTxAttrs attrs, int *prot)
+                                  hwaddr *xlat/*OUT*/, hwaddr *plen/*OUT*/,
+                                  MemTxAttrs attrs, int *prot/*OUT*/)
 {
     MemoryRegionSection *section;
     IOMMUMemoryRegion *iommu_mr;

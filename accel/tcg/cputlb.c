@@ -1297,9 +1297,6 @@ static inline void tlb_set_compare(CPUTLBEntryFull *full, CPUTLBEntryFast *ent,
 void tlb_set_page_full(CPUState *cpu, int mmu_idx,
                        vaddr addr, CPUTLBEntryFull *full)
 {
-    CPUArchState *env = cpu->env_ptr;
-    CPUTLB *tlb = env_tlb(env);
-    CPUTLBDescFull *desc = &tlb->d[mmu_idx];
     MemoryRegionSection *section;
     unsigned int index, read_flags, write_flags;
     uintptr_t addend;
@@ -1308,6 +1305,9 @@ void tlb_set_page_full(CPUState *cpu, int mmu_idx,
     vaddr addr_page;
     int asidx, wp_flags, prot;
     bool is_ram, is_romd;
+    CPUArchState *env = cpu->env_ptr;
+    CPUTLB *tlb = env_tlb(env);
+    CPUTLBDescFull *desc = &tlb->d[mmu_idx];
 
     assert_cpu_is_self(cpu);
 
@@ -1339,7 +1339,7 @@ void tlb_set_page_full(CPUState *cpu, int mmu_idx,
         read_flags |= TLB_BSWAP;
     }
 
-    is_ram = memory_region_is_ram(section->mr);
+    is_ram  = memory_region_is_ram(section->mr);
     is_romd = memory_region_is_romd(section->mr);
 
     if (is_ram || is_romd) {
