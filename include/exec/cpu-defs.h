@@ -152,7 +152,7 @@ typedef struct CPUTLBDescFull {
     size_t n_used_entries;
     size_t vindex;	// The next index to use in the tlb victim table
     /* The tlb victim table, in two parts.  */
-    CPUTLBEntryFast vtable[CPU_VTLB_SIZE];	// 8
+    CPUTLBEntryFast vfastable[CPU_VTLB_SIZE];	// 8
     CPUTLBEntryFull vfulltlb[CPU_VTLB_SIZE];	// 8
     CPUTLBEntryFull *fulltlb; // 256 entries
 } CPUTLBDescFull;
@@ -161,7 +161,7 @@ typedef struct CPUTLBDescFull {
  * Data elements that are shared between all MMU modes.
  */
 typedef struct CPUTLBCommon {
-    /* Serialize updates to f.table and d.vtable, and others as noted. */
+    /* Serialize updates to f.table and d.vfastable, and others as noted. */
     QemuSpin lock;
     /*
      * Within dirty, for each bit N, modifications have been made to

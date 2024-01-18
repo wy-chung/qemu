@@ -236,7 +236,7 @@ static void tlb_mmu_flush_locked(CPUTLBDescFull *desc, CPUTLBDescFast *fast)
     desc->large_page_mask = -1;
     desc->vindex = 0;
     memset(fast->table, -1, sizeof_tlb(fast));
-    memset(desc->vtable, -1, sizeof(desc->vtable));
+    memset(desc->vfastable, -1, sizeof(desc->vfastable));
 }
 
 static void tlb_flush_one_mmuidx_locked(CPUArchState *env, int mmu_idx,
@@ -536,7 +536,7 @@ static void tlb_flush_vtlb_page_mask_locked(CPUArchState *env, int mmu_idx,
 
     assert_cpu_is_self(env_cpu(env));
     for (k = 0; k < CPU_VTLB_SIZE; k++) {
-        if (tlb_flush_entry_mask_locked(&d->vtable[k], page, mask)) {
+        if (tlb_flush_entry_mask_locked(&d->vfastable[k], page, mask)) {
             tlb_n_used_entries_dec(env, mmu_idx);
         }
     }
@@ -1184,7 +1184,7 @@ void tlb_reset_dirty(CPUState *cpu, ram_addr_t start1, ram_addr_t length)
         }
 
         for (i = 0; i < CPU_VTLB_SIZE; i++) {
-            tlb_reset_dirty_range_locked(&env_tlb(env)->d[mmu_idx].vtable[i],
+            tlb_reset_dirty_range_locked(&env_tlb(env)->d[mmu_idx].vfastable[i],
                                          start1, length);
         }
     }
@@ -1219,7 +1219,7 @@ void tlb_set_dirty(CPUState *cpu, vaddr addr)
     for (mmu_idx = 0; mmu_idx < NB_MMU_MODES; mmu_idx++) {
         int k;
         for (k = 0; k < CPU_VTLB_SIZE; k++) {
-            tlb_set_dirty1_locked(&env_tlb(env)->d[mmu_idx].vtable[k], addr);
+            tlb_set_dirty1_locked(&env_tlb(env)->d[mmu_idx].vfastable[k], addr);
         }
     }
     qemu_spin_unlock(&env_tlb(env)->c.lock);
@@ -1405,7 +1405,7 @@ void tlb_set_page_full(CPUState *cpu, int mmu_idx,
      */
     if (!tlb_hit_page_anyprot(te, addr_page) && !tlb_entry_is_empty(te)) {
         unsigned vidx = desc->vindex++ % CPU_VTLB_SIZE;
-        CPUTLBEntryFast *tv = &desc->vtable[vidx];
+        CPUTLBEntryFast *tv = &desc->vfastable[vidx];
 
         /* Evict the old entry into the victim tlb.  */
         copy_tlb_helper_locked(tv, te);
@@ -1664,7 +1664,7 @@ static bool victim_tlb_hit(CPUArchState *env, size_t mmu_idx, size_t index,
 
     assert_cpu_is_self(env_cpu(env));
     for (vidx = 0; vidx < CPU_VTLB_SIZE; ++vidx) {
-        CPUTLBEntryFast *vtlb = &env_tlb(env)->d[mmu_idx].vtable[vidx];
+        CPUTLBEntryFast *vtlb = &env_tlb(env)->d[mmu_idx].vfastable[vidx];
         uint64_t cmp = tlb_read_type(vtlb, access_type);
 
         if (cmp == page) {
