@@ -64,7 +64,7 @@ Int128 HELPER(nonatomic_cmpxchgo)(CPUArchState *env, uint64_t addr,
     }
     return oldv;
 #else
-    g_assert_not_reached();
+    g_assert_not_reached(); // debugging macro to terminate the application if it is ever reached
 #endif
 }
 

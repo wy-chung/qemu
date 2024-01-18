@@ -85,7 +85,7 @@
     MIN(22, TARGET_VIRT_ADDR_SPACE_BITS - TARGET_PAGE_BITS)
   #else
    #define CPU_TLB_DYN_MAX_BITS                                  \
-    MIN_CONST(22, TARGET_VIRT_ADDR_SPACE_BITS - TARGET_PAGE_BITS) // 35
+    MIN_CONST(22, TARGET_VIRT_ADDR_SPACE_BITS - TARGET_PAGE_BITS) // min(22,35) == 22
   #endif
  #endif
 
@@ -154,7 +154,7 @@ typedef struct CPUTLBDescFull {
     /* The tlb victim table, in two parts.  */
     CPUTLBEntryFast vfastable[CPU_VTLB_SIZE];	// 8
     CPUTLBEntryFull vfulltlb[CPU_VTLB_SIZE];	// 8
-    CPUTLBEntryFull *fulltlb; // 256 entries
+    CPUTLBEntryFull *fulltlb; // array size is stored in CPUTLBDescFast.mask
 } CPUTLBDescFull;
 
 /*

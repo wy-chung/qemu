@@ -254,7 +254,7 @@ static void tlb_mmu_init(CPUTLBDescFull *desc, CPUTLBDescFast *fast, int64_t now
     size_t n_entries = 1 << CPU_TLB_DYN_DEFAULT_BITS; // 8
 
     tlb_window_reset(desc, now, 0);
-    desc->n_used_entries = 0;
+    //desc->n_used_entries = 0; //wyctodo this is redundant because tlb_mmu_flush_locked() will set it to 0
     fast->mask = (n_entries - 1) << CPU_TLB_ENTRY_BITS; // 5
     fast->table = g_new(CPUTLBEntryFast, n_entries);
     desc->fulltlb = g_new(CPUTLBEntryFull, n_entries);
@@ -2203,7 +2203,7 @@ static bool mmu_lookup(CPUArchState *env, vaddr addr, MemOpIdx oi,
         if (mmu_lookup1(env, &l->page[1], l->mmu_idx, type, ra)) {
             uintptr_t index = tlb_index(env, l->mmu_idx, addr);
             l->page[0].full = tlb_fullentry(env, l->mmu_idx, index);
-            //l->page[0].full = &env_tlb(env)->d[l->mmu_idx].fulltlb[index];
+            //ori l->page[0].full = &env_tlb(env)->d[l->mmu_idx].fulltlb[index];
         }
 
         flags = l->page[0].flags | l->page[1].flags;

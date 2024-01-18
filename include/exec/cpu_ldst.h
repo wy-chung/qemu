@@ -369,13 +369,6 @@ static inline uintptr_t tlb_index(CPUArchState *env, uintptr_t mmu_idx,
     return (addr >> TARGET_PAGE_BITS) & size_mask;
 }
 
-/* Find the TLB entry corresponding to the mmu_idx + address pair.  */
-static inline CPUTLBEntryFast *tlb_entry_del(CPUArchState *env, uintptr_t mmu_idx,
-                                     vaddr addr)
-{
-    return &env_tlb(env)->f[mmu_idx].table[tlb_index(env, mmu_idx, addr)];
-}
-
 /* Find the TLB fast entry corresponding to the mmu_idx and index.  */
 static inline CPUTLBEntryFast *tlb_fastentry(CPUArchState *env, uintptr_t mmu_idx,
                                      uintptr_t index)
