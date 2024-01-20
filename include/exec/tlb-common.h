@@ -47,6 +47,7 @@ QEMU_BUILD_ASSERT(sizeof(CPUTLBEntryFast) == (1 << CPU_TLB_ENTRY_BITS));
  * The structure is aligned to aid loading the pair with one insn.
  */
 typedef struct CPUTLBDescFast {
+    // mask is also referenced by offsetof in prepare_host_addr()
     uintptr_t mask; // Contains (n_entries - 1) << CPU_TLB_ENTRY_BITS. n_entries is 2^n
     /* The array of tlb entries itself. */
     CPUTLBEntryFast *table; // array size is stored in mask

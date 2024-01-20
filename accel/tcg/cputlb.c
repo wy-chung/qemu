@@ -1717,13 +1717,13 @@ static int probe_access_internal(CPUArchState *env, vaddr addr,
                                  void **phost, CPUTLBEntryFull **pfull,
                                  uintptr_t retaddr, bool check_mem_cbs)
 {
+    CPUTLBEntryFull *full;
     uintptr_t index = tlb_index(env, mmu_idx, addr);
     CPUTLBEntryFast *entry = tlb_fastentry(env, mmu_idx, index);
     uint64_t tlb_addr = tlb_read_type(entry, access_type);
     vaddr page_addr = addr & TARGET_PAGE_MASK;
     int flags = TLB_FLAGS_MASK & ~TLB_FORCE_SLOW;
     bool force_mmio = check_mem_cbs && cpu_plugin_mem_cbs_enabled(env_cpu(env));
-    CPUTLBEntryFull *full;
 
     if (!tlb_hit_page(tlb_addr, page_addr)) {
         if (!victim_tlb_hit(env, mmu_idx, index, access_type, page_addr)) {
@@ -1732,7 +1732,7 @@ static int probe_access_internal(CPUArchState *env, vaddr addr,
             if (!cs->cc->tcg_ops->tlb_fill(cs, addr, fault_size, access_type,
                                            mmu_idx, nonfault, retaddr)) {
 #else
-            if (!x86_cpu_tlb_fill()) {
+            if (!x86_cpu_tlb_fill(cs, addr, fault_size, access_type, mmu_idx, nonfault, retaddr)) {
 #endif
                 /* Non-faulting page table read failed.  */
                 *phost = NULL;
@@ -2050,8 +2050,8 @@ bool tlb_plugin_lookup(CPUState *cpu, vaddr addr, int mmu_idx,
 typedef struct MMULookupPageData {
     CPUTLBEntryFull *full;
     void *haddr;
-    vaddr addr;
-    int flags;
+    vaddr addr;	// virtual address
+    int flags;  // TLB_INVALID_MASK, TLB_NOTDIRTY, TLB_MMIO, TLB_DISCARD_WRITE, TLB_FORCE_SLOW
     int size;
 } MMULookupPageData;
 

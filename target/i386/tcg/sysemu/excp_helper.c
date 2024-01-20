@@ -27,7 +27,7 @@ typedef struct TranslateParams {
     target_ulong cr3;
     int pg_mode;
     int mmu_idx;
-    int ptw_idx;
+    int ptw_idx; // page table walk
     MMUAccessType access_type;
 } TranslateParams;
 
@@ -53,7 +53,7 @@ typedef struct TranslateFault {
 typedef struct PTETranslate {
     CPUX86State *env;
     TranslateFault *err;
-    int ptw_idx;
+    int ptw_idx; // page table walk?, mmu_idx: MMU_NESTED_IDX, MMU_PHYS_IDX
     void *haddr;
     hwaddr gaddr;
 } PTETranslate;
@@ -133,24 +133,24 @@ static inline bool ptw_setl(const PTETranslate *in, uint32_t old, uint32_t set)
 static bool mmu_translate(CPUX86State *env, const TranslateParams *in,
                           TranslateResult *out, TranslateFault *err)
 {
+    uint64_t ptep, pte, rsvd_mask;
+    hwaddr pte_addr, paddr;
+    uint32_t pkr;
+    int page_size;
+    int error_code;
     const int32_t a20_mask = x86_get_a20_mask(env);
     const target_ulong addr = in->addr;
     const int pg_mode = in->pg_mode;
     const bool is_user = (in->mmu_idx == MMU_USER_IDX);
     const MMUAccessType access_type = in->access_type;
-    uint64_t ptep, pte, rsvd_mask;
     PTETranslate pte_trans = {
         .env = env,
         .err = err,
         .ptw_idx = in->ptw_idx,
     };
-    hwaddr pte_addr, paddr;
-    uint32_t pkr;
-    int page_size;
-    int error_code;
 
  restart_all:
-    rsvd_mask = ~MAKE_64BIT_MASK(0, env_archcpu(env)->phys_bits);
+    rsvd_mask = ~ MAKE_64BIT_MASK(0, env_archcpu(env)->phys_bits);
     rsvd_mask &= PG_ADDRESS_MASK;
     if (!(pg_mode & PG_MODE_NXE)) {
         rsvd_mask |= PG_NX_MASK;
@@ -301,7 +301,7 @@ static bool mmu_translate(CPUX86State *env, const TranslateParams *in,
         /* combine pde and pte nx, user and rw protections */
         ptep &= pte ^ PG_NX_MASK;
         page_size = 4096;
-    } else {
+    } else { // !PG_MODE_PAE
         /*
          * Page table level 2
          */
@@ -346,7 +346,7 @@ static bool mmu_translate(CPUX86State *env, const TranslateParams *in,
         ptep &= pte | PG_NX_MASK;
         page_size = 4096;
         rsvd_mask = 0;
-    }
+    } // !PG_MODE_PAE
 
 do_check_protect:
     rsvd_mask |= (page_size - 1) & PG_ADDRESS_MASK & ~PG_PSE_PAT_MASK;
@@ -555,7 +555,7 @@ static bool get_physical_address(CPUX86State *env, vaddr addr,
         }
         break;
 
-    default:
+    default: // MMU_KSMAP_IDX, MMU_USER_IDX, MMU_KNOSMAP_IDX
         if (likely(env->cr[0] & CR0_PG_MASK)) {
             in.cr3 = env->cr[3];
             in.mmu_idx = mmu_idx;

@@ -216,15 +216,15 @@ typedef enum X86Seg {
 #define HF2_IGNNE_SHIFT          7 /* Ignore CR0.NE=0 */
 #define HF2_VGIF_SHIFT           8 /* Can take VIRQ*/
 
-#define HF2_GIF_MASK            (1 << HF2_GIF_SHIFT)
-#define HF2_HIF_MASK            (1 << HF2_HIF_SHIFT)
-#define HF2_NMI_MASK            (1 << HF2_NMI_SHIFT)
-#define HF2_VINTR_MASK          (1 << HF2_VINTR_SHIFT)
-#define HF2_SMM_INSIDE_NMI_MASK (1 << HF2_SMM_INSIDE_NMI_SHIFT)
-#define HF2_MPX_PR_MASK         (1 << HF2_MPX_PR_SHIFT)
-#define HF2_NPT_MASK            (1 << HF2_NPT_SHIFT)
-#define HF2_IGNNE_MASK          (1 << HF2_IGNNE_SHIFT)
-#define HF2_VGIF_MASK           (1 << HF2_VGIF_SHIFT)
+#define HF2_GIF_MASK            (1 << HF2_GIF_SHIFT)	/* if set CPU takes interrupts */
+#define HF2_HIF_MASK            (1 << HF2_HIF_SHIFT)	/* value of IF_MASK when entering SVM */
+#define HF2_NMI_MASK            (1 << HF2_NMI_SHIFT)	/* CPU serving NMI */
+#define HF2_VINTR_MASK          (1 << HF2_VINTR_SHIFT)	/* value of V_INTR_MASKING bit */
+#define HF2_SMM_INSIDE_NMI_MASK (1 << HF2_SMM_INSIDE_NMI_SHIFT) /* CPU serving SMI nested inside NMI */
+#define HF2_MPX_PR_MASK         (1 << HF2_MPX_PR_SHIFT)	/* BNDCFGx.BNDPRESERVE */
+#define HF2_NPT_MASK            (1 << HF2_NPT_SHIFT)	/* Nested Paging enabled */
+#define HF2_IGNNE_MASK          (1 << HF2_IGNNE_SHIFT)	/* Ignore CR0.NE=0 */
+#define HF2_VGIF_MASK           (1 << HF2_VGIF_SHIFT)	/* Can take VIRQ*/
 
 #define CR0_PE_SHIFT 0
 #define CR0_MP_SHIFT 1
@@ -245,7 +245,7 @@ typedef enum X86Seg {
 #define CR4_PVI_MASK  (1U << 1)	// Protected-mode Virtual Interrupts
 #define CR4_TSD_MASK  (1U << 2)	// Time Stamp Disable
 #define CR4_DE_MASK   (1U << 3)	// Debugging Extensions
-#define CR4_PSE_MASK  (1U << 4)	// Page Size Extension
+#define CR4_PSE_MASK  (1U << 4)	// Page Size Extension.  allows for pages larger than the traditional 4 KiB size
 #define CR4_PAE_MASK  (1U << 5)	// Physical Address Extension
 #define CR4_MCE_MASK  (1U << 6)	// Machine Check Exception
 #define CR4_PGE_MASK  (1U << 7)	// Page Global Enabled
