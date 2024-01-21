@@ -683,6 +683,17 @@ static void render_memory_region(FlatView *view,
     }
 }
 
+/**
+ * flatview_for_each_range: Iterate through a FlatView
+ * @fv: the FlatView to iterate through
+ * @cb: function to call for each range
+ * @opaque: opaque data pointer to pass to @cb
+ *
+ * A FlatView is made up of a list of non-overlapping ranges, each of
+ * which is a slice of a MemoryRegion. This function iterates through
+ * each range in @fv, calling @cb. The callback function can terminate
+ * iteration early by returning 'true'.
+ */
 void flatview_for_each_range(FlatView *fv, flatview_cb cb , void *opaque)
 {
     FlatRange *fr;
@@ -1205,6 +1216,17 @@ static void memory_region_do_init(MemoryRegion *mr,
     }
 }
 
+/**
+ * memory_region_init: Initialize a memory region
+ *
+ * The region typically acts as a container for other memory regions.  Use
+ * memory_region_add_subregion() to add subregions.
+ *
+ * @mr: the #MemoryRegion to be initialized
+ * @owner: the object that tracks the region's reference count
+ * @name: used for debugging; not visible to the user or ABI
+ * @size: size of the region; any subregions beyond this size will be clipped
+ */
 void memory_region_init(MemoryRegion *mr,
                         Object *owner,
                         const char *name,
@@ -1517,6 +1539,20 @@ MemTxResult memory_region_dispatch_write(MemoryRegion *mr,
     }
 }
 
+/**
+ * memory_region_init_io: Initialize an I/O memory region.
+ *
+ * Accesses into the region will cause the callbacks in @ops to be called.
+ * if @size is nonzero, subregions will be clipped to @size.
+ *
+ * @mr: the #MemoryRegion to be initialized.
+ * @owner: the object that tracks the region's reference count
+ * @ops: a structure containing read and write callbacks to be used when
+ *       I/O is performed on the region.
+ * @opaque: passed to the read and write callbacks of the @ops structure.
+ * @name: used for debugging; not visible to the user or ABI
+ * @size: size of the region.
+ */
 void memory_region_init_io(MemoryRegion *mr,
                            Object *owner,
                            const MemoryRegionOps *ops,
@@ -1530,6 +1566,21 @@ void memory_region_init_io(MemoryRegion *mr,
     mr->terminates = true;
 }
 
+/**
+ * memory_region_init_ram_nomigrate:  Initialize RAM memory region.  Accesses
+ *                                    into the region will modify memory
+ *                                    directly.
+ *
+ * @mr: the #MemoryRegion to be initialized.
+ * @owner: the object that tracks the region's reference count
+ * @name: Region name, becomes part of RAMBlock name used in migration stream
+ *        must be unique within any device
+ * @size: size of the region.
+ * @errp: pointer to Error*, to store an error if it happens.
+ *
+ * Note that this function does not do anything to cause the data in the
+ * RAM memory region to be migrated; that is the responsibility of the caller.
+ */
 void memory_region_init_ram_nomigrate(MemoryRegion *mr,
                                       Object *owner,
                                       const char *name,
@@ -1539,6 +1590,22 @@ void memory_region_init_ram_nomigrate(MemoryRegion *mr,
     memory_region_init_ram_flags_nomigrate(mr, owner, name, size, 0, errp);
 }
 
+/**
+ * memory_region_init_ram_flags_nomigrate:  Initialize RAM memory region.
+ *                                          Accesses into the region will
+ *                                          modify memory directly.
+ *
+ * @mr: the #MemoryRegion to be initialized.
+ * @owner: the object that tracks the region's reference count
+ * @name: Region name, becomes part of RAMBlock name used in migration stream
+ *        must be unique within any device
+ * @size: size of the region.
+ * @ram_flags: RamBlock flags. Supported flags: RAM_SHARED, RAM_NORESERVE.
+ * @errp: pointer to Error*, to store an error if it happens.
+ *
+ * Note that this function does not do anything to cause the data in the
+ * RAM memory region to be migrated; that is the responsibility of the caller.
+ */
 void memory_region_init_ram_flags_nomigrate(MemoryRegion *mr,
                                             Object *owner,
                                             const char *name,
@@ -1559,6 +1626,27 @@ void memory_region_init_ram_flags_nomigrate(MemoryRegion *mr,
     }
 }
 
+/**
+ * memory_region_init_resizeable_ram:  Initialize memory region with resizable
+ *                                     RAM.  Accesses into the region will
+ *                                     modify memory directly.  Only an initial
+ *                                     portion of this RAM is actually used.
+ *                                     Changing the size while migrating
+ *                                     can result in the migration being
+ *                                     canceled.
+ *
+ * @mr: the #MemoryRegion to be initialized.
+ * @owner: the object that tracks the region's reference count
+ * @name: Region name, becomes part of RAMBlock name used in migration stream
+ *        must be unique within any device
+ * @size: used size of the region.
+ * @max_size: max size of the region.
+ * @resized: callback to notify owner about used size change.
+ * @errp: pointer to Error*, to store an error if it happens.
+ *
+ * Note that this function does not do anything to cause the data in the
+ * RAM memory region to be migrated; that is the responsibility of the caller.
+ */
 void memory_region_init_resizeable_ram(MemoryRegion *mr,
                                        Object *owner,
                                        const char *name,
@@ -1584,6 +1672,27 @@ void memory_region_init_resizeable_ram(MemoryRegion *mr,
 }
 
 #ifdef CONFIG_POSIX
+/**
+ * memory_region_init_ram_from_file:  Initialize RAM memory region with a
+ *                                    mmap-ed backend.
+ *
+ * @mr: the #MemoryRegion to be initialized.
+ * @owner: the object that tracks the region's reference count
+ * @name: Region name, becomes part of RAMBlock name used in migration stream
+ *        must be unique within any device
+ * @size: size of the region.
+ * @align: alignment of the region base address; if 0, the default alignment
+ *         (getpagesize()) will be used.
+ * @ram_flags: RamBlock flags. Supported flags: RAM_SHARED, RAM_PMEM,
+ *             RAM_NORESERVE,
+ * @path: the path in which to allocate the RAM.
+ * @offset: offset within the file referenced by path
+ * @readonly: true to open @path for reading, false for read/write.
+ * @errp: pointer to Error*, to store an error if it happens.
+ *
+ * Note that this function does not do anything to cause the data in the
+ * RAM memory region to be migrated; that is the responsibility of the caller.
+ */
 void memory_region_init_ram_from_file(MemoryRegion *mr,
                                       Object *owner,
                                       const char *name,
@@ -1611,6 +1720,23 @@ void memory_region_init_ram_from_file(MemoryRegion *mr,
     }
 }
 
+/**
+ * memory_region_init_ram_from_fd:  Initialize RAM memory region with a
+ *                                  mmap-ed backend.
+ *
+ * @mr: the #MemoryRegion to be initialized.
+ * @owner: the object that tracks the region's reference count
+ * @name: the name of the region.
+ * @size: size of the region.
+ * @ram_flags: RamBlock flags. Supported flags: RAM_SHARED, RAM_PMEM,
+ *             RAM_NORESERVE, RAM_PROTECTED.
+ * @fd: the fd to mmap.
+ * @offset: offset within the file referenced by fd
+ * @errp: pointer to Error*, to store an error if it happens.
+ *
+ * Note that this function does not do anything to cause the data in the
+ * RAM memory region to be migrated; that is the responsibility of the caller.
+ */
 void memory_region_init_ram_from_fd(MemoryRegion *mr,
                                     Object *owner,
                                     const char *name,
@@ -1635,6 +1761,21 @@ void memory_region_init_ram_from_fd(MemoryRegion *mr,
 }
 #endif
 
+/**
+ * memory_region_init_ram_ptr:  Initialize RAM memory region from a
+ *                              user-provided pointer.  Accesses into the
+ *                              region will modify memory directly.
+ *
+ * @mr: the #MemoryRegion to be initialized.
+ * @owner: the object that tracks the region's reference count
+ * @name: Region name, becomes part of RAMBlock name used in migration stream
+ *        must be unique within any device
+ * @size: size of the region.
+ * @ptr: memory to be mapped; must contain at least @size bytes.
+ *
+ * Note that this function does not do anything to cause the data in the
+ * RAM memory region to be migrated; that is the responsibility of the caller.
+ */
 void memory_region_init_ram_ptr(MemoryRegion *mr,
                                 Object *owner,
                                 const char *name,
@@ -1651,6 +1792,28 @@ void memory_region_init_ram_ptr(MemoryRegion *mr,
     mr->ram_block = qemu_ram_alloc_from_ptr(size, ptr, mr, &error_fatal);
 }
 
+/**
+ * memory_region_init_ram_device_ptr:  Initialize RAM device memory region from
+ *                                     a user-provided pointer.
+ *
+ * A RAM device represents a mapping to a physical device, such as to a PCI
+ * MMIO BAR of an vfio-pci assigned device.  The memory region may be mapped
+ * into the VM address space and access to the region will modify memory
+ * directly.  However, the memory region should not be included in a memory
+ * dump (device may not be enabled/mapped at the time of the dump), and
+ * operations incompatible with manipulating MMIO should be avoided.  Replaces
+ * skip_dump flag.
+ *
+ * @mr: the #MemoryRegion to be initialized.
+ * @owner: the object that tracks the region's reference count
+ * @name: the name of the region.
+ * @size: size of the region.
+ * @ptr: memory to be mapped; must contain at least @size bytes.
+ *
+ * Note that this function does not do anything to cause the data in the
+ * RAM memory region to be migrated; that is the responsibility of the caller.
+ * (For RAM device memory regions, migrating the contents rarely makes sense.)
+ */
 void memory_region_init_ram_device_ptr(MemoryRegion *mr,
                                        Object *owner,
                                        const char *name,
@@ -1670,6 +1833,18 @@ void memory_region_init_ram_device_ptr(MemoryRegion *mr,
     mr->ram_block = qemu_ram_alloc_from_ptr(size, ptr, mr, &error_fatal);
 }
 
+/**
+ * memory_region_init_alias: Initialize a memory region that aliases all or a
+ *                           part of another memory region.
+ *
+ * @mr: the #MemoryRegion to be initialized.
+ * @owner: the object that tracks the region's reference count
+ * @name: used for debugging; not visible to the user or ABI
+ * @orig: the region to be referenced; @mr will be equivalent to
+ *        @orig between @offset and @offset + @size - 1.
+ * @offset: start of the section in @orig to be referenced.
+ * @size: size of the region.
+ */
 void memory_region_init_alias(MemoryRegion *mr,
                               Object *owner,
                               const char *name,
@@ -1682,6 +1857,24 @@ void memory_region_init_alias(MemoryRegion *mr,
     mr->alias_offset = offset;
 }
 
+/**
+ * memory_region_init_rom_nomigrate: Initialize a ROM memory region.
+ *
+ * This has the same effect as calling memory_region_init_ram_nomigrate()
+ * and then marking the resulting region read-only with
+ * memory_region_set_readonly().
+ *
+ * Note that this function does not do anything to cause the data in the
+ * RAM side of the memory region to be migrated; that is the responsibility
+ * of the caller.
+ *
+ * @mr: the #MemoryRegion to be initialized.
+ * @owner: the object that tracks the region's reference count
+ * @name: Region name, becomes part of RAMBlock name used in migration stream
+ *        must be unique within any device
+ * @size: size of the region.
+ * @errp: pointer to Error*, to store an error if it happens.
+ */
 void memory_region_init_rom_nomigrate(MemoryRegion *mr,
                                       Object *owner,
                                       const char *name,
@@ -1692,6 +1885,23 @@ void memory_region_init_rom_nomigrate(MemoryRegion *mr,
     mr->readonly = true;
 }
 
+/**
+ * memory_region_init_rom_device_nomigrate:  Initialize a ROM memory region.
+ *                                 Writes are handled via callbacks.
+ *
+ * Note that this function does not do anything to cause the data in the
+ * RAM side of the memory region to be migrated; that is the responsibility
+ * of the caller.
+ *
+ * @mr: the #MemoryRegion to be initialized.
+ * @owner: the object that tracks the region's reference count
+ * @ops: callbacks for write access handling (must not be NULL).
+ * @opaque: passed to the read and write callbacks of the @ops structure.
+ * @name: Region name, becomes part of RAMBlock name used in migration stream
+ *        must be unique within any device
+ * @size: size of the region.
+ * @errp: pointer to Error*, to store an error if it happens.
+ */
 void memory_region_init_rom_device_nomigrate(MemoryRegion *mr,
                                              Object *owner,
                                              const MemoryRegionOps *ops,
@@ -1716,6 +1926,28 @@ void memory_region_init_rom_device_nomigrate(MemoryRegion *mr,
     }
 }
 
+/**
+ * memory_region_init_iommu: Initialize a memory region of a custom type
+ * that translates addresses
+ *
+ * An IOMMU region translates addresses and forwards accesses to a target
+ * memory region.
+ *
+ * The IOMMU implementation must define a subclass of TYPE_IOMMU_MEMORY_REGION.
+ * @_iommu_mr should be a pointer to enough memory for an instance of
+ * that subclass, @instance_size is the size of that subclass, and
+ * @mrtypename is its name. This function will initialize @_iommu_mr as an
+ * instance of the subclass, and its methods will then be called to handle
+ * accesses to the memory region. See the documentation of
+ * #IOMMUMemoryRegionClass for further details.
+ *
+ * @_iommu_mr: the #IOMMUMemoryRegion to be initialized
+ * @instance_size: the IOMMUMemoryRegion subclass instance size
+ * @mrtypename: the type name of the #IOMMUMemoryRegion
+ * @owner: the object that tracks the region's reference count
+ * @name: used for debugging; not visible to the user or ABI
+ * @size: size of the region.
+ */
 void memory_region_init_iommu(void *_iommu_mr,
                               size_t instance_size,
                               const char *mrtypename,
@@ -1767,6 +1999,21 @@ Object *memory_region_owner(MemoryRegion *mr)
     return obj->parent;
 }
 
+/**
+ * memory_region_ref: Add 1 to a memory region's reference count
+ *
+ * Whenever memory regions are accessed outside the BQL, they need to be
+ * preserved against hot-unplug.  MemoryRegions actually do not have their
+ * own reference count; they piggyback on a QOM object, their "owner".
+ * This function adds a reference to the owner.
+ *
+ * All MemoryRegions must have an owner if they can disappear, even if the
+ * device they belong to operates exclusively under the BQL.  This is because
+ * the region could be returned at any time by memory_region_find, and this
+ * is usually under guest control.
+ *
+ * @mr: the #MemoryRegion
+ */
 void memory_region_ref(MemoryRegion *mr)
 {
     /* MMIO callbacks most likely will access data that belongs
@@ -1784,6 +2031,16 @@ void memory_region_ref(MemoryRegion *mr)
     }
 }
 
+/**
+ * memory_region_unref: Remove 1 to a memory region's reference count
+ *
+ * Whenever memory regions are accessed outside the BQL, they need to be
+ * preserved against hot-unplug.  MemoryRegions actually do not have their
+ * own reference count; they piggyback on a QOM object, their "owner".
+ * This function removes a reference to the owner and possibly destroys it.
+ *
+ * @mr: the #MemoryRegion
+ */
 void memory_region_unref(MemoryRegion *mr)
 {
     if (mr && mr->owner) {
@@ -2264,6 +2521,19 @@ static void memory_region_sync_dirty_bitmap(MemoryRegion *mr, bool last_stage)
     }
 }
 
+/**
+ * memory_region_clear_dirty_bitmap - clear dirty bitmap for memory range
+ *
+ * This function is called when the caller wants to clear the remote
+ * dirty bitmap of a memory range within the memory region.  This can
+ * be used by e.g. KVM to manually clear dirty log when
+ * KVM_CAP_MANUAL_DIRTY_LOG_PROTECT is declared support by the host
+ * kernel.
+ *
+ * @mr:     the memory region to clear the dirty log upon
+ * @start:  start address offset within the memory region
+ * @len:    length of the memory region to clear dirty bitmap
+ */
 void memory_region_clear_dirty_bitmap(MemoryRegion *mr, hwaddr start,
                                       hwaddr len)
 {
@@ -2315,6 +2585,33 @@ void memory_region_clear_dirty_bitmap(MemoryRegion *mr, hwaddr start,
     }
 }
 
+/**
+ * memory_region_snapshot_and_clear_dirty: Get a snapshot of the dirty
+ *                                         bitmap and clear it.
+ *
+ * Creates a snapshot of the dirty bitmap, clears the dirty bitmap and
+ * returns the snapshot.  The snapshot can then be used to query dirty
+ * status, using memory_region_snapshot_get_dirty.  Snapshotting allows
+ * querying the same page multiple times, which is especially useful for
+ * display updates where the scanlines often are not page aligned.
+ *
+ * The dirty bitmap region which gets copied into the snapshot (and
+ * cleared afterwards) can be larger than requested.  The boundaries
+ * are rounded up/down so complete bitmap longs (covering 64 pages on
+ * 64bit hosts) can be copied over into the bitmap snapshot.  Which
+ * isn't a problem for display updates as the extra pages are outside
+ * the visible area, and in case the visible area changes a full
+ * display redraw is due anyway.  Should other use cases for this
+ * function emerge we might have to revisit this implementation
+ * detail.
+ *
+ * Use g_free to release DirtyBitmapSnapshot.
+ *
+ * @mr: the memory region being queried.
+ * @addr: the address (relative to the start of the region) being queried.
+ * @size: the size of the range being queried.
+ * @client: the user of the logging information; typically %DIRTY_MEMORY_VGA.
+ */
 DirtyBitmapSnapshot *memory_region_snapshot_and_clear_dirty(MemoryRegion *mr,
                                                             hwaddr addr,
                                                             hwaddr size,
@@ -2356,6 +2653,18 @@ void memory_region_set_nonvolatile(MemoryRegion *mr, bool nonvolatile)
     }
 }
 
+/**
+ * memory_region_rom_device_set_romd: enable/disable ROMD mode
+ *
+ * Allows a ROM device (initialized with memory_region_init_rom_device() to
+ * set to ROMD mode (default) or MMIO mode.  When it is in ROMD mode, the
+ * device is mapped to guest memory and satisfies read access directly.
+ * When in MMIO mode, reads are forwarded to the #MemoryRegion.read function.
+ * Writes are always handled by the #MemoryRegion.write function.
+ *
+ * @mr: the memory region to be updated
+ * @romd_mode: %true to put the region into ROMD mode
+ */
 void memory_region_rom_device_set_romd(MemoryRegion *mr, bool romd_mode)
 {
     if (mr->romd_mode != romd_mode) {
@@ -2383,6 +2692,20 @@ int memory_region_get_fd(MemoryRegion *mr)
     return mr->ram_block->fd;
 }
 
+/**
+ * memory_region_get_ram_ptr: Get a pointer into a RAM memory region.
+ *
+ * Returns a host pointer to a RAM memory region (created with
+ * memory_region_init_ram() or memory_region_init_ram_ptr()).
+ *
+ * Use with care; by the time this function returns, the returned pointer is
+ * not protected by RCU anymore.  If the caller is not within an RCU critical
+ * section and does not hold the iothread lock, it must have other means of
+ * protecting the pointer, such as a reference to the region that includes
+ * the incoming ram_addr_t.
+ *
+ * @mr: the memory region being queried.
+ */
 void *memory_region_get_ram_ptr(MemoryRegion *mr)
 {
     uint64_t offset = 0;
@@ -2396,6 +2719,23 @@ void *memory_region_get_ram_ptr(MemoryRegion *mr)
     return qemu_map_ram_ptr(mr->ram_block, offset);
 }
 
+/**
+ * memory_region_from_host: Convert a pointer into a RAM memory region
+ * and an offset within it.
+ *
+ * Given a host pointer inside a RAM memory region (created with
+ * memory_region_init_ram() or memory_region_init_ram_ptr()), return
+ * the MemoryRegion and the offset within it.
+ *
+ * Use with care; by the time this function returns, the returned pointer is
+ * not protected by RCU anymore.  If the caller is not within an RCU critical
+ * section and does not hold the iothread lock, it must have other means of
+ * protecting the pointer, such as a reference to the region that includes
+ * the incoming ram_addr_t.
+ *
+ * @ptr: the host pointer to be converted
+ * @offset: the offset within memory region
+ */
 MemoryRegion *memory_region_from_host(void *ptr, ram_addr_t *offset)
 {
     RAMBlock *block;
@@ -2413,6 +2753,15 @@ ram_addr_t memory_region_get_ram_addr(MemoryRegion *mr)
     return mr->ram_block ? mr->ram_block->offset : RAM_ADDR_INVALID;
 }
 
+/* memory_region_ram_resize: Resize a RAM region.
+ *
+ * Resizing RAM while migrating can result in the migration being canceled.
+ * Care has to be taken if the guest might have already detected the memory.
+ *
+ * @mr: a memory region created with @memory_region_init_resizeable_ram.
+ * @newsize: the new size the region
+ * @errp: pointer to Error*, to store an error if it happens.
+ */
 void memory_region_ram_resize(MemoryRegion *mr, ram_addr_t newsize, Error **errp)
 {
     assert(mr->ram_block);
@@ -2625,6 +2974,20 @@ static void memory_region_add_subregion_common(MemoryRegion *mr,
     memory_region_update_container_subregions(subregion);
 }
 
+/**
+ * memory_region_add_subregion: Add a subregion to a container.
+ *
+ * Adds a subregion at @offset.  The subregion may not overlap with other
+ * subregions (except for those explicitly marked as overlapping).  A region
+ * may only be added once as a subregion (unless removed with
+ * memory_region_del_subregion()); use memory_region_init_alias() if you
+ * want a region to be a subregion in multiple locations.
+ *
+ * @mr: the region to contain the new subregion; must be a container
+ *      initialized with memory_region_init().
+ * @offset: the offset relative to @mr where @subregion is added.
+ * @subregion: the subregion to be added.
+ */
 void memory_region_add_subregion(MemoryRegion *mr,
                                  hwaddr offset,
                                  MemoryRegion *subregion)
@@ -2633,6 +2996,23 @@ void memory_region_add_subregion(MemoryRegion *mr,
     memory_region_add_subregion_common(mr, offset, subregion);
 }
 
+/**
+ * memory_region_add_subregion_overlap: Add a subregion to a container
+ *                                      with overlap.
+ *
+ * Adds a subregion at @offset.  The subregion may overlap with other
+ * subregions.  Conflicts are resolved by having a higher @priority hide a
+ * lower @priority. Subregions without priority are taken as @priority 0.
+ * A region may only be added once as a subregion (unless removed with
+ * memory_region_del_subregion()); use memory_region_init_alias() if you
+ * want a region to be a subregion in multiple locations.
+ *
+ * @mr: the region to contain the new subregion; must be a container
+ *      initialized with memory_region_init().
+ * @offset: the offset relative to @mr where @subregion is added.
+ * @subregion: the subregion to be added.
+ * @priority: used for resolving overlaps; highest priority wins.
+ */
 void memory_region_add_subregion_overlap(MemoryRegion *mr,
                                          hwaddr offset,
                                          MemoryRegion *subregion,
@@ -2800,6 +3180,34 @@ static MemoryRegionSection memory_region_find_rcu(MemoryRegion *mr,
     return ret;
 }
 
+/**
+ * memory_region_find: translate an address/size relative to a
+ * MemoryRegion into a #MemoryRegionSection.
+ *
+ * Locates the first #MemoryRegion within @mr that overlaps the range
+ * given by @addr and @size.
+ *
+ * Returns a #MemoryRegionSection that describes a contiguous overlap.
+ * It will have the following characteristics:
+ * - @size = 0 iff no overlap was found
+ * - @mr is non-%NULL iff an overlap was found
+ *
+ * Remember that in the return value the @offset_within_region is
+ * relative to the returned region (in the .@mr field), not to the
+ * @mr argument.
+ *
+ * Similarly, the .@offset_within_address_space is relative to the
+ * address space that contains both regions, the passed and the
+ * returned one.  However, in the special case where the @mr argument
+ * has no container (and thus is the root of the address space), the
+ * following will hold:
+ * - @offset_within_address_space >= @addr
+ * - @offset_within_address_space + .@size <= @addr + @size
+ *
+ * @mr: a MemoryRegion within which @addr is a relative address
+ * @addr: start of the area within @as to be searched
+ * @size: size of the area to be searched
+ */
 MemoryRegionSection memory_region_find(MemoryRegion *mr,
                                        hwaddr addr, uint64_t size)
 {
@@ -2812,6 +3220,14 @@ MemoryRegionSection memory_region_find(MemoryRegion *mr,
     return ret;
 }
 
+/**
+ * memory_region_section_new_copy: Copy a memory region section
+ *
+ * Allocate memory for a new copy, copy the memory region section, and
+ * properly take a reference on all relevant members.
+ *
+ * @s: the #MemoryRegionSection to copy
+ */
 MemoryRegionSection *memory_region_section_new_copy(MemoryRegionSection *s)
 {
     MemoryRegionSection *tmp = g_new(MemoryRegionSection, 1);
@@ -2828,6 +3244,14 @@ MemoryRegionSection *memory_region_section_new_copy(MemoryRegionSection *s)
     return tmp;
 }
 
+/**
+ * memory_region_section_free_copy: Free a copied memory region section
+ *
+ * Free a copy of a memory section created via memory_region_section_new_copy().
+ * properly dropping references on all relevant members.
+ *
+ * @s: the #MemoryRegionSection to copy
+ */
 void memory_region_section_free_copy(MemoryRegionSection *s)
 {
     if (s->fv) {
@@ -3523,6 +3947,28 @@ void mtree_info(bool flatview, bool dispatch_tree, bool owner, bool disabled)
     }
 }
 
+/**
+ * memory_region_init_ram - Initialize RAM memory region.  Accesses into the
+ *                          region will modify memory directly.
+ *
+ * @mr: the #MemoryRegion to be initialized
+ * @owner: the object that tracks the region's reference count (must be
+ *         TYPE_DEVICE or a subclass of TYPE_DEVICE, or NULL)
+ * @name: name of the memory region
+ * @size: size of the region in bytes
+ * @errp: pointer to Error*, to store an error if it happens.
+ *
+ * This function allocates RAM for a board model or device, and
+ * arranges for it to be migrated (by calling vmstate_register_ram()
+ * if @owner is a DeviceState, or vmstate_register_ram_global() if
+ * @owner is NULL).
+ *
+ * TODO: Currently we restrict @owner to being either NULL (for
+ * global RAM regions with no owner) or devices, so that we can
+ * give the RAM block a unique name for migration purposes.
+ * We should lift this restriction and allow arbitrary Objects.
+ * If you pass a non-NULL non-device @owner then we will assert.
+ */
 void memory_region_init_ram(MemoryRegion *mr,
                             Object *owner,
                             const char *name,
@@ -3547,6 +3993,27 @@ void memory_region_init_ram(MemoryRegion *mr,
     vmstate_register_ram(mr, owner_dev);
 }
 
+/**
+ * memory_region_init_rom: Initialize a ROM memory region.
+ *
+ * This has the same effect as calling memory_region_init_ram()
+ * and then marking the resulting region read-only with
+ * memory_region_set_readonly(). This includes arranging for the
+ * contents to be migrated.
+ *
+ * TODO: Currently we restrict @owner to being either NULL (for
+ * global RAM regions with no owner) or devices, so that we can
+ * give the RAM block a unique name for migration purposes.
+ * We should lift this restriction and allow arbitrary Objects.
+ * If you pass a non-NULL non-device @owner then we will assert.
+ *
+ * @mr: the #MemoryRegion to be initialized.
+ * @owner: the object that tracks the region's reference count
+ * @name: Region name, becomes part of RAMBlock name used in migration stream
+ *        must be unique within any device
+ * @size: size of the region.
+ * @errp: pointer to Error*, to store an error if it happens.
+ */
 void memory_region_init_rom(MemoryRegion *mr,
                             Object *owner,
                             const char *name,
@@ -3571,6 +4038,31 @@ void memory_region_init_rom(MemoryRegion *mr,
     vmstate_register_ram(mr, owner_dev);
 }
 
+/**
+ * memory_region_init_rom_device:  Initialize a ROM memory region.
+ *                                 Writes are handled via callbacks.
+ *
+ * This function initializes a memory region backed by RAM for reads
+ * and callbacks for writes, and arranges for the RAM backing to
+ * be migrated (by calling vmstate_register_ram()
+ * if @owner is a DeviceState, or vmstate_register_ram_global() if
+ * @owner is NULL).
+ *
+ * TODO: Currently we restrict @owner to being either NULL (for
+ * global RAM regions with no owner) or devices, so that we can
+ * give the RAM block a unique name for migration purposes.
+ * We should lift this restriction and allow arbitrary Objects.
+ * If you pass a non-NULL non-device @owner then we will assert.
+ *
+ * @mr: the #MemoryRegion to be initialized.
+ * @owner: the object that tracks the region's reference count
+ * @ops: callbacks for write access handling (must not be NULL).
+ * @opaque: passed to the read and write callbacks of the @ops structure.
+ * @name: Region name, becomes part of RAMBlock name used in migration stream
+ *        must be unique within any device
+ * @size: size of the region.
+ * @errp: pointer to Error*, to store an error if it happens.
+ */
 void memory_region_init_rom_device(MemoryRegion *mr,
                                    Object *owner,
                                    const MemoryRegionOps *ops,

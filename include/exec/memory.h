@@ -84,26 +84,15 @@ struct ReservedRegion {
     unsigned type;
 };
 
-/**
- * struct MemoryRegionSection: describes a fragment of a #MemoryRegion
- *
- * @mr: the region, or %NULL if empty
- * @fv: the flat view of the address space the region is mapped in
- * @offset_within_region: the beginning of the section, relative to @mr's start
- * @size: the size of the section; will not exceed @mr's boundaries
- * @offset_within_address_space: the address of the first byte of the section
- *     relative to the region's address space
- * @readonly: writes to this section are ignored
- * @nonvolatile: this section is non-volatile
- */
-struct MemoryRegionSection {
-    Int128 size;
-    MemoryRegion *mr;
-    FlatView *fv;
-    hwaddr offset_within_region;
-    hwaddr offset_within_address_space;
-    bool readonly;
-    bool nonvolatile;
+struct MemoryRegionSection {	// describes a fragment of a #MemoryRegion
+    Int128 size;	// the size of the section; will not exceed @mr's boundaries
+    MemoryRegion *mr;	// the region, or %NULL if empty
+    FlatView *fv;	// the flat view of the address space the region is mapped in
+    hwaddr offset_within_region;	// the beginning of the section, relative to @mr's start
+    hwaddr offset_within_address_space;	// the address of the first byte of the section
+    					// relative to the region's address space
+    bool readonly;	// writes to this section are ignored
+    bool nonvolatile;	// this section is non-volatile
 };
 
 typedef struct IOMMUTLBEntry IOMMUTLBEntry;
