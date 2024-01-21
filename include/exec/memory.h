@@ -76,8 +76,6 @@ static inline void fuzz_dma_read_cb(size_t addr,
 
 extern unsigned int global_dirty_tracking;
 
-typedef struct MemoryRegionOps MemoryRegionOps;
-
 struct ReservedRegion {
     hwaddr low;
     hwaddr high;
@@ -742,14 +740,18 @@ typedef struct MemoryRegionIoeventfd MemoryRegionIoeventfd;
  *
  * A struct representing a memory region.
  */
+#if !defined(WYC)
+typedef struct MemoryRegionOps MemoryRegionOps;
+#endif
+
 struct MemoryRegion {
     Object parent_obj;
 
     /* private: */
 
     /* The following fields should fit in a cache line */
-    bool romd_mode;
     bool rom_device;
+    bool romd_mode; // a rom device that supports direct read
     bool ram;
     bool subpage;
     bool readonly; /* For RAM regions */
