@@ -369,7 +369,7 @@ TranslationBlock *tb_gen_code(CPUState *cpu,
     tcg_ctx->page_mask = TARGET_PAGE_MASK;
     tcg_ctx->tlb_dyn_max_bits = CPU_TLB_DYN_MAX_BITS;
     tcg_ctx->tlb_fast_offset =
-        (int)offsetof(ArchCPU, neg.tlb.f) - (int)offsetof(ArchCPU, env);
+        (int)offsetof(ArchCPU, neg.tlb.dFast) - (int)offsetof(ArchCPU, env);
 #endif
     tcg_ctx->insn_start_words = TARGET_INSN_START_WORDS;
 #ifdef TCG_GUEST_DEFAULT_MO

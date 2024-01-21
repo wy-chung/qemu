@@ -242,8 +242,8 @@ static void tlb_mmu_flush_locked(CPUTLBDescFull *desc, CPUTLBDescFast *fast)
 static void tlb_flush_one_mmuidx_locked(CPUArchState *env, int mmu_idx,
                                         int64_t now)
 {
-    CPUTLBDescFull *desc = &env_tlb(env)->d[mmu_idx];
-    CPUTLBDescFast *fast = &env_tlb(env)->f[mmu_idx];
+    CPUTLBDescFull *desc = &env_tlb(env)->dFull[mmu_idx];
+    CPUTLBDescFast *fast = &env_tlb(env)->dFast[mmu_idx];
 
     tlb_mmu_resize_locked(desc, fast, now);
     tlb_mmu_flush_locked(desc, fast);
@@ -263,12 +263,12 @@ static void tlb_mmu_init(CPUTLBDescFull *desc, CPUTLBDescFast *fast, int64_t now
 
 static inline void tlb_n_used_entries_inc(CPUArchState *env, uintptr_t mmu_idx)
 {
-    env_tlb(env)->d[mmu_idx].n_used_entries++;
+    env_tlb(env)->dFull[mmu_idx].n_used_entries++;
 }
 
 static inline void tlb_n_used_entries_dec(CPUArchState *env, uintptr_t mmu_idx)
 {
-    env_tlb(env)->d[mmu_idx].n_used_entries--;
+    env_tlb(env)->dFull[mmu_idx].n_used_entries--;
 }
 
 /**
@@ -287,7 +287,7 @@ void tlb_init(CPUState *cpu)
     env_tlb(env)->c.dirty = 0;
 
     for (i = 0; i < NB_MMU_MODES; i++) {
-        tlb_mmu_init(&env_tlb(env)->d[i], &env_tlb(env)->f[i], now);
+        tlb_mmu_init(&env_tlb(env)->dFull[i], &env_tlb(env)->dFast[i], now);
     }
 }
 
@@ -302,8 +302,8 @@ void tlb_destroy(CPUState *cpu)
 
     qemu_spin_destroy(&env_tlb(env)->c.lock);
     for (i = 0; i < NB_MMU_MODES; i++) {
-        CPUTLBDescFull *desc = &env_tlb(env)->d[i];
-        CPUTLBDescFast *fast = &env_tlb(env)->f[i];
+        CPUTLBDescFull *desc = &env_tlb(env)->dFull[i];
+        CPUTLBDescFast *fast = &env_tlb(env)->dFast[i];
 
         g_free(fast->table);
         g_free(desc->fulltlb);
@@ -531,7 +531,7 @@ static void tlb_flush_vtlb_page_mask_locked(CPUArchState *env, int mmu_idx,
                                             vaddr page,
                                             vaddr mask)
 {
-    CPUTLBDescFull *d = &env_tlb(env)->d[mmu_idx];
+    CPUTLBDescFull *d = &env_tlb(env)->dFull[mmu_idx];
     int k;
 
     assert_cpu_is_self(env_cpu(env));
@@ -550,8 +550,8 @@ static inline void tlb_flush_vtlb_page_locked(CPUArchState *env, int mmu_idx,
 
 static void tlb_flush_page_locked(CPUArchState *env, int midx, vaddr page)
 {
-    vaddr lp_addr = env_tlb(env)->d[midx].large_page_addr;
-    vaddr lp_mask = env_tlb(env)->d[midx].large_page_mask;
+    vaddr lp_addr = env_tlb(env)->dFull[midx].large_page_addr;
+    vaddr lp_mask = env_tlb(env)->dFull[midx].large_page_mask;
 
     /* Check if we need to flush due to large pages.  */
     if ((page & lp_mask) == lp_addr) {
@@ -828,8 +828,8 @@ static void tlb_flush_range_locked(CPUArchState *env, int midx,
                                    vaddr addr, vaddr len,
                                    unsigned bits)
 {
-    CPUTLBDescFull *d = &env_tlb(env)->d[midx];
-    CPUTLBDescFast *f = &env_tlb(env)->f[midx];
+    CPUTLBDescFull *d = &env_tlb(env)->dFull[midx];
+    CPUTLBDescFast *f = &env_tlb(env)->dFast[midx];
     vaddr mask = MAKE_64BIT_MASK(0, bits);
 
     /*
@@ -1176,15 +1176,15 @@ void tlb_reset_dirty(CPUState *cpu, ram_addr_t start1, ram_addr_t length)
     qemu_spin_lock(&env_tlb(env)->c.lock);
     for (mmu_idx = 0; mmu_idx < NB_MMU_MODES; mmu_idx++) {
         unsigned int i;
-        unsigned int n = tlb_n_entries(&env_tlb(env)->f[mmu_idx]);
+        unsigned int n = tlb_n_entries(&env_tlb(env)->dFast[mmu_idx]);
 
         for (i = 0; i < n; i++) {
-            tlb_reset_dirty_range_locked(&env_tlb(env)->f[mmu_idx].table[i],
+            tlb_reset_dirty_range_locked(&env_tlb(env)->dFast[mmu_idx].table[i],
                                          start1, length);
         }
 
         for (i = 0; i < CPU_VTLB_SIZE; i++) {
-            tlb_reset_dirty_range_locked(&env_tlb(env)->d[mmu_idx].vfastable[i],
+            tlb_reset_dirty_range_locked(&env_tlb(env)->dFull[mmu_idx].vfastable[i],
                                          start1, length);
         }
     }
@@ -1219,7 +1219,7 @@ void tlb_set_dirty(CPUState *cpu, vaddr addr)
     for (mmu_idx = 0; mmu_idx < NB_MMU_MODES; mmu_idx++) {
         int k;
         for (k = 0; k < CPU_VTLB_SIZE; k++) {
-            tlb_set_dirty1_locked(&env_tlb(env)->d[mmu_idx].vfastable[k], addr);
+            tlb_set_dirty1_locked(&env_tlb(env)->dFull[mmu_idx].vfastable[k], addr);
         }
     }
     qemu_spin_unlock(&env_tlb(env)->c.lock);
@@ -1230,7 +1230,7 @@ void tlb_set_dirty(CPUState *cpu, vaddr addr)
 static void tlb_add_large_page(CPUArchState *env, int mmu_idx,
                                vaddr addr, uint64_t size)
 {
-    vaddr lp_addr = env_tlb(env)->d[mmu_idx].large_page_addr;
+    vaddr lp_addr = env_tlb(env)->dFull[mmu_idx].large_page_addr;
     vaddr lp_mask = ~(size - 1);
 
     if (lp_addr == (vaddr)-1) {
@@ -1240,13 +1240,13 @@ static void tlb_add_large_page(CPUArchState *env, int mmu_idx,
         /* Extend the existing region to include the new page.
            This is a compromise between unnecessary flushes and
            the cost of maintaining a full variable size TLB.  */
-        lp_mask &= env_tlb(env)->d[mmu_idx].large_page_mask;
+        lp_mask &= env_tlb(env)->dFull[mmu_idx].large_page_mask;
         while (((lp_addr ^ addr) & lp_mask) != 0) {
             lp_mask <<= 1;
         }
     }
-    env_tlb(env)->d[mmu_idx].large_page_addr = lp_addr & lp_mask;
-    env_tlb(env)->d[mmu_idx].large_page_mask = lp_mask;
+    env_tlb(env)->dFull[mmu_idx].large_page_addr = lp_addr & lp_mask;
+    env_tlb(env)->dFull[mmu_idx].large_page_mask = lp_mask;
 }
 
 static inline void tlb_set_compare(CPUTLBEntryFull *full, CPUTLBEntryFast *ent,
@@ -1308,7 +1308,7 @@ void tlb_set_page_full(CPUState *cpu, int mmu_idx,
 
     CPUArchState *env = cpu->env_ptr;
     CPUTLB *tlb = env_tlb(env);
-    CPUTLBDescFull *desc = &tlb->d[mmu_idx];
+    CPUTLBDescFull *desc = &tlb->dFull[mmu_idx];
 
     assert_cpu_is_self(cpu);
 
@@ -1665,12 +1665,12 @@ static bool victim_tlb_hit(CPUArchState *env, size_t mmu_idx, size_t index,
 
     assert_cpu_is_self(env_cpu(env));
     for (vidx = 0; vidx < CPU_VTLB_SIZE; ++vidx) {
-        CPUTLBEntryFast *vtlb = &env_tlb(env)->d[mmu_idx].vfastable[vidx];
+        CPUTLBEntryFast *vtlb = &env_tlb(env)->dFull[mmu_idx].vfastable[vidx];
         uint64_t cmp = tlb_read_type(vtlb, access_type);
 
         if (cmp == page) {
             /* Found entry in victim tlb, swap tlb and iotlb.  */
-            CPUTLBEntryFast tmptlb, *tlb = &env_tlb(env)->f[mmu_idx].table[index];
+            CPUTLBEntryFast tmptlb, *tlb = &env_tlb(env)->dFast[mmu_idx].table[index];
 
             qemu_spin_lock(&env_tlb(env)->c.lock);
             copy_tlb_helper_locked(&tmptlb, tlb);
@@ -1678,8 +1678,8 @@ static bool victim_tlb_hit(CPUArchState *env, size_t mmu_idx, size_t index,
             copy_tlb_helper_locked(vtlb, &tmptlb);
             qemu_spin_unlock(&env_tlb(env)->c.lock);
 
-            CPUTLBEntryFull *f1 = &env_tlb(env)->d[mmu_idx].fulltlb[index];
-            CPUTLBEntryFull *f2 = &env_tlb(env)->d[mmu_idx].vfulltlb[vidx];
+            CPUTLBEntryFull *f1 = &env_tlb(env)->dFull[mmu_idx].fulltlb[index];
+            CPUTLBEntryFull *f2 = &env_tlb(env)->dFull[mmu_idx].vfulltlb[vidx];
             CPUTLBEntryFull tmpf;
             tmpf = *f1; *f1 = *f2; *f2 = tmpf;
             return true;
@@ -1756,7 +1756,7 @@ static int probe_access_internal(CPUArchState *env, vaddr addr,
     }
     flags &= tlb_addr;
 
-    *pfull = full = &env_tlb(env)->d[mmu_idx].fulltlb[index];
+    *pfull = full = &env_tlb(env)->dFull[mmu_idx].fulltlb[index];
     flags |= full->slow_flags[access_type];
 
     /* Fold all "mmio-like" bits into TLB_MMIO.  This is not RAM.  */
@@ -2022,7 +2022,7 @@ bool tlb_plugin_lookup(CPUState *cpu, vaddr addr, int mmu_idx,
         /* We must have an iotlb entry for MMIO */
         if (tlb_addr & TLB_MMIO) {
             CPUTLBEntryFull *full;
-            full = &env_tlb(env)->d[mmu_idx].fulltlb[index];
+            full = &env_tlb(env)->dFull[mmu_idx].fulltlb[index];
             data->is_io = true;
             data->v.io.section =
                 iotlb_to_section(cpu, full->xlat_section, full->attrs);
@@ -2098,7 +2098,7 @@ static bool mmu_lookup1(CPUArchState *env, MMULookupPageData *data /*IN/OUT*/,
         tlb_addr = tlb_read_type(fast, access_type) & ~TLB_INVALID_MASK;
     }
 
-    full = &env_tlb(env)->d[mmu_idx].fulltlb[index];
+    full = &env_tlb(env)->dFull[mmu_idx].fulltlb[index];
     flags = tlb_addr & (TLB_FLAGS_MASK & ~TLB_FORCE_SLOW);
     flags |= full->slow_flags[access_type];
 
@@ -2304,7 +2304,7 @@ static void *atomic_mmu_lookup(CPUArchState *env, vaddr addr, MemOpIdx oi,
     }
 
     hostaddr = (void *)((uintptr_t)addr + tlbe->addend);
-    full = &env_tlb(env)->d[mmu_idx].fulltlb[index];
+    full = &env_tlb(env)->dFull[mmu_idx].fulltlb[index];
 
     if (unlikely(tlb_addr & TLB_NOTDIRTY)) {
         notdirty_write(env_cpu(env), addr, size, full, retaddr);

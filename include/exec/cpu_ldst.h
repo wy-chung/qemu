@@ -364,7 +364,7 @@ static inline uint64_t tlb_addr_write(const CPUTLBEntryFast *entry)
 static inline uintptr_t tlb_index(CPUArchState *env, uintptr_t mmu_idx,
                                   vaddr addr)
 {
-    uintptr_t size_mask = env_tlb(env)->f[mmu_idx].mask >> CPU_TLB_ENTRY_BITS;
+    uintptr_t size_mask = env_tlb(env)->dFast[mmu_idx].mask >> CPU_TLB_ENTRY_BITS;
 
     return (addr >> TARGET_PAGE_BITS) & size_mask;
 }
@@ -373,14 +373,14 @@ static inline uintptr_t tlb_index(CPUArchState *env, uintptr_t mmu_idx,
 static inline CPUTLBEntryFast *tlb_fastentry(CPUArchState *env, uintptr_t mmu_idx,
                                      uintptr_t index)
 {
-    return &env_tlb(env)->f[mmu_idx].table[index];
+    return &env_tlb(env)->dFast[mmu_idx].table[index];
 }
 
 /* Find the TLB full entry corresponding to the mmu_idx and index.  */
 static inline CPUTLBEntryFull *tlb_fullentry(CPUArchState *env, uintptr_t mmu_idx,
                                      uintptr_t index)
 {
-    return &env_tlb(env)->d[mmu_idx].fulltlb[index];
+    return &env_tlb(env)->dFull[mmu_idx].fulltlb[index];
 }
 
 #endif /* defined(CONFIG_USER_ONLY) */

@@ -188,8 +188,8 @@ typedef struct CPUTLBCommon {
 // modes: MMU_KSMAP_IDX, MMU_USER_IDX, MMU_KNOSMAP_IDX, MMU_NESTED_IDX, MMU_PHYS_IDX
 typedef struct CPUTLB {
     CPUTLBCommon c;
-    CPUTLBDescFull d[NB_MMU_MODES];
-    CPUTLBDescFast f[NB_MMU_MODES];
+    CPUTLBDescFull dFull[NB_MMU_MODES];
+    CPUTLBDescFast dFast[NB_MMU_MODES];
 } CPUTLB;
 
 #else
