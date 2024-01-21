@@ -1305,6 +1305,7 @@ void tlb_set_page_full(CPUState *cpu, int mmu_idx,
     vaddr addr_page;
     int asidx, wp_flags, prot;
     bool is_ram, is_romd;
+
     CPUArchState *env = cpu->env_ptr;
     CPUTLB *tlb = env_tlb(env);
     CPUTLBDescFull *desc = &tlb->d[mmu_idx];
@@ -1320,8 +1321,8 @@ void tlb_set_page_full(CPUState *cpu, int mmu_idx,
     addr_page = addr & TARGET_PAGE_MASK;
     paddr_page = full->phys_addr & TARGET_PAGE_MASK;
 
-    prot = full->prot;
-    asidx = cpu_asidx_from_attrs(cpu, full->attrs);
+    prot = full->prot; // PAGE_READ, PAGE_WRITE, PAGE_EXEC
+    asidx = cpu_asidx_from_attrs(cpu, full->attrs); // returns 0 most of the time
     section = address_space_translate_for_iotlb(cpu, asidx, paddr_page,
                                                 &xlat, &sz, full->attrs, &prot);
     assert(sz >= TARGET_PAGE_SIZE);
@@ -1340,7 +1341,7 @@ void tlb_set_page_full(CPUState *cpu, int mmu_idx,
     }
 
     is_ram  = memory_region_is_ram(section->mr);
-    is_romd = memory_region_is_romd(section->mr);
+    is_romd = memory_region_is_romd(section->mr); // direct read?
 
     if (is_ram || is_romd) {
         /* RAM and ROMD both have associated host memory. */
@@ -1377,7 +1378,7 @@ void tlb_set_page_full(CPUState *cpu, int mmu_idx,
             read_flags = write_flags;
         }
     }
-
+    // watch point flags
     wp_flags = cpu_watchpoint_address_matches(cpu, addr_page,
                                               TARGET_PAGE_SIZE);
 
@@ -1452,7 +1453,7 @@ void tlb_set_page_full(CPUState *cpu, int mmu_idx,
     tlb_set_compare(full, &tn, addr_page, write_flags,
                     MMU_DATA_STORE, prot & PAGE_WRITE);
 
-    copy_tlb_helper_locked(te, &tn);
+    copy_tlb_helper_locked(te, &tn); // (dst, src)
     tlb_n_used_entries_inc(env, mmu_idx);
     qemu_spin_unlock(&tlb->c.lock);
 }

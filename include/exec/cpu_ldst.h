@@ -327,7 +327,7 @@ static inline void clear_helper_retaddr(void)
 #else
 
 #include "tcg/oversized-guest.h"
-
+// orig tlb_read_idx
 static inline uint64_t tlb_read_type(const CPUTLBEntryFast *entry,
                                     MMUAccessType access_type)
 {
@@ -357,7 +357,7 @@ static inline uint64_t tlb_read_type(const CPUTLBEntryFast *entry,
 
 static inline uint64_t tlb_addr_write(const CPUTLBEntryFast *entry)
 {
-    return tlb_read_type(entry, MMU_DATA_STORE);
+    return tlb_read_type(entry, MMU_DATA_STORE); // orig tlb_read_idx
 }
 
 /* Find the TLB index corresponding to the mmu_idx + address pair.  */

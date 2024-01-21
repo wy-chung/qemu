@@ -685,7 +685,7 @@ void tcg_iommu_init_notifier_list(CPUState *cpu)
 MemoryRegionSection *
 address_space_translate_for_iotlb(CPUState *cpu, int asidx, hwaddr orig_addr,
                                   hwaddr *xlat/*OUT*/, hwaddr *plen/*OUT*/,
-                                  MemTxAttrs attrs, int *prot/*OUT*/)
+                                  MemTxAttrs attrs, int *prot/*INOUT*/)
 {
     MemoryRegionSection *section;
     IOMMUMemoryRegion *iommu_mr;
