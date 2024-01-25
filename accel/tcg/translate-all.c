@@ -299,12 +299,12 @@ static int setjmp_gen_code(CPUArchState *env, TranslationBlock *tb,
     tcg_func_start(tcg_ctx); // initialize tcg_cxt
 
     tcg_ctx->cpu = env_cpu(env);
-    gen_intermediate_code(env_cpu(env), tb, max_insns, pc, host_pc);
+    gen_intermediate_code(env_cpu(env), tb, max_insns, pc, host_pc); // frontend
     assert(tb->size != 0);
     tcg_ctx->cpu = NULL;
     *max_insns = tb->icount;
 
-    return tcg_gen_code(tcg_ctx, tb, pc);
+    return tcg_gen_code(tcg_ctx, tb, pc); // backend
 }
 
 /* Called with mmap_lock held for user mode emulation.  */

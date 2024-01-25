@@ -150,10 +150,12 @@ typedef struct CPUTLBDescFull {
     int64_t window_begin_ns;	// host time (in ns) at the beginning of the time window
     size_t window_max_entries;	// maximum number of entries observed in the window
     size_t n_used_entries;
-    size_t vindex;	// The next index to use in the tlb victim table
+
     /* The tlb victim table, in two parts.  */
+    size_t vindex;	// The next index to use for the victim table
     CPUTLBEntryFast vfastable[CPU_VTLB_SIZE];	// 8
     CPUTLBEntryFull vfulltlb[CPU_VTLB_SIZE];	// 8
+
     CPUTLBEntryFull *fulltlb; // array size is stored in CPUTLBDescFast.mask
 } CPUTLBDescFull;
 

@@ -46,4 +46,7 @@ int main(int argc, char **argv)
 {
     qemu_init(argc, argv);
     return qemu_main();
+#if defined(WYC)
+    return qemu_default_main();
+#endif
 }

@@ -92,11 +92,11 @@ static inline size_t sizeof_tlb(CPUTLBDescFast *fast)
     return fast->mask + (1 << CPU_TLB_ENTRY_BITS);
 }
 
-static void tlb_window_reset(CPUTLBDescFull *desc, int64_t ns,
+static void tlb_window_reset(CPUTLBDescFull *dFull, int64_t ns,
                              size_t max_entries)
 {
-    desc->window_begin_ns = ns;
-    desc->window_max_entries = max_entries;
+    dFull->window_begin_ns = ns;
+    dFull->window_max_entries = max_entries;
 }
 
 static void tb_jmp_cache_clear_page(CPUState *cpu, vaddr page_addr)
@@ -154,26 +154,26 @@ static void tb_jmp_cache_clear_page(CPUState *cpu, vaddr page_addr)
  * high), since otherwise we are likely to have a significant amount of
  * conflict misses.
  */
-static void tlb_mmu_resize_locked(CPUTLBDescFull *desc, CPUTLBDescFast *fast,
+static void tlb_mmu_resize_locked(CPUTLBDescFull *dFull, CPUTLBDescFast *dFast,
                                   int64_t now)
 {
     size_t rate;
-    size_t old_size = tlb_n_entries(fast);
+    size_t old_size = tlb_n_entries(dFast);
     size_t new_size = old_size;
     int64_t window_len_ms = 100;
     int64_t window_len_ns = window_len_ms * 1000 * 1000;
-    bool window_expired = now > desc->window_begin_ns + window_len_ns;
+    bool window_expired = now > dFull->window_begin_ns + window_len_ns;
 
-    if (desc->n_used_entries > desc->window_max_entries) {
-        desc->window_max_entries = desc->n_used_entries;
+    if (dFull->n_used_entries > dFull->window_max_entries) {
+        dFull->window_max_entries = dFull->n_used_entries;
     }
-    rate = desc->window_max_entries * 100 / old_size;
+    rate = dFull->window_max_entries * 100 / old_size;
 
     if (rate > 70) {
         new_size = MIN(old_size << 1, 1 << CPU_TLB_DYN_MAX_BITS);
     } else if (rate < 30 && window_expired) {
-        size_t ceil = pow2ceil(desc->window_max_entries);
-        size_t expected_rate = desc->window_max_entries * 100 / ceil;
+        size_t ceil = pow2ceil(dFull->window_max_entries);
+        size_t expected_rate = dFull->window_max_entries * 100 / ceil;
 
         /*
          * Avoid undersizing when the max number of entries seen is just below
@@ -193,19 +193,20 @@ static void tlb_mmu_resize_locked(CPUTLBDescFull *desc, CPUTLBDescFast *fast,
 
     if (new_size == old_size) {
         if (window_expired) {
-            tlb_window_reset(desc, now, desc->n_used_entries);
+            tlb_window_reset(dFull, now, dFull->n_used_entries);
         }
         return;
     }
 
-    g_free(fast->table);
-    g_free(desc->fulltlb);
+    g_free(dFast->table);
+    g_free(dFull->fulltlb);
 
-    tlb_window_reset(desc, now, 0);
-    /* desc->n_used_entries is cleared by the caller */
-    fast->mask = (new_size - 1) << CPU_TLB_ENTRY_BITS;
-    fast->table = g_try_new(CPUTLBEntryFast, new_size);
-    desc->fulltlb = g_try_new(CPUTLBEntryFull, new_size);
+    tlb_window_reset(dFull, now, 0);
+    /* dFull->n_used_entries is cleared by the caller */
+    dFull->n_used_entries = 0; //wyctest pass
+    dFast->mask = (new_size - 1) << CPU_TLB_ENTRY_BITS;
+    dFast->table = g_try_new(CPUTLBEntryFast, new_size);
+    dFull->fulltlb = g_try_new(CPUTLBEntryFull, new_size);
 
     /*
      * If the allocations fail, try smaller sizes. We just freed some
@@ -214,51 +215,51 @@ static void tlb_mmu_resize_locked(CPUTLBDescFull *desc, CPUTLBDescFast *fast,
      * allocations to fail though, so we progressively reduce the allocation
      * size, aborting if we cannot even allocate the smallest TLB we support.
      */
-    while (fast->table == NULL || desc->fulltlb == NULL) {
+    while (dFast->table == NULL || dFull->fulltlb == NULL) {
         if (new_size == (1 << CPU_TLB_DYN_MIN_BITS)) {
             error_report("%s: %s", __func__, strerror(errno));
             abort();
         }
         new_size = MAX(new_size >> 1, 1 << CPU_TLB_DYN_MIN_BITS);
-        fast->mask = (new_size - 1) << CPU_TLB_ENTRY_BITS;
+        dFast->mask = (new_size - 1) << CPU_TLB_ENTRY_BITS;
 
-        g_free(fast->table);
-        g_free(desc->fulltlb);
-        fast->table = g_try_new(CPUTLBEntryFast, new_size);
-        desc->fulltlb = g_try_new(CPUTLBEntryFull, new_size);
+        g_free(dFast->table);
+        g_free(dFull->fulltlb);
+        dFast->table = g_try_new(CPUTLBEntryFast, new_size);
+        dFull->fulltlb = g_try_new(CPUTLBEntryFull, new_size);
     }
 }
 
-static void tlb_mmu_flush_locked(CPUTLBDescFull *desc, CPUTLBDescFast *fast)
+static void tlb_mmu_flush_locked(CPUTLBDescFull *dFull, CPUTLBDescFast *dFast)
 {
-    desc->n_used_entries = 0;
-    desc->large_page_addr = -1;
-    desc->large_page_mask = -1;
-    desc->vindex = 0;
-    memset(fast->table, -1, sizeof_tlb(fast));
-    memset(desc->vfastable, -1, sizeof(desc->vfastable));
+    dFull->n_used_entries = 0;
+    dFull->large_page_addr = -1;
+    dFull->large_page_mask = -1;
+    dFull->vindex = 0;
+    memset(dFast->table, -1, sizeof_tlb(dFast));
+    memset(dFull->vfastable, -1, sizeof(dFull->vfastable));
 }
 
 static void tlb_flush_one_mmuidx_locked(CPUArchState *env, int mmu_idx,
                                         int64_t now)
 {
-    CPUTLBDescFull *desc = &env_tlb(env)->dFull[mmu_idx];
-    CPUTLBDescFast *fast = &env_tlb(env)->dFast[mmu_idx];
+    CPUTLBDescFull *dFull = &env_tlb(env)->dFull[mmu_idx];
+    CPUTLBDescFast *dFast = &env_tlb(env)->dFast[mmu_idx];
 
-    tlb_mmu_resize_locked(desc, fast, now);
-    tlb_mmu_flush_locked(desc, fast);
+    tlb_mmu_resize_locked(dFull, dFast, now);
+    tlb_mmu_flush_locked(dFull, dFast);
 }
 
-static void tlb_mmu_init(CPUTLBDescFull *desc, CPUTLBDescFast *fast, int64_t now)
+static void tlb_mmu_init(CPUTLBDescFull *dFull, CPUTLBDescFast *dFast, int64_t now)
 {
     size_t n_entries = 1 << CPU_TLB_DYN_DEFAULT_BITS; // 8
 
-    tlb_window_reset(desc, now, 0);
-    //desc->n_used_entries = 0; //wyctodo this is redundant because tlb_mmu_flush_locked() will set it to 0
-    fast->mask = (n_entries - 1) << CPU_TLB_ENTRY_BITS; // 5
-    fast->table = g_new(CPUTLBEntryFast, n_entries);
-    desc->fulltlb = g_new(CPUTLBEntryFull, n_entries);
-    tlb_mmu_flush_locked(desc, fast);
+    tlb_window_reset(dFull, now, 0);
+    //dFull->n_used_entries = 0; //wyctodo this is redundant because tlb_mmu_flush_locked() will set it to 0
+    dFast->mask = (n_entries - 1) << CPU_TLB_ENTRY_BITS; // 5
+    dFast->table = g_new(CPUTLBEntryFast, n_entries);
+    dFull->fulltlb = g_new(CPUTLBEntryFull, n_entries);
+    tlb_mmu_flush_locked(dFull, dFast);
 }
 
 static inline void tlb_n_used_entries_inc(CPUArchState *env, uintptr_t mmu_idx)
@@ -828,8 +829,8 @@ static void tlb_flush_range_locked(CPUArchState *env, int midx,
                                    vaddr addr, vaddr len,
                                    unsigned bits)
 {
-    CPUTLBDescFull *d = &env_tlb(env)->dFull[midx];
-    CPUTLBDescFast *f = &env_tlb(env)->dFast[midx];
+    CPUTLBDescFull *dFull = &env_tlb(env)->dFull[midx];
+    CPUTLBDescFast *dFast = &env_tlb(env)->dFast[midx];
     vaddr mask = MAKE_64BIT_MASK(0, bits);
 
     /*
@@ -842,7 +843,7 @@ static void tlb_flush_range_locked(CPUArchState *env, int midx,
      * If @len is larger than the tlb size, then it will take longer to
      * test all of the entries in the TLB than it will to flush it all.
      */
-    if (mask < f->mask || len > f->mask) {
+    if (mask < dFast->mask || len > dFast->mask) {
         tlb_debug("forcing full flush midx %d ("
                   "%016" VADDR_PRIx "/%016" VADDR_PRIx "+%016" VADDR_PRIx ")\n",
                   midx, addr, mask, len);
@@ -855,10 +856,10 @@ static void tlb_flush_range_locked(CPUArchState *env, int midx,
      * Because large_page_mask contains all 1's from the msb,
      * we only need to test the end of the range.
      */
-    if (((addr + len - 1) & d->large_page_mask) == d->large_page_addr) {
+    if (((addr + len - 1) & dFull->large_page_mask) == dFull->large_page_addr) {
         tlb_debug("forcing full flush midx %d ("
                   "%016" VADDR_PRIx "/%016" VADDR_PRIx ")\n",
-                  midx, d->large_page_addr, d->large_page_mask);
+                  midx, dFull->large_page_addr, dFull->large_page_mask);
         tlb_flush_one_mmuidx_locked(env, midx, get_clock_realtime());
         return;
     }
@@ -1279,7 +1280,7 @@ static inline void tlb_set_compare(CPUTLBEntryFull *full, CPUTLBEntryFast *ent,
  * the complete description of the translated page.
  *
  * This is generally called by the target tlb_fill function after
- * having performed a successful page table walk to find the physical
+ * having performed a successful page table walk (x86_cpu_tlb_fill) to find the physical
  * address and attributes for the translation.
  *
  * At most one entry for a given virtual address is permitted. Only a
@@ -1295,7 +1296,7 @@ static inline void tlb_set_compare(CPUTLBEntryFull *full, CPUTLBEntryFast *ent,
  * critical section.
  */
 void tlb_set_page_full(CPUState *cpu, int mmu_idx,
-                       vaddr addr, CPUTLBEntryFull *full)
+                       vaddr addr, CPUTLBEntryFull *eFull)
 {
     MemoryRegionSection *section;
     unsigned int index, read_flags, write_flags;
@@ -1308,35 +1309,35 @@ void tlb_set_page_full(CPUState *cpu, int mmu_idx,
 
     CPUArchState *env = cpu->env_ptr;
     CPUTLB *tlb = env_tlb(env);
-    CPUTLBDescFull *desc = &tlb->dFull[mmu_idx];
+    CPUTLBDescFull *dFull = &tlb->dFull[mmu_idx];
 
     assert_cpu_is_self(cpu);
 
-    if (full->lg_page_size <= TARGET_PAGE_BITS) {
+    if (eFull->lg_page_size <= TARGET_PAGE_BITS) {
         sz = TARGET_PAGE_SIZE;
     } else {
-        sz = (hwaddr)1 << full->lg_page_size;
+        sz = (hwaddr)1 << eFull->lg_page_size;
         tlb_add_large_page(env, mmu_idx, addr, sz);
     }
     addr_page = addr & TARGET_PAGE_MASK;
-    paddr_page = full->phys_addr & TARGET_PAGE_MASK;
+    paddr_page = eFull->phys_addr & TARGET_PAGE_MASK;
 
-    prot = full->prot; // PAGE_READ, PAGE_WRITE, PAGE_EXEC
-    asidx = cpu_asidx_from_attrs(cpu, full->attrs); // returns 0 most of the time
+    prot = eFull->prot; // PAGE_READ, PAGE_WRITE, PAGE_EXEC
+    asidx = cpu_asidx_from_attrs(cpu, eFull->attrs); // returns 0 most of the time
     section = address_space_translate_for_iotlb(cpu, asidx, paddr_page,
-                                                &xlat, &sz, full->attrs, &prot);
+                                                &xlat, &sz, eFull->attrs, &prot);
     assert(sz >= TARGET_PAGE_SIZE);
 
     tlb_debug("vaddr=%016" VADDR_PRIx " paddr=0x" HWADDR_FMT_plx
               " prot=%x idx=%d\n",
-              addr, full->phys_addr, prot, mmu_idx);
+              addr, eFull->phys_addr, prot, mmu_idx);
 
     read_flags = 0;
-    if (full->lg_page_size < TARGET_PAGE_BITS) {
+    if (eFull->lg_page_size < TARGET_PAGE_BITS) {
         /* Repeat the MMU check and TLB fill on every access.  */
         read_flags |= TLB_INVALID_MASK;
     }
-    if (full->attrs.byte_swap) {
+    if (eFull->attrs.byte_swap) {
         read_flags |= TLB_BSWAP;
     }
 
@@ -1405,12 +1406,12 @@ void tlb_set_page_full(CPUState *cpu, int mmu_idx,
      * different page; otherwise just overwrite the stale data.
      */
     if (!tlb_hit_page_anyprot(te, addr_page) && !tlb_entry_is_empty(te)) {
-        unsigned vidx = desc->vindex++ % CPU_VTLB_SIZE;
-        CPUTLBEntryFast *tv = &desc->vfastable[vidx];
+        unsigned vidx = dFull->vindex++ % CPU_VTLB_SIZE;
+        CPUTLBEntryFast *tv = &dFull->vfastable[vidx];
 
         /* Evict the old entry into the victim tlb.  */
         copy_tlb_helper_locked(tv, te);
-        desc->vfulltlb[vidx] = desc->fulltlb[index];
+        dFull->vfulltlb[vidx] = dFull->fulltlb[index];
         tlb_n_used_entries_dec(env, mmu_idx);
     }
 
@@ -1427,21 +1428,21 @@ void tlb_set_page_full(CPUState *cpu, int mmu_idx,
      * subtract here is that of the page base, and not the same as the
      * vaddr we add back in io_readx()/io_writex()/get_page_addr_code().
      */
-    desc->fulltlb[index] = *full;
-    full = &desc->fulltlb[index];
-    full->xlat_section = iotlb - addr_page;
-    full->phys_addr = paddr_page;
+    dFull->fulltlb[index] = *eFull;
+    eFull = &dFull->fulltlb[index];
+    eFull->xlat_section = iotlb - addr_page;
+    eFull->phys_addr = paddr_page;
 
     /* Now calculate the new entry */
     tn.addend = addend - addr_page;
 
-    tlb_set_compare(full, &tn, addr_page, read_flags,
+    tlb_set_compare(eFull, &tn, addr_page, read_flags,
                     MMU_INST_FETCH, prot & PAGE_EXEC);
 
     if (wp_flags & BP_MEM_READ) {
         read_flags |= TLB_WATCHPOINT;
     }
-    tlb_set_compare(full, &tn, addr_page, read_flags,
+    tlb_set_compare(eFull, &tn, addr_page, read_flags,
                     MMU_DATA_LOAD, prot & PAGE_READ);
 
     if (prot & PAGE_WRITE_INV) {
@@ -1450,7 +1451,7 @@ void tlb_set_page_full(CPUState *cpu, int mmu_idx,
     if (wp_flags & BP_MEM_WRITE) {
         write_flags |= TLB_WATCHPOINT;
     }
-    tlb_set_compare(full, &tn, addr_page, write_flags,
+    tlb_set_compare(eFull, &tn, addr_page, write_flags,
                     MMU_DATA_STORE, prot & PAGE_WRITE);
 
     copy_tlb_helper_locked(te, &tn); // (dst, src)
@@ -1527,7 +1528,7 @@ static void tlb_fill(CPUState *cpu, vaddr addr, int size,
     ok = cpu->cc->tcg_ops->tlb_fill(cpu, addr, size,
                                     access_type, mmu_idx, false, retaddr);
 #if defined(WYC)
-         x86_cpu_tlb_fill();
+    ok = x86_cpu_tlb_fill(cpu, addr, size, access_type, mmu_idx, false, retaddr);
 #endif
     assert(ok);
 }
@@ -1666,7 +1667,7 @@ static bool victim_tlb_hit(CPUArchState *env, size_t mmu_idx, size_t index,
     assert_cpu_is_self(env_cpu(env));
     for (vidx = 0; vidx < CPU_VTLB_SIZE; ++vidx) {
         CPUTLBEntryFast *vtlb = &env_tlb(env)->dFull[mmu_idx].vfastable[vidx];
-        uint64_t cmp = tlb_read_type(vtlb, access_type);
+        uint64_t cmp = tlb_read_type(vtlb, access_type); // MMU_DATA_LOAD, MMU_DATA_STORE, MMU_INST_FETCH
 
         if (cmp == page) {
             /* Found entry in victim tlb, swap tlb and iotlb.  */
@@ -2080,10 +2081,11 @@ static bool mmu_lookup1(CPUArchState *env, MMULookupPageData *data /*IN/OUT*/,
 {
     CPUTLBEntryFull *full;
     int flags;
+
     vaddr addr = data->addr;
     uintptr_t index = tlb_index(env, mmu_idx, addr);
-    CPUTLBEntryFast *fast = tlb_fastentry(env, mmu_idx, index);
-    uint64_t tlb_addr = tlb_read_type(fast, access_type);
+    CPUTLBEntryFast *eFast = tlb_fastentry(env, mmu_idx, index);
+    uint64_t tlb_addr = tlb_read_type(eFast, access_type);
     bool maybe_resized = false;
 
     /* If the TLB entry is for a different page, reload and try again.  */
@@ -2093,9 +2095,9 @@ static bool mmu_lookup1(CPUArchState *env, MMULookupPageData *data /*IN/OUT*/,
             tlb_fill(env_cpu(env), addr, data->size, access_type, mmu_idx, ra);
             maybe_resized = true;
             index = tlb_index(env, mmu_idx, addr);
-            fast = tlb_fastentry(env, mmu_idx, index);
+            eFast = tlb_fastentry(env, mmu_idx, index);
         }
-        tlb_addr = tlb_read_type(fast, access_type) & ~TLB_INVALID_MASK;
+        tlb_addr = tlb_read_type(eFast, access_type) & ~TLB_INVALID_MASK;
     }
 
     full = &env_tlb(env)->dFull[mmu_idx].fulltlb[index];
@@ -2105,7 +2107,7 @@ static bool mmu_lookup1(CPUArchState *env, MMULookupPageData *data /*IN/OUT*/,
     data->full = full;
     data->flags = flags;
     /* Compute haddr speculatively; depending on flags it might be invalid. */
-    data->haddr = (void *)((uintptr_t)addr + fast->addend);
+    data->haddr = (void *)((uintptr_t)addr + eFast->addend);
 
     return maybe_resized;
 }

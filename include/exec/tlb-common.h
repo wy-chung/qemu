@@ -24,9 +24,9 @@
 /* Minimalized TLB entry for use by TCG fast path. */
 typedef union CPUTLBEntryFast {
     struct {
-        uint64_t addr_read;
-        uint64_t addr_write;
-        uint64_t addr_code;
+        uint64_t addr_read;	// accessed by tlb_read_type(MMU_DATA_LOAD)
+        uint64_t addr_write;	// accessed by tlb_read_type(MMU_DATA_STORE)
+        uint64_t addr_code;	// accessed by tlb_read_type(MMU_INST_FETCH)
         /*
          * Addend to virtual address to get host address.  IO accesses
          * use the corresponding iotlb value.
