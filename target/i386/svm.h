@@ -222,7 +222,7 @@ struct QEMU_PACKED vmcb_save_area {
 	uint64_t sysenter_cs;
 	uint64_t sysenter_esp;
 	uint64_t sysenter_eip;
-	uint64_t cr2;
+	uint64_t cr2; // page fault linear address
 	uint8_t reserved_6[32];
 	uint64_t g_pat;
 	uint64_t dbgctl;

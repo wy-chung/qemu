@@ -389,7 +389,7 @@ static void tlb_flush_by_mmuidx_async_work(CPUState *cpu, run_on_cpu_data data)
 }
 
 /**
- * tlb_flush_by_mmuidx:
+ * tlb_flush_by_mmuidxmap:
  * @cpu: CPU whose TLB should be flushed
  * @wait: If true ensure synchronisation by exiting the cpu_loop
  * @idxmap: bitmap of MMU indexes to flush
@@ -397,7 +397,7 @@ static void tlb_flush_by_mmuidx_async_work(CPUState *cpu, run_on_cpu_data data)
  * Flush all entries from the TLB of the specified CPU, for the specified
  * MMU indexes.
  */
-void tlb_flush_by_mmuidx(CPUState *cpu, uint16_t idxmap)
+void tlb_flush_by_mmuidxmap(CPUState *cpu, uint16_t idxmap)
 {
     tlb_debug("mmu_idx: 0x%" PRIx16 "\n", idxmap);
 
@@ -420,7 +420,7 @@ void tlb_flush_by_mmuidx(CPUState *cpu, uint16_t idxmap)
  */
 void tlb_flush(CPUState *cpu)
 {
-    tlb_flush_by_mmuidx(cpu, ALL_MMUIDX_BITS);
+    tlb_flush_by_mmuidxmap(cpu, ALL_MMUIDX_BITS);
 }
 
 /**
@@ -511,12 +511,12 @@ static inline bool tlb_entry_is_empty(const CPUTLBEntryFast *te)
 }
 
 /* Called with tlb_c.lock held */
-static bool tlb_flush_entry_mask_locked(CPUTLBEntryFast *tlb_entry,
+static bool tlb_flush_entry_mask_locked(CPUTLBEntryFast *eFast,
                                         vaddr page,
                                         vaddr mask)
 {
-    if (tlb_hit_page_mask_anyprot(tlb_entry, page, mask)) {
-        memset(tlb_entry, -1, sizeof(*tlb_entry));
+    if (tlb_hit_page_mask_anyprot(eFast, page, mask)) {
+        memset(eFast, -1, sizeof(*eFast));
         return true;
     }
     return false;
@@ -532,12 +532,12 @@ static void tlb_flush_vtlb_page_mask_locked(CPUArchState *env, int mmu_idx,
                                             vaddr page,
                                             vaddr mask)
 {
-    CPUTLBDescFull *d = &env_tlb(env)->dFull[mmu_idx];
+    CPUTLBDescFull *dFull = &env_tlb(env)->dFull[mmu_idx];
     int k;
 
     assert_cpu_is_self(env_cpu(env));
     for (k = 0; k < CPU_VTLB_SIZE; k++) {
-        if (tlb_flush_entry_mask_locked(&d->vfastable[k], page, mask)) {
+        if (tlb_flush_entry_mask_locked(&dFull->vfastable[k], page, mask)) {
             tlb_n_used_entries_dec(env, mmu_idx);
         }
     }
@@ -957,7 +957,7 @@ void tlb_flush_range_by_mmuidx(CPUState *cpu, vaddr addr,
     }
     /* If no page bits are significant, this devolves to tlb_flush. */
     if (bits < TARGET_PAGE_BITS) {
-        tlb_flush_by_mmuidx(cpu, idxmap);
+        tlb_flush_by_mmuidxmap(cpu, idxmap);
         return;
     }
 
@@ -1271,7 +1271,7 @@ static inline void tlb_set_compare(CPUTLBEntryFull *full, CPUTLBEntryFast *ent,
 /**
  * tlb_set_page_full:
  * @cpu: CPU context
- * @mmu_idx: mmu index of the tlb to modify
+ * @mmu_idx: mmu index of the tlb to modify. MMU_KSMAP_IDX, MMU_USER_IDX, MMU_KNOSMAP_IDX
  * @addr: virtual address of the entry to add
  * @full: the details of the tlb entry
  *

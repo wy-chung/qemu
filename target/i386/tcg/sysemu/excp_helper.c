@@ -46,7 +46,7 @@ typedef enum TranslateFaultStage2 {
 typedef struct TranslateFault {
     int exception_index;
     int error_code;
-    target_ulong cr2;
+    target_ulong cr2; // page fault linear address
     TranslateFaultStage2 stage2;
 } TranslateFault;
 

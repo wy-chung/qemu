@@ -2899,6 +2899,7 @@ typedef enum ARMMMUIdx {
     ARMMMUIdx_MSPrivNegPri = ARMMMUIdx_MPrivNegPri | ARM_MMU_IDX_M_S,
 } ARMMMUIdx;
 
+#define tlb_flush_by_mmuidx tlb_flush_by_mmuidxmap  //wyc
 /*
  * Bit macros for the core-mmu-index values for each index,
  * for use when calling tlb_flush_by_mmuidx() and friends.

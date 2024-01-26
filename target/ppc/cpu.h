@@ -709,6 +709,7 @@ enum {
     HFLAGS_IMMU_IDX = 26, /* 26..28 -- the composite immu_idx */
     HFLAGS_DMMU_IDX = 29, /* 29..31 -- the composite dmmu_idx */
 };
+#define tlb_flush_by_mmuidx tlb_flush_by_mmuidxmap  //wyc
 
 /*****************************************************************************/
 /* Floating point status and control register                                */

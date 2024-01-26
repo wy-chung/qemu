@@ -1618,7 +1618,7 @@ typedef struct CPUArchState /* CPUX86State */ {
     SegmentCache gdt; /* only base and limit are used */
     SegmentCache idt; /* only base and limit are used */
 
-    target_ulong cr[5]; /* NOTE: cr1 is unused */
+    target_ulong cr[5]; /* NOTE: cr1: unused, cr2: page fault linear address, cr3: PDBR */
 
     bool pdptrs_valid;
     uint64_t pdptrs[4];
