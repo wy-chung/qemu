@@ -81,7 +81,7 @@ void helper_syscall(CPUX86State *env, int next_eip_addend)
     }
 }
 
-void handle_even_inj(CPUX86State *env, int intno, int is_int,
+void handle_even_inj(CPUX86State *env, int intno, bool is_int,
                      int error_code, int is_hw, int rm)
 {
     CPUState *cs = env_cpu(env);

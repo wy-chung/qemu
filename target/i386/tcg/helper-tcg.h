@@ -65,7 +65,7 @@ G_NORETURN void raise_exception_err(CPUX86State *env, int exception_index,
                                     int error_code);
 G_NORETURN void raise_exception_err_ra(CPUX86State *env, int exception_index,
                                        int error_code, uintptr_t retaddr);
-G_NORETURN void raise_interrupt(CPUX86State *nenv, int intno, int is_int,
+G_NORETURN void raise_interrupt(CPUX86State *nenv, int intno, bool is_int,
                                 int error_code, int next_eip_addend);
 G_NORETURN void handle_unaligned_access(CPUX86State *env, vaddr vaddr,
                                         MMUAccessType access_type,
@@ -101,9 +101,9 @@ void do_vmexit(CPUX86State *env);
 
 /* seg_helper.c */
 void do_interrupt_x86_hardirq(CPUX86State *env, int intno, int is_hw);
-void do_interrupt_all(X86CPU *cpu, int intno, int is_int,
+void do_interrupt_all(X86CPU *cpu, int intno, bool is_int,
                       int error_code, target_ulong next_eip, int is_hw);
-void handle_even_inj(CPUX86State *env, int intno, int is_int,
+void handle_even_inj(CPUX86State *env, int intno, bool is_int,
                      int error_code, int is_hw, int rm);
 int exception_has_error_code(int intno);
 

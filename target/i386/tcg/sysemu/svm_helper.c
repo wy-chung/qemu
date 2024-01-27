@@ -412,7 +412,7 @@ void helper_vmrun(CPUX86State *env, int aflag, int next_eip_addend)
         case SVM_EVTINJ_TYPE_INTR:
             cs->exception_index = vector;
             env->error_code = event_inj_err;
-            env->exception_is_int = 0;
+            env->exception_is_int = false;
             env->exception_next_eip = -1;
             qemu_log_mask(CPU_LOG_TB_IN_ASM, "INTR");
             /* XXX: is it always correct? */
@@ -421,7 +421,7 @@ void helper_vmrun(CPUX86State *env, int aflag, int next_eip_addend)
         case SVM_EVTINJ_TYPE_NMI:
             cs->exception_index = EXCP02_NMI;
             env->error_code = event_inj_err;
-            env->exception_is_int = 0;
+            env->exception_is_int = false;
             env->exception_next_eip = env->eip;
             qemu_log_mask(CPU_LOG_TB_IN_ASM, "NMI");
             cpu_loop_exit(cs);
@@ -432,7 +432,7 @@ void helper_vmrun(CPUX86State *env, int aflag, int next_eip_addend)
             }
             cs->exception_index = vector;
             env->error_code = event_inj_err;
-            env->exception_is_int = 0;
+            env->exception_is_int = false;
             env->exception_next_eip = -1;
             qemu_log_mask(CPU_LOG_TB_IN_ASM, "EXEPT");
             cpu_loop_exit(cs);
@@ -440,7 +440,7 @@ void helper_vmrun(CPUX86State *env, int aflag, int next_eip_addend)
         case SVM_EVTINJ_TYPE_SOFT:
             cs->exception_index = vector;
             env->error_code = event_inj_err;
-            env->exception_is_int = 1;
+            env->exception_is_int = true;
             env->exception_next_eip = env->eip;
             qemu_log_mask(CPU_LOG_TB_IN_ASM, "SOFT");
             cpu_loop_exit(cs);

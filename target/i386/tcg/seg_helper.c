@@ -596,7 +596,7 @@ int exception_has_error_code(int intno)
 #define POPL(ssp, sp, sp_mask, val) POPL_RA(ssp, sp, sp_mask, val, 0)
 
 /* protected mode interrupt */
-static void do_interrupt_protected(CPUX86State *env, int intno, int is_int,
+static void do_interrupt_protected(CPUX86State *env, int intno, bool is_int,
                                    int error_code, unsigned int next_eip,
                                    int is_hw)
 {
@@ -864,7 +864,7 @@ static inline target_ulong get_rsp_from_tss(CPUX86State *env, int level)
 }
 
 /* 64 bit interrupt */
-static void do_interrupt64(CPUX86State *env, int intno, int is_int,
+static void do_interrupt64(CPUX86State *env, int intno, bool is_int,
                            int error_code, target_ulong next_eip, int is_hw)
 {
     SegmentCache *dt;
@@ -1040,7 +1040,7 @@ void helper_sysret(CPUX86State *env, int dflag)
 }
 
 /* real mode interrupt */
-static void do_interrupt_real(CPUX86State *env, int intno, int is_int,
+static void do_interrupt_real(CPUX86State *env, int intno, bool is_int,
                               int error_code, unsigned int next_eip)
 {
     SegmentCache *dt;
@@ -1083,7 +1083,7 @@ static void do_interrupt_real(CPUX86State *env, int intno, int is_int,
  * the int instruction. next_eip is the env->eip value AFTER the interrupt
  * instruction. It is only relevant if is_int is TRUE.
  */
-void do_interrupt_all(X86CPU *cpu, int intno, int is_int,
+void do_interrupt_all(X86CPU *cpu, int intno, bool is_int,
                       int error_code, target_ulong next_eip, int is_hw)
 {
     CPUX86State *env = &cpu->env;

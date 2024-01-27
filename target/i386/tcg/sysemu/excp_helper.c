@@ -593,7 +593,7 @@ static bool get_physical_address(CPUX86State *env, vaddr addr,
 }
 
 /**
- * @tlb_fill: Handle a softmmu tlb miss //wyc page table walk routine
+ * @tlb_fill: Handle a softmmu tlb miss //wyc ptw(page table walk) routine
  *
  * If the access is valid, call tlb_set_page and return true;
  * if the access is invalid and probe is true, return false;

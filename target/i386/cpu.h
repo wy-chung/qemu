@@ -1762,7 +1762,7 @@ typedef struct CPUArchState /* CPUX86State */ {
 
     /* exception/interrupt handling */
     int error_code;
-    int exception_is_int;
+    bool exception_is_int;
     target_ulong exception_next_eip;
     target_ulong dr[8]; /* debug registers; note dr4 and dr5 are unused */
     union {
@@ -2261,6 +2261,7 @@ uint64_t cpu_get_tsc(CPUX86State *env);
 #define MMU_KSMAP_IDX   0	// kernel super mode access prevention
 #define MMU_USER_IDX    1	// user
 #define MMU_KNOSMAP_IDX 2	// kernel no super mode access prevention
+
 #define MMU_NESTED_IDX  3
 #define MMU_PHYS_IDX    4
 
