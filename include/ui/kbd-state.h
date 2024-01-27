@@ -24,9 +24,9 @@ enum QKbdModifier {
 
     QKBD_MOD__MAX
 };
-
+#if !defined(WYC)
 typedef struct QKbdState QKbdState;
-
+#endif
 /**
  * qkbd_state_init: init keyboard state tracker.
  *

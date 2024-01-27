@@ -628,6 +628,9 @@ bool gdb_supports_guest_debug(void)
     const AccelOpsClass *ops = cpus_get_accel();
     if (ops->supports_guest_debug) {
         return ops->supports_guest_debug();
+#if defined(WYC)
+        tcg_supports_guest_debug();
+#endif
     }
     return false;
 }
@@ -637,6 +640,9 @@ int gdb_breakpoint_insert(CPUState *cs, int type, vaddr addr, vaddr len)
     const AccelOpsClass *ops = cpus_get_accel();
     if (ops->insert_breakpoint) {
         return ops->insert_breakpoint(cs, type, addr, len);
+#if defined(WYC)
+        tcg_insert_breakpoint();
+#endif
     }
     return -ENOSYS;
 }
@@ -646,6 +652,9 @@ int gdb_breakpoint_remove(CPUState *cs, int type, vaddr addr, vaddr len)
     const AccelOpsClass *ops = cpus_get_accel();
     if (ops->remove_breakpoint) {
         return ops->remove_breakpoint(cs, type, addr, len);
+#if defined(WYC)
+        tcg_remove_breakpoint();
+#endif
     }
     return -ENOSYS;
 }
@@ -655,5 +664,8 @@ void gdb_breakpoint_remove_all(CPUState *cs)
     const AccelOpsClass *ops = cpus_get_accel();
     if (ops->remove_all_breakpoints) {
         ops->remove_all_breakpoints(cs);
+#if defined(WYC)
+        tcg_remove_all_breakpoints();
+#endif
     }
 }

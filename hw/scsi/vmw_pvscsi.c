@@ -65,7 +65,7 @@ struct PVSCSIClass {
 };
 
 #define TYPE_PVSCSI "pvscsi"
-OBJECT_DECLARE_TYPE(PVSCSIState, PVSCSIClass, PVSCSI)
+OBJECT_DECLARE_TYPE(PVSCSIState, PVSCSIClass, PVSCSI);
 
 
 /* Compatibility flags for migration */

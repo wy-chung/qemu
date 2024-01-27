@@ -39,8 +39,7 @@
 
 #define TYPE_I8259 "isa-i8259"
 typedef struct PICClass PICClass;
-DECLARE_CLASS_CHECKERS(PICClass, PIC,
-                       TYPE_I8259)
+DECLARE_CLASS_CHECKERS(PICClass, PIC, TYPE_I8259);
 
 /**
  * PICClass:

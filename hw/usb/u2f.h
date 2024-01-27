@@ -34,7 +34,7 @@
 typedef struct U2FKeyInfo U2FKeyInfo;
 
 #define TYPE_U2F_KEY "u2f-key"
-OBJECT_DECLARE_TYPE(U2FKeyState, U2FKeyClass, U2F_KEY)
+OBJECT_DECLARE_TYPE(U2FKeyState, U2FKeyClass, U2F_KEY);
 
 /*
  * Callbacks to be used by the U2F key base device (i.e. hw/u2f.c)

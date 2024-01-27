@@ -206,6 +206,7 @@ bool check_hw_breakpoints(CPUX86State *env, bool force_dr6_update)
     return hit_enabled;
 }
 
+/** @debug_excp_handler: Callback for handling debug exceptions */
 void breakpoint_handler(CPUState *cs)
 {
     X86CPU *cpu = X86_CPU(cs);

@@ -44,16 +44,16 @@
 #define dh_ctype(t) dh_ctype_##t
 
 #ifdef NEED_CPU_H
-# ifdef TARGET_LONG_BITS
-#  if TARGET_LONG_BITS == 32
-#   define dh_alias_tl i32
-#   define dh_typecode_tl dh_typecode_i32
-#  else
-#   define dh_alias_tl i64
-#   define dh_typecode_tl dh_typecode_i64
-#  endif
-# endif
-# define dh_ctype_tl target_ulong
+ #ifdef TARGET_LONG_BITS
+  #if TARGET_LONG_BITS == 32
+   #define dh_alias_tl i32
+   #define dh_typecode_tl dh_typecode_i32
+  #else
+   #define dh_alias_tl i64
+   #define dh_typecode_tl dh_typecode_i64
+  #endif
+ #endif
+ #define dh_ctype_tl target_ulong
 #endif
 
 /* We can't use glue() here because it falls foul of C preprocessor

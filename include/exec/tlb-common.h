@@ -19,14 +19,14 @@
 #ifndef EXEC_TLB_COMMON_H
 #define EXEC_TLB_COMMON_H 1
 
-#define CPU_TLB_ENTRY_BITS 5
+#define CPU_TLB_ENTRY_BITS 5 // tlb entry size in 2^n
 
 /* Minimalized TLB entry for use by TCG fast path. */
-typedef union CPUTLBEntry {
+typedef union CPUTLBEntryFast {
     struct {
-        uint64_t addr_read;
-        uint64_t addr_write;
-        uint64_t addr_code;
+        uint64_t addr_read;	// accessed by tlb_read_type(MMU_DATA_LOAD)
+        uint64_t addr_write;	// accessed by tlb_read_type(MMU_DATA_STORE)
+        uint64_t addr_code;	// accessed by tlb_read_type(MMU_INST_FETCH)
         /*
          * Addend to virtual address to get host address.  IO accesses
          * use the corresponding iotlb value.
@@ -38,19 +38,19 @@ typedef union CPUTLBEntry {
      * access to addr_{read,write,code}.
      */
     uint64_t addr_idx[(1 << CPU_TLB_ENTRY_BITS) / sizeof(uint64_t)];
-} CPUTLBEntry;
+} CPUTLBEntryFast;
 
-QEMU_BUILD_BUG_ON(sizeof(CPUTLBEntry) != (1 << CPU_TLB_ENTRY_BITS));
+QEMU_BUILD_ASSERT(sizeof(CPUTLBEntryFast) == (1 << CPU_TLB_ENTRY_BITS));
 
 /*
  * Data elements that are per MMU mode, accessed by the fast path.
  * The structure is aligned to aid loading the pair with one insn.
  */
 typedef struct CPUTLBDescFast {
-    /* Contains (n_entries - 1) << CPU_TLB_ENTRY_BITS */
-    uintptr_t mask;
+    // mask is also referenced by offsetof in prepare_host_addr()
+    uintptr_t mask; // Contains (n_entries - 1) << CPU_TLB_ENTRY_BITS. n_entries is 2^n
     /* The array of tlb entries itself. */
-    CPUTLBEntry *table;
+    CPUTLBEntryFast *table; // array size is stored in mask
 } CPUTLBDescFast QEMU_ALIGNED(2 * sizeof(void *));
 
 #endif /* EXEC_TLB_COMMON_H */

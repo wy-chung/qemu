@@ -192,9 +192,10 @@ typedef enum X86VEXSpecial {
     X86_VEX_AVX2_256,
 } X86VEXSpecial;
 
-
+#if !defined(WYC)
 typedef struct X86OpEntry  X86OpEntry;
 typedef struct X86DecodedInsn X86DecodedInsn;
+#endif
 
 /* Decode function for multibyte opcodes.  */
 typedef void (*X86DecodeFunc)(DisasContext *s, CPUX86State *env, X86OpEntry *entry, uint8_t *b);

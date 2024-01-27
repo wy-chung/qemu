@@ -32,7 +32,7 @@
 #include "qom/object.h"
 
 #define TYPE_CAN_HOST "can-host"
-OBJECT_DECLARE_TYPE(CanHostState, CanHostClass, CAN_HOST)
+OBJECT_DECLARE_TYPE(CanHostState, CanHostClass, CAN_HOST);
 
 struct CanHostState {
     Object oc;

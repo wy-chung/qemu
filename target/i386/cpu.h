@@ -87,30 +87,33 @@ typedef enum X86Seg {
 } X86Seg;
 
 /* segment descriptor fields */
-#define DESC_G_SHIFT    23
+#define DESC_G_SHIFT    23 // granularity
 #define DESC_G_MASK     (1 << DESC_G_SHIFT)
-#define DESC_B_SHIFT    22
+#define DESC_B_SHIFT    22 // 0: 16-bit segment, 1: 32-bit segment
 #define DESC_B_MASK     (1 << DESC_B_SHIFT)
 #define DESC_L_SHIFT    21 /* x86_64 only : 64 bit code segment */
 #define DESC_L_MASK     (1 << DESC_L_SHIFT)
-#define DESC_AVL_SHIFT  20
+#define DESC_AVL_SHIFT  20 // available for use by system software
 #define DESC_AVL_MASK   (1 << DESC_AVL_SHIFT)
-#define DESC_P_SHIFT    15
+#define DESC_P_SHIFT    15 // segment present
 #define DESC_P_MASK     (1 << DESC_P_SHIFT)
-#define DESC_DPL_SHIFT  13
+#define DESC_DPL_SHIFT  13 // descriptor privelege level
 #define DESC_DPL_MASK   (3 << DESC_DPL_SHIFT)
-#define DESC_S_SHIFT    12
+#define DESC_S_SHIFT    12 // 0: system, 1: code or data
 #define DESC_S_MASK     (1 << DESC_S_SHIFT)
-#define DESC_TYPE_SHIFT 8
+#define DESC_TYPE_SHIFT 8  // segment type
 #define DESC_TYPE_MASK  (15 << DESC_TYPE_SHIFT)
-#define DESC_A_MASK     (1 << 8)
 
+// specify if it's a code or data segment
 #define DESC_CS_MASK    (1 << 11) /* 1=code segment 0=data segment */
+// for code segment
 #define DESC_C_MASK     (1 << 10) /* code: conforming */
 #define DESC_R_MASK     (1 << 9)  /* code: readable */
-
+// for data segment
 #define DESC_E_MASK     (1 << 10) /* data: expansion direction */
 #define DESC_W_MASK     (1 << 9)  /* data: writable */
+// for both code and data segment
+#define DESC_A_MASK     (1 << 8) // the accessed bit
 
 #define DESC_TSS_BUSY_MASK (1 << 9)
 
@@ -126,17 +129,17 @@ typedef enum X86Seg {
 #define IOPL_SHIFT 12
 #define VM_SHIFT   17
 
-#define TF_MASK                 0x00000100
-#define IF_MASK                 0x00000200
-#define DF_MASK                 0x00000400
-#define IOPL_MASK               0x00003000
-#define NT_MASK                 0x00004000
-#define RF_MASK                 0x00010000
-#define VM_MASK                 0x00020000
-#define AC_MASK                 0x00040000
-#define VIF_MASK                0x00080000
-#define VIP_MASK                0x00100000
-#define ID_MASK                 0x00200000
+#define TF_MASK                 0x00000100	// Trap flag
+#define IF_MASK                 0x00000200	// Interrupt enable flag
+#define DF_MASK                 0x00000400	// Direction flag for string operaction
+#define IOPL_MASK               0x00003000	// I/O privilege level
+#define NT_MASK                 0x00004000	// Nested task flag
+#define RF_MASK                 0x00010000	// Resume flag
+#define VM_MASK                 0x00020000	// Virtual 8086 mode flag
+#define AC_MASK                 0x00040000	// Alignment Check, SMAP Access Check
+#define VIF_MASK                0x00080000	// Virtual(8086) interrupt flag
+#define VIP_MASK                0x00100000	// Virtual(8086) interrupt pending
+#define ID_MASK                 0x00200000	// Able to use CPUID instruction
 
 /* hidden flags - used internally by qemu to represent additional cpu
    states. Only the INHIBIT_IRQ, SMM and SVMI are not redundant. We
@@ -153,16 +156,16 @@ typedef enum X86Seg {
 #define HF_ADDSEG_SHIFT      6
 /* copy of CR0.PE (protected mode) */
 #define HF_PE_SHIFT          7
-#define HF_TF_SHIFT          8 /* must be same as eflags */
+#define HF_TF_SHIFT          8 /* must be same as eflags' trap flag */
 #define HF_MP_SHIFT          9 /* the order must be MP, EM, TS */
 #define HF_EM_SHIFT         10
 #define HF_TS_SHIFT         11
-#define HF_IOPL_SHIFT       12 /* must be same as eflags */
+#define HF_IOPL_SHIFT       12 /* must be same as eflags' I/O privilege level */
 #define HF_LMA_SHIFT        14 /* only used on x86_64: long mode active */
 #define HF_CS64_SHIFT       15 /* only used on x86_64: 64 bit code segment  */
-#define HF_RF_SHIFT         16 /* must be same as eflags */
-#define HF_VM_SHIFT         17 /* must be same as eflags */
-#define HF_AC_SHIFT         18 /* must be same as eflags */
+#define HF_RF_SHIFT         16 /* must be same as eflags' resume flag */
+#define HF_VM_SHIFT         17 /* must be same as eflags' virtual 8086 mode flag */
+#define HF_AC_SHIFT         18 /* must be same as eflags' alignment check, smap access check flag */
 #define HF_SMM_SHIFT        19 /* CPU in SMM mode */
 #define HF_SVME_SHIFT       20 /* SVME enabled (copy of EFER.SVME) */
 #define HF_GUEST_SHIFT      21 /* SVM intercepts are active */
@@ -174,32 +177,32 @@ typedef enum X86Seg {
 #define HF_UMIP_SHIFT       27 /* CR4.UMIP */
 #define HF_AVX_EN_SHIFT     28 /* AVX Enabled (CR4+XCR0) */
 
-#define HF_CPL_MASK          (3 << HF_CPL_SHIFT)
+#define HF_CPL_MASK          (3 << HF_CPL_SHIFT)	/* current cpl */
 #define HF_INHIBIT_IRQ_MASK  (1 << HF_INHIBIT_IRQ_SHIFT)
-#define HF_CS32_MASK         (1 << HF_CS32_SHIFT)
+#define HF_CS32_MASK         (1 << HF_CS32_SHIFT)	/* 16 or 32 segments */
 #define HF_SS32_MASK         (1 << HF_SS32_SHIFT)
-#define HF_ADDSEG_MASK       (1 << HF_ADDSEG_SHIFT)
-#define HF_PE_MASK           (1 << HF_PE_SHIFT)
-#define HF_TF_MASK           (1 << HF_TF_SHIFT)
-#define HF_MP_MASK           (1 << HF_MP_SHIFT)
+#define HF_ADDSEG_MASK       (1 << HF_ADDSEG_SHIFT)	/* zero base for DS, ES and SS */
+#define HF_PE_MASK           (1 << HF_PE_SHIFT)	/* copy of CR0.PE (protected mode) */
+#define HF_TF_MASK           (1 << HF_TF_SHIFT)	/* must be same as eflags' TF_MASK */
+#define HF_MP_MASK           (1 << HF_MP_SHIFT)	/* the order must be MP, EM, TS */
 #define HF_EM_MASK           (1 << HF_EM_SHIFT)
 #define HF_TS_MASK           (1 << HF_TS_SHIFT)
-#define HF_IOPL_MASK         (3 << HF_IOPL_SHIFT)
-#define HF_LMA_MASK          (1 << HF_LMA_SHIFT)
-#define HF_CS64_MASK         (1 << HF_CS64_SHIFT)
-#define HF_RF_MASK           (1 << HF_RF_SHIFT)
-#define HF_VM_MASK           (1 << HF_VM_SHIFT)
-#define HF_AC_MASK           (1 << HF_AC_SHIFT)
-#define HF_SMM_MASK          (1 << HF_SMM_SHIFT)
-#define HF_SVME_MASK         (1 << HF_SVME_SHIFT)
-#define HF_GUEST_MASK        (1 << HF_GUEST_SHIFT)
-#define HF_OSFXSR_MASK       (1 << HF_OSFXSR_SHIFT)
-#define HF_SMAP_MASK         (1 << HF_SMAP_SHIFT)
-#define HF_IOBPT_MASK        (1 << HF_IOBPT_SHIFT)
-#define HF_MPX_EN_MASK       (1 << HF_MPX_EN_SHIFT)
-#define HF_MPX_IU_MASK       (1 << HF_MPX_IU_SHIFT)
-#define HF_UMIP_MASK         (1 << HF_UMIP_SHIFT)
-#define HF_AVX_EN_MASK       (1 << HF_AVX_EN_SHIFT)
+#define HF_IOPL_MASK         (3 << HF_IOPL_SHIFT)	/* must be same as eflags' IOPL_MASK */
+#define HF_LMA_MASK          (1 << HF_LMA_SHIFT)	/* long mode active */
+#define HF_CS64_MASK         (1 << HF_CS64_SHIFT)	/* 64 bit code segment */
+#define HF_RF_MASK           (1 << HF_RF_SHIFT)	/* must be same as eflags' RFMASK */
+#define HF_VM_MASK           (1 << HF_VM_SHIFT)	/* must be same as eflags' VM_MASK */
+#define HF_AC_MASK           (1 << HF_AC_SHIFT)	/* must be same as eflags' AC_MASK */
+#define HF_SMM_MASK          (1 << HF_SMM_SHIFT)	/* CPU in SMM mode */
+#define HF_SVME_MASK         (1 << HF_SVME_SHIFT)	/* SVME enabled (copy of EFER.SVME) */
+#define HF_GUEST_MASK        (1 << HF_GUEST_SHIFT)	/* SVM intercepts are active */
+#define HF_OSFXSR_MASK       (1 << HF_OSFXSR_SHIFT)	/* CR4.OSFXSR */
+#define HF_SMAP_MASK         (1 << HF_SMAP_SHIFT)	/* CR4.SMAP */ // Supervisor Mode Access Prevention
+#define HF_IOBPT_MASK        (1 << HF_IOBPT_SHIFT)	/* an io breakpoint enabled */
+#define HF_MPX_EN_MASK       (1 << HF_MPX_EN_SHIFT)	/* MPX Enabled (CR4+XCR0+BNDCFGx) */
+#define HF_MPX_IU_MASK       (1 << HF_MPX_IU_SHIFT)	/* BND registers in-use */
+#define HF_UMIP_MASK         (1 << HF_UMIP_SHIFT)	/* CR4.UMIP */
+#define HF_AVX_EN_MASK       (1 << HF_AVX_EN_SHIFT)	/* AVX Enabled (CR4+XCR0) */
 
 /* hflags2 */
 
@@ -213,54 +216,54 @@ typedef enum X86Seg {
 #define HF2_IGNNE_SHIFT          7 /* Ignore CR0.NE=0 */
 #define HF2_VGIF_SHIFT           8 /* Can take VIRQ*/
 
-#define HF2_GIF_MASK            (1 << HF2_GIF_SHIFT)
-#define HF2_HIF_MASK            (1 << HF2_HIF_SHIFT)
-#define HF2_NMI_MASK            (1 << HF2_NMI_SHIFT)
-#define HF2_VINTR_MASK          (1 << HF2_VINTR_SHIFT)
-#define HF2_SMM_INSIDE_NMI_MASK (1 << HF2_SMM_INSIDE_NMI_SHIFT)
-#define HF2_MPX_PR_MASK         (1 << HF2_MPX_PR_SHIFT)
-#define HF2_NPT_MASK            (1 << HF2_NPT_SHIFT)
-#define HF2_IGNNE_MASK          (1 << HF2_IGNNE_SHIFT)
-#define HF2_VGIF_MASK           (1 << HF2_VGIF_SHIFT)
+#define HF2_GIF_MASK            (1 << HF2_GIF_SHIFT)	/* if set CPU takes interrupts */
+#define HF2_HIF_MASK            (1 << HF2_HIF_SHIFT)	/* value of IF_MASK when entering SVM */
+#define HF2_NMI_MASK            (1 << HF2_NMI_SHIFT)	/* CPU serving NMI */
+#define HF2_VINTR_MASK          (1 << HF2_VINTR_SHIFT)	/* value of V_INTR_MASKING bit */
+#define HF2_SMM_INSIDE_NMI_MASK (1 << HF2_SMM_INSIDE_NMI_SHIFT) /* CPU serving SMI nested inside NMI */
+#define HF2_MPX_PR_MASK         (1 << HF2_MPX_PR_SHIFT)	/* BNDCFGx.BNDPRESERVE */
+#define HF2_NPT_MASK            (1 << HF2_NPT_SHIFT)	/* Nested Paging enabled */
+#define HF2_IGNNE_MASK          (1 << HF2_IGNNE_SHIFT)	/* Ignore CR0.NE=0 */
+#define HF2_VGIF_MASK           (1 << HF2_VGIF_SHIFT)	/* Can take VIRQ*/
 
 #define CR0_PE_SHIFT 0
 #define CR0_MP_SHIFT 1
 
-#define CR0_PE_MASK  (1U << 0)
-#define CR0_MP_MASK  (1U << 1)
-#define CR0_EM_MASK  (1U << 2)
-#define CR0_TS_MASK  (1U << 3)
-#define CR0_ET_MASK  (1U << 4)
-#define CR0_NE_MASK  (1U << 5)
-#define CR0_WP_MASK  (1U << 16)
-#define CR0_AM_MASK  (1U << 18)
-#define CR0_NW_MASK  (1U << 29)
-#define CR0_CD_MASK  (1U << 30)
-#define CR0_PG_MASK  (1U << 31)
+#define CR0_PE_MASK  (1U << 0)	// Protected Mode Enable
+#define CR0_MP_MASK  (1U << 1)	// Monitor co-processor
+#define CR0_EM_MASK  (1U << 2)	// If set, no x87 floating-point unit present
+#define CR0_TS_MASK  (1U << 3)	// Task switched
+#define CR0_ET_MASK  (1U << 4)	// to specify whether the external math coprocessor was an 80287 or 80387
+#define CR0_NE_MASK  (1U << 5)	// Enable internal x87 floating point error reporting
+#define CR0_WP_MASK  (1U << 16)	// can't write to read-only pages when privilege level is 0
+#define CR0_AM_MASK  (1U << 18)	// Alignment check enabled
+#define CR0_NW_MASK  (1U << 29)	// Not-write through
+#define CR0_CD_MASK  (1U << 30)	// Cache disable
+#define CR0_PG_MASK  (1U << 31)	// enable paging
 
-#define CR4_VME_MASK  (1U << 0)
-#define CR4_PVI_MASK  (1U << 1)
-#define CR4_TSD_MASK  (1U << 2)
-#define CR4_DE_MASK   (1U << 3)
-#define CR4_PSE_MASK  (1U << 4)
-#define CR4_PAE_MASK  (1U << 5)
-#define CR4_MCE_MASK  (1U << 6)
-#define CR4_PGE_MASK  (1U << 7)
-#define CR4_PCE_MASK  (1U << 8)
-#define CR4_OSFXSR_SHIFT 9
+#define CR4_VME_MASK  (1U << 0)	// Virtual 8086 Mode Extensions
+#define CR4_PVI_MASK  (1U << 1)	// Protected-mode Virtual Interrupts
+#define CR4_TSD_MASK  (1U << 2)	// Time Stamp Disable
+#define CR4_DE_MASK   (1U << 3)	// Debugging Extensions
+#define CR4_PSE_MASK  (1U << 4)	// Page Size Extension.  allows for pages larger than the traditional 4 KiB size
+#define CR4_PAE_MASK  (1U << 5)	// Physical Address Extension
+#define CR4_MCE_MASK  (1U << 6)	// Machine Check Exception
+#define CR4_PGE_MASK  (1U << 7)	// Page Global Enabled
+#define CR4_PCE_MASK  (1U << 8)	// Performance-Monitoring Counter enable
+#define CR4_OSFXSR_SHIFT 9	// Operating system support for FXSAVE and FXRSTOR instructions
 #define CR4_OSFXSR_MASK (1U << CR4_OSFXSR_SHIFT)
-#define CR4_OSXMMEXCPT_MASK  (1U << 10)
-#define CR4_UMIP_MASK   (1U << 11)
-#define CR4_LA57_MASK   (1U << 12)
-#define CR4_VMXE_MASK   (1U << 13)
-#define CR4_SMXE_MASK   (1U << 14)
-#define CR4_FSGSBASE_MASK (1U << 16)
-#define CR4_PCIDE_MASK  (1U << 17)
-#define CR4_OSXSAVE_MASK (1U << 18)
-#define CR4_SMEP_MASK   (1U << 20)
-#define CR4_SMAP_MASK   (1U << 21)
-#define CR4_PKE_MASK   (1U << 22)
-#define CR4_PKS_MASK   (1U << 24)
+#define CR4_OSXMMEXCPT_MASK  (1U << 10)	// Operating System Support for Unmasked SIMD Floating-Point Exceptions
+#define CR4_UMIP_MASK   (1U << 11)	// User-Mode Instruction Prevention
+#define CR4_LA57_MASK   (1U << 12)	// 57-Bit Linear Addresses
+#define CR4_VMXE_MASK   (1U << 13)	// Virtual Machine Extensions Enable
+#define CR4_SMXE_MASK   (1U << 14)	// Safer Mode Extensions Enable
+#define CR4_FSGSBASE_MASK (1U << 16)	// FS.BASE GS.BASE Enable
+#define CR4_PCIDE_MASK  (1U << 17)	// process-context identifier Enable
+#define CR4_OSXSAVE_MASK (1U << 18)	// XSAVE and Processor Extended States Enable
+#define CR4_SMEP_MASK   (1U << 20)	// Supervisor Mode Execution Protection
+#define CR4_SMAP_MASK   (1U << 21)	// Supervisor Mode Access Prevention
+#define CR4_PKE_MASK   (1U << 22)	// Protection Key Enable
+#define CR4_PKS_MASK   (1U << 24)	// Protection Keys for Supervisor-Mode Pages
 
 #define CR4_RESERVED_MASK \
 (~(target_ulong)(CR4_VME_MASK | CR4_PVI_MASK | CR4_TSD_MASK \
@@ -327,18 +330,18 @@ typedef enum X86Seg {
 #define PG_ERROR_I_D_MASK  0x10
 #define PG_ERROR_PK_MASK   0x20
 
-#define PG_MODE_PAE      (1 << 0)
-#define PG_MODE_LMA      (1 << 1)
-#define PG_MODE_NXE      (1 << 2)
-#define PG_MODE_PSE      (1 << 3)
-#define PG_MODE_LA57     (1 << 4)
+#define PG_MODE_PAE      (1 << 0)	// Physical Address Extension
+#define PG_MODE_LMA      (1 << 1)	// long mode active
+#define PG_MODE_NXE      (1 << 2)	// No-Execute Enable
+#define PG_MODE_PSE      (1 << 3)	// Page Size Extension
+#define PG_MODE_LA57     (1 << 4)	// 57-Bit Linear Addresses
 #define PG_MODE_SVM_MASK MAKE_64BIT_MASK(0, 15)
 
 /* Bits of CR4 that do not affect the NPT page format.  */
-#define PG_MODE_WP       (1 << 16)
-#define PG_MODE_PKE      (1 << 17)
-#define PG_MODE_PKS      (1 << 18)
-#define PG_MODE_SMEP     (1 << 19)
+#define PG_MODE_WP       (1 << 16)	// can't write to read-only pages when privilege level is 0
+#define PG_MODE_PKE      (1 << 17)	// Protection Key Enable
+#define PG_MODE_PKS      (1 << 18)	// Protection Keys for Supervisor-Mode Pages
+#define PG_MODE_SMEP     (1 << 19)	// Supervisor Mode Execution Prevention
 
 #define MCG_CTL_P       (1ULL<<8)   /* MCG_CAP register available */
 #define MCG_SER_P       (1ULL<<24) /* MCA recovery/new status bits */
@@ -491,14 +494,14 @@ typedef enum X86Seg {
 #define MSR_IA32_RTIT_ADDR3_B           0x587
 #define MAX_RTIT_ADDRS                  8
 
-#define MSR_EFER                        0xc0000080
+#define MSR_EFER                        0xc0000080	// Extended Feature Enable Register
 
-#define MSR_EFER_SCE   (1 << 0)
-#define MSR_EFER_LME   (1 << 8)
-#define MSR_EFER_LMA   (1 << 10)
-#define MSR_EFER_NXE   (1 << 11)
-#define MSR_EFER_SVME  (1 << 12)
-#define MSR_EFER_FFXSR (1 << 14)
+#define MSR_EFER_SCE   (1 << 0)		// System Call Extensions
+#define MSR_EFER_LME   (1 << 8)		// Long Mode Enable
+#define MSR_EFER_LMA   (1 << 10)	// Long Mode Active
+#define MSR_EFER_NXE   (1 << 11)	// No-Execute Enable
+#define MSR_EFER_SVME  (1 << 12)	// Secure Virtual Machine Enable
+#define MSR_EFER_FFXSR (1 << 14)	// Fast FXSAVE/FXRSTOR
 
 #define MSR_EFER_RESERVED\
         (~(target_ulong)(MSR_EFER_SCE | MSR_EFER_LME\
@@ -508,12 +511,17 @@ typedef enum X86Seg {
 #define MSR_STAR                        0xc0000081
 #define MSR_LSTAR                       0xc0000082
 #define MSR_CSTAR                       0xc0000083
-#define MSR_FMASK                       0xc0000084
+#define MSR_FMASK                       0xc0000084 // system call flag mask
 #define MSR_FSBASE                      0xc0000100
 #define MSR_GSBASE                      0xc0000101
 #define MSR_KERNELGSBASE                0xc0000102
 #define MSR_TSC_AUX                     0xc0000103
 #define MSR_AMD64_TSC_RATIO             0xc0000104
+//wyc
+#define MSR_CSBASE                      0xc000010c
+#define MSR_DSBASE                      0xc000010d
+#define MSR_ESBASE                      0xc000010e
+#define MSR_SSBASE                      0xc000010f
 
 #define MSR_AMD64_TSC_RATIO_DEFAULT     0x100000000ULL
 
@@ -1198,10 +1206,10 @@ uint64_t x86_cpu_get_supported_feature_word(FeatureWord w,
 #define CPU_INTERRUPT_POLL      CPU_INTERRUPT_TGT_EXT_1
 #define CPU_INTERRUPT_SMI       CPU_INTERRUPT_TGT_EXT_2
 #define CPU_INTERRUPT_NMI       CPU_INTERRUPT_TGT_EXT_3
-#define CPU_INTERRUPT_MCE       CPU_INTERRUPT_TGT_EXT_4
+#define CPU_INTERRUPT_MCE       CPU_INTERRUPT_TGT_EXT_4	// Machine Check Exceptions
 #define CPU_INTERRUPT_VIRQ      CPU_INTERRUPT_TGT_INT_0
-#define CPU_INTERRUPT_SIPI      CPU_INTERRUPT_TGT_INT_1
-#define CPU_INTERRUPT_TPR       CPU_INTERRUPT_TGT_INT_2
+#define CPU_INTERRUPT_SIPI      CPU_INTERRUPT_TGT_INT_1	// Startup Inter-Processor Interrupt
+#define CPU_INTERRUPT_TPR       CPU_INTERRUPT_TGT_INT_2	// Task Priority Register
 
 /* Use a clearer name for this.  */
 #define CPU_INTERRUPT_INIT      CPU_INTERRUPT_RESET
@@ -1286,7 +1294,7 @@ typedef struct SegmentCache {
     uint32_t selector;
     target_ulong base;
     uint32_t limit;
-    uint32_t flags;
+    uint32_t flags; // the second DW (byte 4..7) of segment descriptor. See DESC_G_MASK for example
 } SegmentCache;
 
 typedef union MMXReg {
@@ -1496,16 +1504,16 @@ typedef struct XSavesArchLBR {
     LBREntry lbr_records[ARCH_LBR_NR_ENTRIES];
 } XSavesArchLBR;
 
-QEMU_BUILD_BUG_ON(sizeof(XSaveAVX) != 0x100);
-QEMU_BUILD_BUG_ON(sizeof(XSaveBNDREG) != 0x40);
-QEMU_BUILD_BUG_ON(sizeof(XSaveBNDCSR) != 0x40);
-QEMU_BUILD_BUG_ON(sizeof(XSaveOpmask) != 0x40);
-QEMU_BUILD_BUG_ON(sizeof(XSaveZMM_Hi256) != 0x200);
-QEMU_BUILD_BUG_ON(sizeof(XSaveHi16_ZMM) != 0x400);
-QEMU_BUILD_BUG_ON(sizeof(XSavePKRU) != 0x8);
-QEMU_BUILD_BUG_ON(sizeof(XSaveXTILECFG) != 0x40);
-QEMU_BUILD_BUG_ON(sizeof(XSaveXTILEDATA) != 0x2000);
-QEMU_BUILD_BUG_ON(sizeof(XSavesArchLBR) != 0x328);
+QEMU_BUILD_ASSERT(sizeof(XSaveAVX) == 0x100);
+QEMU_BUILD_ASSERT(sizeof(XSaveBNDREG) == 0x40);
+QEMU_BUILD_ASSERT(sizeof(XSaveBNDCSR) == 0x40);
+QEMU_BUILD_ASSERT(sizeof(XSaveOpmask) == 0x40);
+QEMU_BUILD_ASSERT(sizeof(XSaveZMM_Hi256) == 0x200);
+QEMU_BUILD_ASSERT(sizeof(XSaveHi16_ZMM) == 0x400);
+QEMU_BUILD_ASSERT(sizeof(XSavePKRU) == 0x8);
+QEMU_BUILD_ASSERT(sizeof(XSaveXTILECFG) == 0x40);
+QEMU_BUILD_ASSERT(sizeof(XSaveXTILEDATA) == 0x2000);
+QEMU_BUILD_ASSERT(sizeof(XSavesArchLBR) == 0x328);
 
 typedef struct ExtSaveArea {
     uint32_t feature, bits;
@@ -1586,7 +1594,7 @@ typedef struct HVFX86LazyFlags {
     target_ulong auxbits;
 } HVFX86LazyFlags;
 
-typedef struct CPUArchState {
+typedef struct CPUArchState /* CPUX86State */ {
     /* standard registers */
     target_ulong regs[CPU_NB_REGS];
     target_ulong eip;
@@ -1600,9 +1608,8 @@ typedef struct CPUArchState {
     target_ulong cc_src2;
     uint32_t cc_op;
     int32_t df; /* D flag : 1 if D = 0, -1 if D = 1 */
-    uint32_t hflags; /* TB flags, see HF_xxx constants. These flags
-                        are known at translation time. */
-    uint32_t hflags2; /* various other flags, see HF2_xxx constants. */
+    uint32_t hflags; // TB flags known at translation time, see HF_CS64_MASK and DisasContext.flags
+    uint32_t hflags2; /* various other flags, see HF2_GIF_MASK constants. */
 
     /* segments */
     SegmentCache segs[6]; /* selector values */
@@ -1611,7 +1618,7 @@ typedef struct CPUArchState {
     SegmentCache gdt; /* only base and limit are used */
     SegmentCache idt; /* only base and limit are used */
 
-    target_ulong cr[5]; /* NOTE: cr1 is unused */
+    target_ulong cr[5]; /* NOTE: cr1: unused, cr2: page fault linear address, cr3: PDBR */
 
     bool pdptrs_valid;
     uint64_t pdptrs[4];
@@ -1755,7 +1762,7 @@ typedef struct CPUArchState {
 
     /* exception/interrupt handling */
     int error_code;
-    int exception_is_int;
+    bool exception_is_int;
     target_ulong exception_next_eip;
     target_ulong dr[8]; /* debug registers; note dr4 and dr5 are unused */
     union {
@@ -1836,7 +1843,7 @@ typedef struct CPUArchState {
     int64_t user_tsc_khz; /* for sanity check only */
     uint64_t apic_bus_freq;
     uint64_t tsc;
-#if defined(CONFIG_KVM) || defined(CONFIG_HVF)
+#if defined(CONFIG_KVM) || defined(CONFIG_HVF) // HVF is a QEMU accelerator on macOS
     void *xsave_buf;
     uint32_t xsave_buf_len;
 #endif
@@ -1879,7 +1886,7 @@ typedef struct CPUArchState {
     TPRAccess tpr_access_type;
 
     unsigned nr_dies;
-} CPUX86State;
+} CPUX86State; // typedef struct CPUArchState
 
 struct kvm_msrs;
 
@@ -2130,7 +2137,7 @@ static inline void cpu_x86_load_seg_cache(CPUX86State *env,
                    (env->eflags & VM_MASK) ||
                    !(env->hflags & HF_CS32_MASK)) {
             /* XXX: try to avoid this test. The problem comes from the
-               fact that is real mode or vm86 mode we only modify the
+               fact that in real mode or vm86 mode we only modify the
                'base' and 'selector' fields of the segment cache to go
                faster. A solution may be to force addseg to one in
                translate-i386.c. */
@@ -2251,9 +2258,10 @@ uint64_t cpu_get_tsc(CPUX86State *env);
 #define cpu_list x86_cpu_list
 
 /* MMU modes definitions */
-#define MMU_KSMAP_IDX   0
-#define MMU_USER_IDX    1
-#define MMU_KNOSMAP_IDX 2
+#define MMU_KSMAP_IDX   0	// kernel super mode access prevention
+#define MMU_USER_IDX    1	// user
+#define MMU_KNOSMAP_IDX 2	// kernel no super mode access prevention
+
 #define MMU_NESTED_IDX  3
 #define MMU_PHYS_IDX    4
 
@@ -2266,9 +2274,11 @@ static inline int cpu_mmu_index(CPUX86State *env, bool ifetch)
 
 static inline int cpu_mmu_index_kernel(CPUX86State *env)
 {
-    return !(env->hflags & HF_SMAP_MASK) ? MMU_KNOSMAP_IDX :
+    int ret;
+    ret = !(env->hflags & HF_SMAP_MASK) ? MMU_KNOSMAP_IDX :
         ((env->hflags & HF_CPL_MASK) < 3 && (env->eflags & AC_MASK))
         ? MMU_KNOSMAP_IDX : MMU_KSMAP_IDX;
+    return ret;
 }
 
 #define CC_DST  (env->cc_dst)

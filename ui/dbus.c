@@ -420,8 +420,7 @@ typedef struct DBusVCClass {
     void (*parent_parse)(QemuOpts *opts, ChardevBackend *b, Error **errp);
 } DBusVCClass;
 
-DECLARE_CLASS_CHECKERS(DBusVCClass, DBUS_VC,
-                       TYPE_CHARDEV_VC)
+DECLARE_CLASS_CHECKERS(DBusVCClass, DBUS_VC, TYPE_CHARDEV_VC);
 
 static void
 dbus_vc_parse(QemuOpts *opts, ChardevBackend *backend,

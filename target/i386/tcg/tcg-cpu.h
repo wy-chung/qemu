@@ -61,20 +61,20 @@ typedef struct X86XSaveArea {
     XSavePKRU pkru_state;
 } X86XSaveArea;
 
-QEMU_BUILD_BUG_ON(offsetof(X86XSaveArea, legacy.fcw) != XSAVE_FCW_FSW_OFFSET);
-QEMU_BUILD_BUG_ON(offsetof(X86XSaveArea, legacy.ftw) != XSAVE_FTW_FOP_OFFSET);
-QEMU_BUILD_BUG_ON(offsetof(X86XSaveArea, legacy.fpip) != XSAVE_CWD_RIP_OFFSET);
-QEMU_BUILD_BUG_ON(offsetof(X86XSaveArea, legacy.fpdp) != XSAVE_CWD_RDP_OFFSET);
-QEMU_BUILD_BUG_ON(offsetof(X86XSaveArea, legacy.mxcsr) != XSAVE_MXCSR_OFFSET);
-QEMU_BUILD_BUG_ON(offsetof(X86XSaveArea, legacy.fpregs) != XSAVE_ST_SPACE_OFFSET);
-QEMU_BUILD_BUG_ON(offsetof(X86XSaveArea, legacy.xmm_regs) != XSAVE_XMM_SPACE_OFFSET);
-QEMU_BUILD_BUG_ON(offsetof(X86XSaveArea, avx_state) != XSAVE_AVX_OFFSET);
-QEMU_BUILD_BUG_ON(offsetof(X86XSaveArea, bndreg_state) != XSAVE_BNDREG_OFFSET);
-QEMU_BUILD_BUG_ON(offsetof(X86XSaveArea, bndcsr_state) != XSAVE_BNDCSR_OFFSET);
-QEMU_BUILD_BUG_ON(offsetof(X86XSaveArea, opmask_state) != XSAVE_OPMASK_OFFSET);
-QEMU_BUILD_BUG_ON(offsetof(X86XSaveArea, zmm_hi256_state) != XSAVE_ZMM_HI256_OFFSET);
-QEMU_BUILD_BUG_ON(offsetof(X86XSaveArea, hi16_zmm_state) != XSAVE_HI16_ZMM_OFFSET);
-QEMU_BUILD_BUG_ON(offsetof(X86XSaveArea, pkru_state) != XSAVE_PKRU_OFFSET);
+QEMU_BUILD_ASSERT(offsetof(X86XSaveArea, legacy.fcw) == XSAVE_FCW_FSW_OFFSET);
+QEMU_BUILD_ASSERT(offsetof(X86XSaveArea, legacy.ftw) == XSAVE_FTW_FOP_OFFSET);
+QEMU_BUILD_ASSERT(offsetof(X86XSaveArea, legacy.fpip) == XSAVE_CWD_RIP_OFFSET);
+QEMU_BUILD_ASSERT(offsetof(X86XSaveArea, legacy.fpdp) == XSAVE_CWD_RDP_OFFSET);
+QEMU_BUILD_ASSERT(offsetof(X86XSaveArea, legacy.mxcsr) == XSAVE_MXCSR_OFFSET);
+QEMU_BUILD_ASSERT(offsetof(X86XSaveArea, legacy.fpregs) == XSAVE_ST_SPACE_OFFSET);
+QEMU_BUILD_ASSERT(offsetof(X86XSaveArea, legacy.xmm_regs) == XSAVE_XMM_SPACE_OFFSET);
+QEMU_BUILD_ASSERT(offsetof(X86XSaveArea, avx_state) == XSAVE_AVX_OFFSET);
+QEMU_BUILD_ASSERT(offsetof(X86XSaveArea, bndreg_state) == XSAVE_BNDREG_OFFSET);
+QEMU_BUILD_ASSERT(offsetof(X86XSaveArea, bndcsr_state) == XSAVE_BNDCSR_OFFSET);
+QEMU_BUILD_ASSERT(offsetof(X86XSaveArea, opmask_state) == XSAVE_OPMASK_OFFSET);
+QEMU_BUILD_ASSERT(offsetof(X86XSaveArea, zmm_hi256_state) == XSAVE_ZMM_HI256_OFFSET);
+QEMU_BUILD_ASSERT(offsetof(X86XSaveArea, hi16_zmm_state) == XSAVE_HI16_ZMM_OFFSET);
+QEMU_BUILD_ASSERT(offsetof(X86XSaveArea, pkru_state) == XSAVE_PKRU_OFFSET);
 
 bool tcg_cpu_realizefn(CPUState *cs, Error **errp);
 

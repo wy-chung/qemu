@@ -93,7 +93,7 @@ struct X86MachineState {
 #define X86_MACHINE_BUS_LOCK_RATELIMIT  "bus-lock-ratelimit"
 
 #define TYPE_X86_MACHINE   MACHINE_TYPE_NAME("x86")
-OBJECT_DECLARE_TYPE(X86MachineState, X86MachineClass, X86_MACHINE)
+OBJECT_DECLARE_TYPE(X86MachineState, X86MachineClass, X86_MACHINE);
 
 uint32_t x86_cpu_apic_id_from_index(X86MachineState *pcms,
                                     unsigned int cpu_index);

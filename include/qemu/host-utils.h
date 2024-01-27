@@ -685,21 +685,21 @@ static inline uint64_t usub64_borrow(uint64_t x, uint64_t y, bool *pborrow)
 /* Host type specific sizes of these routines.  */
 
 #if ULONG_MAX == UINT32_MAX
-# define clzl   clz32
-# define ctzl   ctz32
-# define clol   clo32
-# define ctol   cto32
-# define ctpopl ctpop32
-# define revbitl revbit32
+ #define clzl   clz32
+ #define ctzl   ctz32
+ #define clol   clo32
+ #define ctol   cto32
+ #define ctpopl ctpop32
+ #define revbitl revbit32
 #elif ULONG_MAX == UINT64_MAX
-# define clzl   clz64
-# define ctzl   ctz64
-# define clol   clo64
-# define ctol   cto64
-# define ctpopl ctpop64
-# define revbitl revbit64
+ #define clzl   clz64
+ #define ctzl   ctz64
+ #define clol   clo64
+ #define ctol   cto64
+ #define ctpopl ctpop64
+ #define revbitl revbit64
 #else
-# error Unknown sizeof long
+ #error Unknown sizeof long
 #endif
 
 static inline bool is_power_of_2(uint64_t value)

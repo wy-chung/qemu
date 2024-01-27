@@ -14,7 +14,7 @@
 #include "qom/object.h"
 
 #define TYPE_ASPEED_GPIO "aspeed.gpio"
-OBJECT_DECLARE_TYPE(AspeedGPIOState, AspeedGPIOClass, ASPEED_GPIO)
+OBJECT_DECLARE_TYPE(AspeedGPIOState, AspeedGPIOClass, ASPEED_GPIO);
 
 #define ASPEED_GPIO_MAX_NR_SETS 8
 #define ASPEED_GPIOS_PER_SET 32

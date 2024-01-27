@@ -58,7 +58,7 @@
 
 #define TYPE_SCSI_DISK_BASE         "scsi-disk-base"
 
-OBJECT_DECLARE_TYPE(SCSIDiskState, SCSIDiskClass, SCSI_DISK_BASE)
+OBJECT_DECLARE_TYPE(SCSIDiskState, SCSIDiskClass, SCSI_DISK_BASE);
 
 struct SCSIDiskClass {
     SCSIDeviceClass parent_class;

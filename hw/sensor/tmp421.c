@@ -72,7 +72,7 @@ struct TMP421Class {
 };
 
 #define TYPE_TMP421 "tmp421-generic"
-OBJECT_DECLARE_TYPE(TMP421State, TMP421Class, TMP421)
+OBJECT_DECLARE_TYPE(TMP421State, TMP421Class, TMP421);
 
 
 /* the TMP421 registers */

@@ -81,6 +81,10 @@ unsigned int cpu_list_generation_id_get(void)
     return cpu_list_generation_id;
 }
 
+/**
+ * cpu_list_add:
+ * @cpu: The CPU to be added to the list of CPUs.
+ */
 void cpu_list_add(CPUState *cpu)
 {
     QEMU_LOCK_GUARD(&qemu_cpu_list_lock);
@@ -94,6 +98,10 @@ void cpu_list_add(CPUState *cpu)
     cpu_list_generation_id++;
 }
 
+/**
+ * cpu_list_remove:
+ * @cpu: The CPU to be removed from the list of CPUs.
+ */
 void cpu_list_remove(CPUState *cpu)
 {
     QEMU_LOCK_GUARD(&qemu_cpu_list_lock);
@@ -107,6 +115,14 @@ void cpu_list_remove(CPUState *cpu)
     cpu_list_generation_id++;
 }
 
+/**
+ * qemu_get_cpu:
+ * @index: The CPUState@cpu_index value of the CPU to obtain.
+ *
+ * Gets a CPU matching @index.
+ *
+ * Returns: The CPU or %NULL if there is no matching CPU.
+ */
 CPUState *qemu_get_cpu(int index)
 {
     CPUState *cpu;
@@ -140,6 +156,15 @@ static void queue_work_on_cpu(CPUState *cpu, struct qemu_work_item *wi)
     qemu_cpu_kick(cpu);
 }
 
+/**
+ * do_run_on_cpu:
+ * @cpu: The vCPU to run on.
+ * @func: The function to be executed.
+ * @data: Data to pass to the function.
+ * @mutex: Mutex to release while waiting for @func to run.
+ *
+ * Used internally in the implementation of run_on_cpu.
+ */
 void do_run_on_cpu(CPUState *cpu, run_on_cpu_func func, run_on_cpu_data data,
                    QemuMutex *mutex)
 {
@@ -165,6 +190,14 @@ void do_run_on_cpu(CPUState *cpu, run_on_cpu_func func, run_on_cpu_data data,
     }
 }
 
+/**
+ * async_run_on_cpu:
+ * @cpu: The vCPU to run on.
+ * @func: The function to be executed.
+ * @data: Data to pass to the function.
+ *
+ * Schedules the function @func for execution on the vCPU @cpu asynchronously.
+ */
 void async_run_on_cpu(CPUState *cpu, run_on_cpu_func func, run_on_cpu_data data)
 {
     struct qemu_work_item *wi;
@@ -186,6 +219,16 @@ static inline void exclusive_idle(void)
     }
 }
 
+/**
+ * start_exclusive:
+ *
+ * Wait for a concurrent exclusive section to end, and then start
+ * a section of work that is run while other CPUs are not running
+ * between cpu_exec_start and cpu_exec_end.  CPUs that are running
+ * cpu_exec are exited immediately.  CPUs that call cpu_exec_start
+ * during the exclusive section go to sleep until this CPU calls
+ * end_exclusive.
+ */
 /* Start an exclusive operation.
    Must only be called from outside cpu_exec.  */
 void start_exclusive(void)
@@ -228,6 +271,11 @@ void start_exclusive(void)
     current_cpu->exclusive_context_count = 1;
 }
 
+/**
+ * end_exclusive:
+ *
+ * Concludes an exclusive execution section started by start_exclusive.
+ */
 /* Finish an exclusive operation.  */
 void end_exclusive(void)
 {
@@ -242,6 +290,13 @@ void end_exclusive(void)
     qemu_mutex_unlock(&qemu_cpu_list_lock);
 }
 
+/**
+ * cpu_exec_start:
+ * @cpu: The CPU for the current thread.
+ *
+ * Record that a CPU has started execution and can be interrupted with
+ * cpu_exit.
+ */
 /* Wait for exclusive ops to finish, and begin cpu execution.  */
 void cpu_exec_start(CPUState *cpu)
 {
@@ -282,6 +337,13 @@ void cpu_exec_start(CPUState *cpu)
     }
 }
 
+/**
+ * cpu_exec_end:
+ * @cpu: The CPU for the current thread.
+ *
+ * Record that a CPU has stopped execution and exclusive sections
+ * can be executed without interrupting it.
+ */
 /* Mark cpu as not executing, and release pending exclusive ops.  */
 void cpu_exec_end(CPUState *cpu)
 {
@@ -317,6 +379,18 @@ void cpu_exec_end(CPUState *cpu)
     }
 }
 
+/**
+ * async_safe_run_on_cpu:
+ * @cpu: The vCPU to run on.
+ * @func: The function to be executed.
+ * @data: Data to pass to the function.
+ *
+ * Schedules the function @func for execution on the vCPU @cpu asynchronously,
+ * while all other vCPUs are sleeping.
+ *
+ * Unlike run_on_cpu and async_run_on_cpu, the function is run outside the
+ * BQL.
+ */
 void async_safe_run_on_cpu(CPUState *cpu, run_on_cpu_func func,
                            run_on_cpu_data data)
 {
@@ -331,6 +405,10 @@ void async_safe_run_on_cpu(CPUState *cpu, run_on_cpu_func func,
     queue_work_on_cpu(cpu, wi);
 }
 
+/**
+ * process_queued_cpu_work() - process all items on CPU work queue
+ * @cpu: The CPU which work queue to process.
+ */
 void process_queued_cpu_work(CPUState *cpu)
 {
     struct qemu_work_item *wi;

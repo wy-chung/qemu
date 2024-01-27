@@ -89,7 +89,7 @@ static int check_exception(CPUX86State *env, int intno, int *error_code,
  */
 static G_NORETURN
 void raise_interrupt2(CPUX86State *env, int intno,
-                      int is_int, int error_code,
+                      bool is_int, int error_code,
                       int next_eip_addend,
                       uintptr_t retaddr)
 {
@@ -112,7 +112,7 @@ void raise_interrupt2(CPUX86State *env, int intno,
 
 /* shortcuts to generate exceptions */
 
-G_NORETURN void raise_interrupt(CPUX86State *env, int intno, int is_int,
+G_NORETURN void raise_interrupt(CPUX86State *env, int intno, bool is_int,
                                 int error_code, int next_eip_addend)
 {
     raise_interrupt2(env, intno, is_int, error_code, next_eip_addend, 0);

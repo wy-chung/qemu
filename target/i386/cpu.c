@@ -6719,24 +6719,23 @@ static void x86_cpu_reset_hold(Object *obj)
     env->tr.limit = 0xffff;
     env->tr.flags = DESC_P_MASK | (11 << DESC_TYPE_SHIFT);
 
-    cpu_x86_load_seg_cache(env, R_CS, 0xf000, 0xffff0000, 0xffff,
-                           DESC_P_MASK | DESC_S_MASK | DESC_CS_MASK |
-                           DESC_R_MASK | DESC_A_MASK);
+    cpu_x86_load_seg_cache(env, R_CS, 0xf000, 0xffff0000, 0xffff, DESC_CS_MASK |
+                           DESC_P_MASK | DESC_S_MASK | DESC_A_MASK | DESC_R_MASK);
+
     cpu_x86_load_seg_cache(env, R_DS, 0, 0, 0xffff,
-                           DESC_P_MASK | DESC_S_MASK | DESC_W_MASK |
-                           DESC_A_MASK);
+                           DESC_P_MASK | DESC_S_MASK | DESC_A_MASK | DESC_W_MASK);
+
     cpu_x86_load_seg_cache(env, R_ES, 0, 0, 0xffff,
-                           DESC_P_MASK | DESC_S_MASK | DESC_W_MASK |
-                           DESC_A_MASK);
+                           DESC_P_MASK | DESC_S_MASK | DESC_A_MASK | DESC_W_MASK);
+
     cpu_x86_load_seg_cache(env, R_SS, 0, 0, 0xffff,
-                           DESC_P_MASK | DESC_S_MASK | DESC_W_MASK |
-                           DESC_A_MASK);
+                           DESC_P_MASK | DESC_S_MASK | DESC_A_MASK | DESC_W_MASK);
+
     cpu_x86_load_seg_cache(env, R_FS, 0, 0, 0xffff,
-                           DESC_P_MASK | DESC_S_MASK | DESC_W_MASK |
-                           DESC_A_MASK);
+                           DESC_P_MASK | DESC_S_MASK | DESC_A_MASK | DESC_W_MASK);
+
     cpu_x86_load_seg_cache(env, R_GS, 0, 0, 0xffff,
-                           DESC_P_MASK | DESC_S_MASK | DESC_W_MASK |
-                           DESC_A_MASK);
+                           DESC_P_MASK | DESC_S_MASK | DESC_A_MASK | DESC_W_MASK);
 
     env->eip = 0xfff0;
     env->regs[R_EDX] = env->cpuid_version;
@@ -7733,6 +7732,12 @@ static void x86_disas_set_info(CPUState *cs, disassemble_info *info)
     info->cap_insn_split = 8;
 }
 
+#if !defined(WYC)
+// only called by
+// hvf(mac Hypervisor Framework),
+// nvmm(NetBSD Virtual Machine Monitor),
+// kvm(Linux Kernel-based Virtual Machine) and
+// whpx(Windows Hypervisor Platform)
 void x86_update_hflags(CPUX86State *env)
 {
    uint32_t hflags;
@@ -7774,6 +7779,7 @@ void x86_update_hflags(CPUX86State *env)
     }
     env->hflags = hflags;
 }
+#endif // !defined(WYC)
 
 static Property x86_cpu_properties[] = {
 #ifdef CONFIG_USER_ONLY
@@ -7918,6 +7924,7 @@ static Property x86_cpu_properties[] = {
 static const struct SysemuCPUOps i386_sysemu_ops = {
     .get_memory_mapping = x86_cpu_get_memory_mapping,
     .get_paging_enabled = x86_cpu_get_paging_enabled,
+    //.get_phys_page_debug = ,
     .get_phys_page_attrs_debug = x86_cpu_get_phys_page_attrs_debug,
     .asidx_from_attrs = x86_asidx_from_attrs,
     .get_crash_info = x86_cpu_get_crash_info,
@@ -7925,6 +7932,7 @@ static const struct SysemuCPUOps i386_sysemu_ops = {
     .write_elf64_note = x86_cpu_write_elf64_note,
     .write_elf32_qemunote = x86_cpu_write_elf32_qemunote,
     .write_elf64_qemunote = x86_cpu_write_elf64_qemunote,
+    //.virtio_is_big_endian = ,
     .legacy_vmsd = &vmstate_x86_cpu,
 };
 #endif

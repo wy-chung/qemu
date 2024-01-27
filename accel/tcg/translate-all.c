@@ -218,8 +218,21 @@ void cpu_restore_state_from_tb(CPUState *cpu, TranslationBlock *tb,
     }
 
     cpu->cc->tcg_ops->restore_state_to_opc(cpu, tb, data);
+#if defined(WYC)
+    x86_restore_state_to_opc();
+#endif
 }
 
+/**
+ * cpu_restore_state:
+ * @cpu: the cpu context
+ * @host_pc: the host pc within the translation
+ * @return: true if state was restored, false otherwise
+ *
+ * Attempt to restore the state for a fault occurring in translated
+ * code. If @host_pc is not in translated code no state is
+ * restored and the function returns false.
+ */
 bool cpu_restore_state(CPUState *cpu, uintptr_t host_pc)
 {
     /*
@@ -242,6 +255,17 @@ bool cpu_restore_state(CPUState *cpu, uintptr_t host_pc)
     return false;
 }
 
+/**
+ * cpu_unwind_state_data:
+ * @cpu: the cpu context
+ * @host_pc: the host pc within the translation
+ * @data: output data
+ *
+ * Attempt to load the the unwind state for a host pc occurring in
+ * translated code.  If @host_pc is not in translated code, the
+ * function returns false; otherwise @data is loaded.
+ * This is the same unwind info as given to restore_state_to_opc.
+ */
 bool cpu_unwind_state_data(CPUState *cpu, uintptr_t host_pc, uint64_t *data)
 {
     if (in_code_gen_buffer((const void *)(host_pc - tcg_splitwx_diff))) {
@@ -265,22 +289,22 @@ void page_init(void)
  */
 static int setjmp_gen_code(CPUArchState *env, TranslationBlock *tb,
                            vaddr pc, void *host_pc,
-                           int *max_insns, int64_t *ti)
+                           int *max_insns /* IN/OUT *//*, int64_t *ti*/ /* not used */)
 {
     int ret = sigsetjmp(tcg_ctx->jmp_trans, 0);
     if (unlikely(ret != 0)) {
         return ret;
     }
 
-    tcg_func_start(tcg_ctx);
+    tcg_func_start(tcg_ctx); // initialize tcg_cxt
 
     tcg_ctx->cpu = env_cpu(env);
-    gen_intermediate_code(env_cpu(env), tb, max_insns, pc, host_pc);
+    gen_intermediate_code(env_cpu(env), tb, max_insns, pc, host_pc); // frontend
     assert(tb->size != 0);
     tcg_ctx->cpu = NULL;
     *max_insns = tb->icount;
 
-    return tcg_gen_code(tcg_ctx, tb, pc);
+    return tcg_gen_code(tcg_ctx, tb, pc); // backend
 }
 
 /* Called with mmap_lock held for user mode emulation.  */
@@ -293,7 +317,7 @@ TranslationBlock *tb_gen_code(CPUState *cpu,
     tb_page_addr_t phys_pc, phys_p2;
     tcg_insn_unit *gen_code_buf;
     int gen_code_size, search_size, max_insns;
-    int64_t ti;
+    //int64_t ti;
     void *host_pc;
 
     assert_memory_lock();
@@ -343,7 +367,7 @@ TranslationBlock *tb_gen_code(CPUState *cpu,
     tcg_ctx->page_mask = TARGET_PAGE_MASK;
     tcg_ctx->tlb_dyn_max_bits = CPU_TLB_DYN_MAX_BITS;
     tcg_ctx->tlb_fast_offset =
-        (int)offsetof(ArchCPU, neg.tlb.f) - (int)offsetof(ArchCPU, env);
+        (int)offsetof(ArchCPU, neg.tlb.dFast) - (int)offsetof(ArchCPU, env);
 #endif
     tcg_ctx->insn_start_words = TARGET_INSN_START_WORDS;
 #ifdef TCG_GUEST_DEFAULT_MO
@@ -355,7 +379,7 @@ TranslationBlock *tb_gen_code(CPUState *cpu,
  restart_translate:
     trace_translate_block(tb, pc, tb->tc.ptr);
 
-    gen_code_size = setjmp_gen_code(env, tb, pc, host_pc, &max_insns, &ti);
+    gen_code_size = setjmp_gen_code(env, tb, pc, host_pc, &max_insns/*, &ti*/);
     if (unlikely(gen_code_size < 0)) {
         switch (gen_code_size) {
         case -1:
@@ -619,7 +643,7 @@ void cpu_io_recompile(CPUState *cpu, uintptr_t retaddr)
      */
     n = 1;
     cc = CPU_GET_CLASS(cpu);
-    if (cc->tcg_ops->io_recompile_replay_branch &&
+    if (cc->tcg_ops->io_recompile_replay_branch && // NULL
         cc->tcg_ops->io_recompile_replay_branch(cpu, tb)) {
         cpu_neg(cpu)->icount_decr.u16.low++;
         n = 2;

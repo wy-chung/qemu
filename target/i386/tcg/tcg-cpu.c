@@ -27,6 +27,7 @@
 
 /* Frob eflags into and out of the CPU temporary format.  */
 
+/** @cpu_exec_enter: Callback for cpu_exec preparation */
 static void x86_cpu_exec_enter(CPUState *cs)
 {
     X86CPU *cpu = X86_CPU(cs);
@@ -38,6 +39,7 @@ static void x86_cpu_exec_enter(CPUState *cs)
     env->eflags &= ~(DF_MASK | CC_O | CC_S | CC_Z | CC_A | CC_P | CC_C);
 }
 
+/** @cpu_exec_exit: Callback for cpu_exec cleanup */
 static void x86_cpu_exec_exit(CPUState *cs)
 {
     X86CPU *cpu = X86_CPU(cs);
@@ -46,6 +48,17 @@ static void x86_cpu_exec_exit(CPUState *cs)
     env->eflags = cpu_compute_eflags(env);
 }
 
+/**
+ * @synchronize_from_tb: Synchronize state from a TCG #TranslationBlock
+ *
+ * This is called when we abandon execution of a TB before starting it,
+ * and must set all parts of the CPU state which the previous TB in the
+ * chain may not have updated.
+ * By default, when this is NULL, a call is made to @set_pc(tb->pc).
+ *
+ * If more state needs to be restored, the target must implement a
+ * function to restore all the state, and register it here.
+ */
 static void x86_cpu_synchronize_from_tb(CPUState *cs,
                                         const TranslationBlock *tb)
 {
@@ -61,6 +74,14 @@ static void x86_cpu_synchronize_from_tb(CPUState *cs,
     }
 }
 
+/**
+ * @restore_state_to_opc: Synchronize state from INDEX_op_start_insn
+ *
+ * This is called when we unwind state in the middle of a TB,
+ * usually before raising an exception.  Set all part of the CPU
+ * state which are tracked insn-by-insn in the target-specific
+ * arguments to start_insn, passed as @data.
+ */
 static void x86_restore_state_to_opc(CPUState *cs,
                                      const TranslationBlock *tb,
                                      const uint64_t *data)
@@ -94,6 +115,10 @@ static void x86_restore_state_to_opc(CPUState *cs,
 }
 
 #ifndef CONFIG_USER_ONLY
+/**
+ * @debug_check_breakpoint: return true if the architectural
+ * breakpoint whose PC has matched should really fire.
+ */
 static bool x86_debug_check_breakpoint(CPUState *cs)
 {
     X86CPU *cpu = X86_CPU(cs);

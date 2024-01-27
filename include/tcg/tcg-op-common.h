@@ -649,6 +649,7 @@ static inline void tcg_gen_st_i64(TCGv_i64 arg1, TCGv_ptr arg2,
     tcg_gen_ldst_op_i64(INDEX_op_st_i64, arg1, arg2, offset);
 }
 
+// ret, arg1, arg2 are tcg variables
 static inline void tcg_gen_add_i64(TCGv_i64 ret, TCGv_i64 arg1, TCGv_i64 arg2)
 {
     tcg_gen_op3_i64(INDEX_op_add_i64, ret, arg1, arg2);

@@ -130,13 +130,13 @@ static inline void cpu_to_ ## endian ## size ## s(type *p)\
     glue(endian, _bswaps)(p, size);\
 }
 
-CPU_CONVERT(be, 16, uint16_t)
-CPU_CONVERT(be, 32, uint32_t)
-CPU_CONVERT(be, 64, uint64_t)
+CPU_CONVERT(be, 16, uint16_t);
+CPU_CONVERT(be, 32, uint32_t);
+CPU_CONVERT(be, 64, uint64_t);
 
-CPU_CONVERT(le, 16, uint16_t)
-CPU_CONVERT(le, 32, uint32_t)
-CPU_CONVERT(le, 64, uint64_t)
+CPU_CONVERT(le, 16, uint16_t);
+CPU_CONVERT(le, 32, uint32_t);
+CPU_CONVERT(le, 64, uint64_t);
 
 /*
  * Same as cpu_to_le{16,32,64}, except that gcc will figure the result is

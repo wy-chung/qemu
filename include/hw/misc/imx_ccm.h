@@ -28,7 +28,7 @@
 #define PLL_MFN(x)              (((x) & 0x3ff) << 0)
 
 #define TYPE_IMX_CCM "imx.ccm"
-OBJECT_DECLARE_TYPE(IMXCCMState, IMXCCMClass, IMX_CCM)
+OBJECT_DECLARE_TYPE(IMXCCMState, IMXCCMClass, IMX_CCM);
 
 struct IMXCCMState {
     /* <private> */

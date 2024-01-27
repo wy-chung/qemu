@@ -31,7 +31,7 @@
 #include "trace.h"
 #include "qom/object.h"
 
-OBJECT_DECLARE_TYPE(MouseState, ADBMouseClass, ADB_MOUSE)
+OBJECT_DECLARE_TYPE(MouseState, ADBMouseClass, ADB_MOUSE);
 
 struct MouseState {
     /*< public >*/

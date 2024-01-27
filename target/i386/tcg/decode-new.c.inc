@@ -45,6 +45,8 @@
  * as "d" or "q".  These have to be fixed for the decoder to work correctly.
  */
 
+// this is included by translate.c
+
 #define X86_OP_NONE { 0 },
 
 #define X86_OP_GROUP3(op, op0_, s0_, op1_, s1_, op2_, s2_, ...) { \
@@ -1042,7 +1044,7 @@ static int decode_modrm(DisasContext *s, CPUX86State *env, X86DecodedInsn *decod
     } else {
         op->has_ea = true;
         op->n = -1;
-        decode->mem = gen_lea_modrm_0(env, s, get_modrm(s, env));
+        gen_lea_modrm_0(&decode->mem, env, s, get_modrm(s, env));
     }
     return modrm;
 }
@@ -1823,6 +1825,9 @@ static void disas_insn_new(DisasContext *s, CPUState *cpu, int b)
     if (decode.e.special == X86_SPECIAL_MMX &&
         !(s->prefix & (PREFIX_REPZ | PREFIX_REPNZ | PREFIX_DATA))) {
         gen_helper_enter_mmx(cpu_env);
+#if defined(WYC)
+        helper_enter_mmx();
+#endif
     }
 
     if (decode.op[0].has_ea || decode.op[1].has_ea || decode.op[2].has_ea) {

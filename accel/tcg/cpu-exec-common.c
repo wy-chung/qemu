@@ -39,7 +39,7 @@ void cpu_loop_exit(CPUState *cpu)
     cpu->can_do_io = 1;
     /* Undo any setting in generated code.  */
     qemu_plugin_disable_mem_helpers(cpu);
-    siglongjmp(cpu->jmp_env, 1);
+    siglongjmp(cpu->jmp_env, 1); // jump to cpu_exec_setjmp
 }
 
 void cpu_loop_exit_restore(CPUState *cpu, uintptr_t pc)

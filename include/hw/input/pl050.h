@@ -22,7 +22,7 @@ struct PL050DeviceClass {
 };
 
 #define TYPE_PL050 "pl050"
-OBJECT_DECLARE_TYPE(PL050State, PL050DeviceClass, PL050)
+OBJECT_DECLARE_TYPE(PL050State, PL050DeviceClass, PL050);
 
 struct PL050State {
     SysBusDevice parent_obj;

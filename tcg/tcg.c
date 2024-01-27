@@ -1466,6 +1466,7 @@ void tcg_prologue_init(TCGContext *s)
     tcg_region_prologue_set(s);
 }
 
+// initialize s
 void tcg_func_start(TCGContext *s)
 {
     tcg_pool_reset(s);

@@ -132,7 +132,7 @@ struct PCMachineClass {
 };
 
 #define TYPE_PC_MACHINE "generic-pc-machine"
-OBJECT_DECLARE_TYPE(PCMachineState, PCMachineClass, PC_MACHINE)
+OBJECT_DECLARE_TYPE(PCMachineState, PCMachineClass, PC_MACHINE);
 
 /* ioapic.c */
 

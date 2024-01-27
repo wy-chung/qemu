@@ -39,8 +39,7 @@
 
 #define TYPE_CRYPTODEV_BACKEND "cryptodev-backend"
 
-OBJECT_DECLARE_TYPE(CryptoDevBackend, CryptoDevBackendClass,
-                    CRYPTODEV_BACKEND)
+OBJECT_DECLARE_TYPE(CryptoDevBackend, CryptoDevBackendClass, CRYPTODEV_BACKEND);
 
 
 #define MAX_CRYPTO_QUEUE_NUM  64

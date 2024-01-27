@@ -19,8 +19,7 @@
 typedef enum SSICSMode SSICSMode;
 
 #define TYPE_SSI_PERIPHERAL "ssi-peripheral"
-OBJECT_DECLARE_TYPE(SSIPeripheral, SSIPeripheralClass,
-                    SSI_PERIPHERAL)
+OBJECT_DECLARE_TYPE(SSIPeripheral, SSIPeripheralClass, SSI_PERIPHERAL);
 
 #define SSI_GPIO_CS "ssi-gpio-cs"
 

@@ -62,7 +62,7 @@ struct PS2State {
 };
 
 #define TYPE_PS2_DEVICE "ps2-device"
-OBJECT_DECLARE_TYPE(PS2State, PS2DeviceClass, PS2_DEVICE)
+OBJECT_DECLARE_TYPE(PS2State, PS2DeviceClass, PS2_DEVICE);
 
 struct PS2KbdState {
     PS2State parent_obj;

@@ -72,11 +72,13 @@
     }
 
 #define QEMU_BUILD_BUG_MSG(x, msg) _Static_assert(!(x), msg)
-
 #define QEMU_BUILD_BUG_ON(x) QEMU_BUILD_BUG_MSG(x, "not expecting: " #x)
 
 #define QEMU_BUILD_BUG_ON_ZERO(x) (sizeof(QEMU_BUILD_BUG_ON_STRUCT(x)) - \
                                    sizeof(QEMU_BUILD_BUG_ON_STRUCT(x)))
+
+#define QEMU_BUILD_ASSERT_MSG(x, msg) _Static_assert((x), msg)
+#define QEMU_BUILD_ASSERT(x) QEMU_BUILD_ASSERT_MSG(x, "expecting: " #x)
 
 #if !defined(__clang__) && defined(_WIN32)
 /*

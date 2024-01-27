@@ -82,7 +82,7 @@ typedef struct VirtQueueElement
 #define VIRTIO_CONFIG_IRQ_IDX -1
 
 #define TYPE_VIRTIO_DEVICE "virtio-device"
-OBJECT_DECLARE_TYPE(VirtIODevice, VirtioDeviceClass, VIRTIO_DEVICE)
+OBJECT_DECLARE_TYPE(VirtIODevice, VirtioDeviceClass, VIRTIO_DEVICE);
 
 typedef struct {
     int virtio_bit;

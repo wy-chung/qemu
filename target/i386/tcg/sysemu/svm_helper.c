@@ -25,7 +25,7 @@
 #include "exec/cpu_ldst.h"
 #include "tcg/helper-tcg.h"
 
-/* Secure Virtual Machine helpers */
+/* svm(Secure Virtual Machine) helpers */
 
 static void svm_save_seg(CPUX86State *env, int mmu_idx, hwaddr addr,
                          const SegmentCache *sc)
@@ -283,7 +283,7 @@ void helper_vmrun(CPUX86State *env, int aflag, int next_eip_addend)
 
         env->nested_pg_mode = get_pg_mode(env) & PG_MODE_SVM_MASK;
 
-        tlb_flush_by_mmuidx(cs, 1 << MMU_NESTED_IDX);
+        tlb_flush_by_mmuidxmap(cs, 1 << MMU_NESTED_IDX);
     }
 
     /* enable intercepts */
@@ -412,7 +412,7 @@ void helper_vmrun(CPUX86State *env, int aflag, int next_eip_addend)
         case SVM_EVTINJ_TYPE_INTR:
             cs->exception_index = vector;
             env->error_code = event_inj_err;
-            env->exception_is_int = 0;
+            env->exception_is_int = false;
             env->exception_next_eip = -1;
             qemu_log_mask(CPU_LOG_TB_IN_ASM, "INTR");
             /* XXX: is it always correct? */
@@ -421,7 +421,7 @@ void helper_vmrun(CPUX86State *env, int aflag, int next_eip_addend)
         case SVM_EVTINJ_TYPE_NMI:
             cs->exception_index = EXCP02_NMI;
             env->error_code = event_inj_err;
-            env->exception_is_int = 0;
+            env->exception_is_int = false;
             env->exception_next_eip = env->eip;
             qemu_log_mask(CPU_LOG_TB_IN_ASM, "NMI");
             cpu_loop_exit(cs);
@@ -432,7 +432,7 @@ void helper_vmrun(CPUX86State *env, int aflag, int next_eip_addend)
             }
             cs->exception_index = vector;
             env->error_code = event_inj_err;
-            env->exception_is_int = 0;
+            env->exception_is_int = false;
             env->exception_next_eip = -1;
             qemu_log_mask(CPU_LOG_TB_IN_ASM, "EXEPT");
             cpu_loop_exit(cs);
@@ -440,7 +440,7 @@ void helper_vmrun(CPUX86State *env, int aflag, int next_eip_addend)
         case SVM_EVTINJ_TYPE_SOFT:
             cs->exception_index = vector;
             env->error_code = event_inj_err;
-            env->exception_is_int = 1;
+            env->exception_is_int = true;
             env->exception_next_eip = env->eip;
             qemu_log_mask(CPU_LOG_TB_IN_ASM, "SOFT");
             cpu_loop_exit(cs);
@@ -739,7 +739,7 @@ void do_vmexit(CPUX86State *env)
                  env->vm_vmcb + offsetof(struct vmcb, control.int_state), 0);
     }
     env->hflags2 &= ~HF2_NPT_MASK;
-    tlb_flush_by_mmuidx(cs, 1 << MMU_NESTED_IDX);
+    tlb_flush_by_mmuidxmap(cs, 1 << MMU_NESTED_IDX);
 
     /* Save the VM state in the vmcb */
     svm_save_seg(env, MMU_PHYS_IDX,

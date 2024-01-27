@@ -26,8 +26,7 @@
 #include "block/aio.h"
 
 #define TYPE_QIO_CHANNEL "qio-channel"
-OBJECT_DECLARE_TYPE(QIOChannel, QIOChannelClass,
-                    QIO_CHANNEL)
+OBJECT_DECLARE_TYPE(QIOChannel, QIOChannelClass, QIO_CHANNEL);
 
 
 #define QIO_CHANNEL_ERR_BLOCK -2

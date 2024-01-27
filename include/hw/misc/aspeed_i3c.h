@@ -14,7 +14,7 @@
 
 #define TYPE_ASPEED_I3C "aspeed.i3c"
 #define TYPE_ASPEED_I3C_DEVICE "aspeed.i3c.device"
-OBJECT_DECLARE_TYPE(AspeedI3CState, AspeedI3CClass, ASPEED_I3C)
+OBJECT_DECLARE_TYPE(AspeedI3CState, AspeedI3CClass, ASPEED_I3C);
 
 #define ASPEED_I3C_NR_REGS (0x70 >> 2)
 #define ASPEED_I3C_DEVICE_NR_REGS (0x300 >> 2)

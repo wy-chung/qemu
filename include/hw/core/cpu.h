@@ -58,9 +58,10 @@ typedef int (*WriteCoreDumpFunction)(const void *buf, size_t size,
  * has a cached value for the class in cs->cc which is set up in
  * cpu_exec_realizefn() for use in hot code paths.
  */
+#if !defined(WYC)
 typedef struct CPUClass CPUClass;
-DECLARE_CLASS_CHECKERS(CPUClass, CPU,
-                       TYPE_CPU)
+#endif
+DECLARE_CLASS_CHECKERS(CPUClass, CPU, TYPE_CPU);
 
 /**
  * OBJECT_DECLARE_CPU_TYPE:
@@ -78,14 +79,14 @@ DECLARE_CLASS_CHECKERS(CPUClass, CPU,
  */
 #define OBJECT_DECLARE_CPU_TYPE(CpuInstanceType, CpuClassType, CPU_MODULE_OBJ_NAME) \
     typedef struct ArchCPU CpuInstanceType; \
-    OBJECT_DECLARE_TYPE(ArchCPU, CpuClassType, CPU_MODULE_OBJ_NAME);
+    OBJECT_DECLARE_TYPE(ArchCPU, CpuClassType, CPU_MODULE_OBJ_NAME) //wyc semicolon removed
 
 typedef enum MMUAccessType {
     MMU_DATA_LOAD  = 0,
     MMU_DATA_STORE = 1,
-    MMU_INST_FETCH = 2
-#define MMU_ACCESS_COUNT 3
+    MMU_INST_FETCH = 2,
 } MMUAccessType;
+#define MMU_ACCESS_COUNT (MMU_INST_FETCH + 1)
 
 typedef struct CPUWatchpoint CPUWatchpoint;
 
@@ -253,9 +254,9 @@ typedef union {
     vaddr         target_ptr;
 } run_on_cpu_data;
 
-#define RUN_ON_CPU_HOST_PTR(p)    ((run_on_cpu_data){.host_ptr = (p)})
 #define RUN_ON_CPU_HOST_INT(i)    ((run_on_cpu_data){.host_int = (i)})
 #define RUN_ON_CPU_HOST_ULONG(ul) ((run_on_cpu_data){.host_ulong = (ul)})
+#define RUN_ON_CPU_HOST_PTR(p)    ((run_on_cpu_data){.host_ptr = (p)})
 #define RUN_ON_CPU_TARGET_PTR(v)  ((run_on_cpu_data){.target_ptr = (v)})
 #define RUN_ON_CPU_NULL           RUN_ON_CPU_HOST_PTR(NULL)
 
@@ -366,7 +367,7 @@ struct CPUState {
     QSIMPLEQ_HEAD(, qemu_work_item) work_list;
 
     CPUAddressSpace *cpu_ases;
-    int num_ases;
+    int num_ases;	// number of address spaces
     AddressSpace *as;
     MemoryRegion *memory;
 
@@ -416,7 +417,7 @@ struct CPUState {
     /* TODO Move common fields from CPUArchState here. */
     int cpu_index;
     int cluster_index;
-    uint32_t tcg_cflags;
+    uint32_t tcg_cflags;                // #define CF_PCREL 0x00200000
     uint32_t halted;
     uint32_t can_do_io;
     int32_t exception_index;
@@ -797,7 +798,6 @@ CPUState *cpu_by_arch_id(int64_t id);
  *
  * Invokes the interrupt handler.
  */
-
 void cpu_interrupt(CPUState *cpu, int mask);
 
 /**

@@ -74,7 +74,7 @@ enum {
 };
 
 #define TYPE_DEVICE "device"
-OBJECT_DECLARE_TYPE(DeviceState, DeviceClass, DEVICE)
+OBJECT_DECLARE_TYPE(DeviceState, DeviceClass, DEVICE);
 
 typedef enum DeviceCategory {
     DEVICE_CATEGORY_BRIDGE,

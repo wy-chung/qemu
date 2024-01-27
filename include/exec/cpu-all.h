@@ -158,7 +158,7 @@ static inline void stl_phys_notdirty(AddressSpace *as, hwaddr addr, uint32_t val
 
 /* page related stuff */
 
-#ifdef TARGET_PAGE_BITS_VARY
+#ifdef TARGET_PAGE_BITS_VARY // only for arm and mips
 # include "exec/page-vary.h"
 extern const TargetPageBits target_page;
 #ifdef CONFIG_DEBUG_TCG
@@ -171,7 +171,7 @@ extern const TargetPageBits target_page;
 #endif
 #define TARGET_PAGE_SIZE   (-(int)TARGET_PAGE_MASK)
 #else
-#define TARGET_PAGE_BITS_MIN TARGET_PAGE_BITS
+#define TARGET_PAGE_BITS_MIN TARGET_PAGE_BITS // 12
 #define TARGET_PAGE_SIZE   (1 << TARGET_PAGE_BITS)
 #define TARGET_PAGE_MASK   ((target_long)-1 << TARGET_PAGE_BITS)
 #endif
@@ -378,7 +378,7 @@ CPUArchState *cpu_copy(CPUArchState *env);
 
 /*
  * Flags stored in CPUTLBEntryFull.slow_flags[x].
- * TLB_FORCE_SLOW must be set in CPUTLBEntry.addr_idx[x].
+ * TLB_FORCE_SLOW must be set in CPUTLBEntryFast.addr_idx[x].
  */
 /* Set if TLB entry requires byte swap.  */
 #define TLB_BSWAP            (1 << 0)
@@ -388,14 +388,14 @@ CPUArchState *cpu_copy(CPUArchState *env);
 #define TLB_SLOW_FLAGS_MASK  (TLB_BSWAP | TLB_WATCHPOINT)
 
 /* The two sets of flags must not overlap. */
-QEMU_BUILD_BUG_ON(TLB_FLAGS_MASK & TLB_SLOW_FLAGS_MASK);
+QEMU_BUILD_ASSERT((TLB_FLAGS_MASK & TLB_SLOW_FLAGS_MASK) == 0);
 
 /**
  * tlb_hit_page: return true if page aligned @addr is a hit against the
  * TLB entry @tlb_addr
  *
  * @addr: virtual address to test (must be page aligned)
- * @tlb_addr: TLB entry address (a CPUTLBEntry addr_read/write/code value)
+ * @tlb_addr: TLB entry address (a CPUTLBEntryFast addr_read/write/code value)
  */
 static inline bool tlb_hit_page(uint64_t tlb_addr, vaddr addr)
 {
@@ -406,7 +406,7 @@ static inline bool tlb_hit_page(uint64_t tlb_addr, vaddr addr)
  * tlb_hit: return true if @addr is a hit against the TLB entry @tlb_addr
  *
  * @addr: virtual address to test (need not be page aligned)
- * @tlb_addr: TLB entry address (a CPUTLBEntry addr_read/write/code value)
+ * @tlb_addr: TLB entry address (a CPUTLBEntryFast addr_read/write/code value)
  */
 static inline bool tlb_hit(uint64_t tlb_addr, vaddr addr)
 {

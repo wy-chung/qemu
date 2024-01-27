@@ -15,8 +15,8 @@
 #include "qemu/host-utils.h"
 
 typedef enum MemOp {
-    MO_8     = 0,
-    MO_16    = 1,
+    MO_8     = 0,	// 1 byte
+    MO_16    = 1,	// 2 bytes
     MO_32    = 2,
     MO_64    = 3,
     MO_128   = 4,
@@ -70,7 +70,7 @@ typedef enum MemOp {
     MO_ALIGN_16 = 4 << MO_ASHIFT,
     MO_ALIGN_32 = 5 << MO_ASHIFT,
     MO_ALIGN_64 = 6 << MO_ASHIFT,
-    MO_ALIGN    = MO_AMASK,
+    MO_ALIGN    = MO_AMASK,	// the alignment size is the size of a memory access
 
     /*
      * MO_ATOM_* describes the atomicity requirements of the operation:

@@ -76,34 +76,21 @@ static inline void fuzz_dma_read_cb(size_t addr,
 
 extern unsigned int global_dirty_tracking;
 
-typedef struct MemoryRegionOps MemoryRegionOps;
-
 struct ReservedRegion {
     hwaddr low;
     hwaddr high;
     unsigned type;
 };
 
-/**
- * struct MemoryRegionSection: describes a fragment of a #MemoryRegion
- *
- * @mr: the region, or %NULL if empty
- * @fv: the flat view of the address space the region is mapped in
- * @offset_within_region: the beginning of the section, relative to @mr's start
- * @size: the size of the section; will not exceed @mr's boundaries
- * @offset_within_address_space: the address of the first byte of the section
- *     relative to the region's address space
- * @readonly: writes to this section are ignored
- * @nonvolatile: this section is non-volatile
- */
-struct MemoryRegionSection {
-    Int128 size;
-    MemoryRegion *mr;
-    FlatView *fv;
-    hwaddr offset_within_region;
-    hwaddr offset_within_address_space;
-    bool readonly;
-    bool nonvolatile;
+struct MemoryRegionSection {	// describes a fragment of a #MemoryRegion
+    Int128 size;	// the size of the section; will not exceed @mr's boundaries
+    MemoryRegion *mr;	// the region, or %NULL if empty
+    FlatView *fv;	// the flat view of the address space the region is mapped in
+    hwaddr offset_within_region;	// the beginning of the section, relative to @mr's start
+    hwaddr offset_within_address_space;	// the address of the first byte of the section
+    					// relative to the region's address space
+    bool readonly;	// writes to this section are ignored
+    bool nonvolatile;	// this section is non-volatile
 };
 
 typedef struct IOMMUTLBEntry IOMMUTLBEntry;
@@ -753,21 +740,25 @@ typedef struct MemoryRegionIoeventfd MemoryRegionIoeventfd;
  *
  * A struct representing a memory region.
  */
+#if !defined(WYC)
+typedef struct MemoryRegionOps MemoryRegionOps;
+#endif
+
 struct MemoryRegion {
     Object parent_obj;
 
     /* private: */
 
     /* The following fields should fit in a cache line */
-    bool romd_mode;
+    bool rom_device;
+    bool romd_mode; // a rom device that supports direct read
     bool ram;
     bool subpage;
     bool readonly; /* For RAM regions */
     bool nonvolatile;
-    bool rom_device;
     bool flush_coalesced_mmio;
-    uint8_t dirty_log_mask;
     bool is_iommu;
+    uint8_t dirty_log_mask;
     RAMBlock *ram_block;
     Object *owner;
     /* owner as TYPE_DEVICE. Used for re-entrancy checks in MR access hotpath */

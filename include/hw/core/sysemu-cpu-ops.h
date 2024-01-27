@@ -18,16 +18,16 @@
 typedef struct SysemuCPUOps {
     /**
      * @get_memory_mapping: Callback for obtaining the memory mappings.
-     */
+     */ //x86_cpu_get_memory_mapping
     void (*get_memory_mapping)(CPUState *cpu, MemoryMappingList *list,
                                Error **errp);
     /**
      * @get_paging_enabled: Callback for inquiring whether paging is enabled.
-     */
+     */ //x86_cpu_get_paging_enabled
     bool (*get_paging_enabled)(const CPUState *cpu);
     /**
      * @get_phys_page_debug: Callback for obtaining a physical address.
-     */
+     */ // NULL
     hwaddr (*get_phys_page_debug)(CPUState *cpu, vaddr addr);
     /**
      * @get_phys_page_attrs_debug: Callback for obtaining a physical address
@@ -35,41 +35,41 @@ typedef struct SysemuCPUOps {
      *       access.
      * CPUs which use memory transaction attributes should implement this
      * instead of get_phys_page_debug.
-     */
+     */ // x86_cpu_get_phys_page_attrs_debug
     hwaddr (*get_phys_page_attrs_debug)(CPUState *cpu, vaddr addr,
                                         MemTxAttrs *attrs);
     /**
      * @asidx_from_attrs: Callback to return the CPU AddressSpace to use for
      *       a memory access with the specified memory transaction attributes.
-     */
+     */ // x86_asidx_from_attrs
     int (*asidx_from_attrs)(CPUState *cpu, MemTxAttrs attrs);
     /**
      * @get_crash_info: Callback for reporting guest crash information in
      * GUEST_PANICKED events.
-     */
+     */ // x86_cpu_get_crash_info
     GuestPanicInformation* (*get_crash_info)(CPUState *cpu);
     /**
      * @write_elf32_note: Callback for writing a CPU-specific ELF note to a
      * 32-bit VM coredump.
-     */
+     */ // x86_cpu_write_elf32_note
     int (*write_elf32_note)(WriteCoreDumpFunction f, CPUState *cpu,
                             int cpuid, DumpState *s);
     /**
      * @write_elf64_note: Callback for writing a CPU-specific ELF note to a
      * 64-bit VM coredump.
-     */
+     */ // x86_cpu_write_elf64_note
     int (*write_elf64_note)(WriteCoreDumpFunction f, CPUState *cpu,
                             int cpuid, DumpState *s);
     /**
      * @write_elf32_qemunote: Callback for writing a CPU- and QEMU-specific ELF
      * note to a 32-bit VM coredump.
-     */
+     */ // x86_cpu_write_elf32_qemunote
     int (*write_elf32_qemunote)(WriteCoreDumpFunction f, CPUState *cpu,
                                 DumpState *s);
     /**
      * @write_elf64_qemunote: Callback for writing a CPU- and QEMU-specific ELF
      * note to a 64-bit VM coredump.
-     */
+     */ // x86_cpu_write_elf64_qemunote
     int (*write_elf64_qemunote)(WriteCoreDumpFunction f, CPUState *cpu,
                                 DumpState *s);
     /**
@@ -78,14 +78,14 @@ typedef struct SysemuCPUOps {
      * Non-configurable CPUs can use the default implementation of this method.
      * This method should not be used by any callers other than the pre-1.0
      * virtio devices.
-     */
+     */ // NULL
     bool (*virtio_is_big_endian)(CPUState *cpu);
 
     /**
      * @legacy_vmsd: Legacy state for migration.
      *               Do not use in new targets, use #DeviceClass::vmsd instead.
      */
-    const VMStateDescription *legacy_vmsd;
+    const VMStateDescription *legacy_vmsd; // vmstate_x86_cpu
 
 } SysemuCPUOps;
 

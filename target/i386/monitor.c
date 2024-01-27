@@ -607,12 +607,12 @@ static target_long monitor_get_pc(Monitor *mon, const struct MonitorDef *md,
     return env->eip + env->segs[R_CS].base;
 }
 
-const MonitorDef monitor_defs[] = {
 #define SEG(name, seg) \
     { name, offsetof(CPUX86State, segs[seg].selector), NULL, MD_I32 },\
     { name ".base", offsetof(CPUX86State, segs[seg].base) },\
     { name ".limit", offsetof(CPUX86State, segs[seg].limit), NULL, MD_I32 },
 
+const MonitorDef monitor_defs[] = {
     { "eax", offsetof(CPUX86State, regs[0]) },
     { "ecx", offsetof(CPUX86State, regs[1]) },
     { "edx", offsetof(CPUX86State, regs[2]) },

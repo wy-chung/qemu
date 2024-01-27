@@ -73,7 +73,13 @@ struct rcu_reader_data {
     NotifierList force_rcu;
 };
 
+#if !defined(WYC)
 QEMU_DECLARE_CO_TLS(struct rcu_reader_data, rcu_reader)
+#else
+__attribute__((noinline)) struct rcu_reader_data get_rcu_reader(void);
+__attribute__((noinline)) void set_rcu_reader(struct rcu_reader_data v);
+__attribute__((noinline)) struct rcu_reader_data *get_ptr_rcu_reader(void);
+#endif
 
 static inline void rcu_read_lock(void)
 {

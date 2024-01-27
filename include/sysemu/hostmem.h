@@ -21,8 +21,7 @@
 #include "qemu/thread-context.h"
 
 #define TYPE_MEMORY_BACKEND "memory-backend"
-OBJECT_DECLARE_TYPE(HostMemoryBackend, HostMemoryBackendClass,
-                    MEMORY_BACKEND)
+OBJECT_DECLARE_TYPE(HostMemoryBackend, HostMemoryBackendClass, MEMORY_BACKEND);
 
 /* hostmem-ram.c */
 /**

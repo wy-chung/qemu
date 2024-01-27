@@ -59,7 +59,7 @@ typedef struct Pca954xClass {
 } Pca954xClass;
 
 #define TYPE_PCA954X "pca954x"
-OBJECT_DECLARE_TYPE(Pca954xState, Pca954xClass, PCA954X)
+OBJECT_DECLARE_TYPE(Pca954xState, Pca954xClass, PCA954X);
 
 /*
  * For each channel, if it's enabled, recursively call match on those children.

@@ -34,6 +34,7 @@
 #define MMU_USER_IDX     3
 #define MMU_PHYS_IDX     4
 #define TARGET_INSN_START_EXTRA_WORDS 1
+#define tlb_flush_by_mmuidx tlb_flush_by_mmuidxmap  //wyc
 
 /* Hardware exceptions, interrupts, faults, and traps.  */
 #define EXCP_HPMC                1  /* high priority machine check */

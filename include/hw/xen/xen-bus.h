@@ -53,7 +53,7 @@ struct XenDeviceClass {
 };
 
 #define TYPE_XEN_DEVICE "xen-device"
-OBJECT_DECLARE_TYPE(XenDevice, XenDeviceClass, XEN_DEVICE)
+OBJECT_DECLARE_TYPE(XenDevice, XenDeviceClass, XEN_DEVICE);
 
 struct XenBus {
     BusState qbus;
@@ -70,8 +70,7 @@ struct XenBusClass {
 };
 
 #define TYPE_XEN_BUS "xen-bus"
-OBJECT_DECLARE_TYPE(XenBus, XenBusClass,
-                    XEN_BUS)
+OBJECT_DECLARE_TYPE(XenBus, XenBusClass, XEN_BUS);
 
 void xen_bus_init(void);
 

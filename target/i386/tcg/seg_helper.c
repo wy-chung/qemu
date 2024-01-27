@@ -85,6 +85,10 @@ static inline int load_segment_ra(CPUX86State *env, uint32_t *e1_ptr,
     ptr = dt->base + index;
     *e1_ptr = cpu_ldl_kernel_ra(env, ptr, retaddr);
     *e2_ptr = cpu_ldl_kernel_ra(env, ptr + 4, retaddr);
+#if defined(WYC)
+    *e1_ptr = cpu_ldl_le_mmuidx_ra(env, ptr,     cpu_mmu_index_kernel(env), retaddr);
+    *e2_ptr = cpu_ldl_le_mmuidx_ra(env, ptr + 4, cpu_mmu_index_kernel(env), retaddr);
+#endif
     return 0;
 }
 
@@ -592,7 +596,7 @@ int exception_has_error_code(int intno)
 #define POPL(ssp, sp, sp_mask, val) POPL_RA(ssp, sp, sp_mask, val, 0)
 
 /* protected mode interrupt */
-static void do_interrupt_protected(CPUX86State *env, int intno, int is_int,
+static void do_interrupt_protected(CPUX86State *env, int intno, bool is_int,
                                    int error_code, unsigned int next_eip,
                                    int is_hw)
 {
@@ -860,7 +864,7 @@ static inline target_ulong get_rsp_from_tss(CPUX86State *env, int level)
 }
 
 /* 64 bit interrupt */
-static void do_interrupt64(CPUX86State *env, int intno, int is_int,
+static void do_interrupt64(CPUX86State *env, int intno, bool is_int,
                            int error_code, target_ulong next_eip, int is_hw)
 {
     SegmentCache *dt;
@@ -1036,7 +1040,7 @@ void helper_sysret(CPUX86State *env, int dflag)
 }
 
 /* real mode interrupt */
-static void do_interrupt_real(CPUX86State *env, int intno, int is_int,
+static void do_interrupt_real(CPUX86State *env, int intno, bool is_int,
                               int error_code, unsigned int next_eip)
 {
     SegmentCache *dt;
@@ -1079,7 +1083,7 @@ static void do_interrupt_real(CPUX86State *env, int intno, int is_int,
  * the int instruction. next_eip is the env->eip value AFTER the interrupt
  * instruction. It is only relevant if is_int is TRUE.
  */
-void do_interrupt_all(X86CPU *cpu, int intno, int is_int,
+void do_interrupt_all(X86CPU *cpu, int intno, bool is_int,
                       int error_code, target_ulong next_eip, int is_hw)
 {
     CPUX86State *env = &cpu->env;
@@ -1298,7 +1302,7 @@ void helper_load_seg(CPUX86State *env, int seg_reg, int selector)
             ) {
             raise_exception_err_ra(env, EXCP0D_GPF, 0, GETPC());
         }
-        cpu_x86_load_seg_cache(env, seg_reg, selector, 0, 0, 0);
+        cpu_x86_load_seg_cache(env, seg_reg, selector, 0/*base*/, 0/*limit*/, 0/*flag*/);
     } else {
 
         if (selector & 0x4) {
@@ -1311,17 +1315,21 @@ void helper_load_seg(CPUX86State *env, int seg_reg, int selector)
             raise_exception_err_ra(env, EXCP0D_GPF, selector & 0xfffc, GETPC());
         }
         ptr = dt->base + index;
-        e1 = cpu_ldl_kernel_ra(env, ptr, GETPC());
+        e1 = cpu_ldl_kernel_ra(env, ptr,     GETPC()); // ra means return address
         e2 = cpu_ldl_kernel_ra(env, ptr + 4, GETPC());
+#if defined(WYC)
+        e1 = cpu_ldl_le_mmuidx_ra(env, ptr,     cpu_mmu_index_kernel(env), GETPC());
+        e2 = cpu_ldl_le_mmuidx_ra(env, ptr + 4, cpu_mmu_index_kernel(env), GETPC());
+#endif
 
-        if (!(e2 & DESC_S_MASK)) {
+        if (!(e2 & DESC_S_MASK)) { // system descriptor
             raise_exception_err_ra(env, EXCP0D_GPF, selector & 0xfffc, GETPC());
         }
-        rpl = selector & 3;
-        dpl = (e2 >> DESC_DPL_SHIFT) & 3;
+        rpl = selector & 3; // requested privilege level
+        dpl = (e2 >> DESC_DPL_SHIFT) & 3; // descriptor privilege level
         if (seg_reg == R_SS) {
             /* must be writable segment */
-            if ((e2 & DESC_CS_MASK) || !(e2 & DESC_W_MASK)) {
+            if ((e2 & DESC_CS_MASK) || !(e2 & DESC_W_MASK)) { // code segment or read-only
                 raise_exception_err_ra(env, EXCP0D_GPF, selector & 0xfffc, GETPC());
             }
             if (rpl != cpl || dpl != cpl) {
@@ -1329,11 +1337,11 @@ void helper_load_seg(CPUX86State *env, int seg_reg, int selector)
             }
         } else {
             /* must be readable segment */
-            if ((e2 & (DESC_CS_MASK | DESC_R_MASK)) == DESC_CS_MASK) {
+            if ((e2 & (DESC_CS_MASK | DESC_R_MASK)) == DESC_CS_MASK) { // not readable code segment
                 raise_exception_err_ra(env, EXCP0D_GPF, selector & 0xfffc, GETPC());
             }
 
-            if (!(e2 & DESC_CS_MASK) || !(e2 & DESC_C_MASK)) {
+            if (!(e2 & DESC_CS_MASK) || !(e2 & DESC_C_MASK)) { // not cs or not conforming
                 /* if not conforming code, test rights */
                 if (dpl < cpl || dpl < rpl) {
                     raise_exception_err_ra(env, EXCP0D_GPF, selector & 0xfffc, GETPC());
@@ -1341,7 +1349,7 @@ void helper_load_seg(CPUX86State *env, int seg_reg, int selector)
             }
         }
 
-        if (!(e2 & DESC_P_MASK)) {
+        if (!(e2 & DESC_P_MASK)) { // segment not present
             if (seg_reg == R_SS) {
                 raise_exception_err_ra(env, EXCP0C_STACK, selector & 0xfffc, GETPC());
             } else {
@@ -1354,7 +1362,7 @@ void helper_load_seg(CPUX86State *env, int seg_reg, int selector)
             e2 |= DESC_A_MASK;
             cpu_stl_kernel_ra(env, ptr + 4, e2, GETPC());
         }
-
+        //}
         cpu_x86_load_seg_cache(env, seg_reg, selector,
                        get_seg_base(e1, e2),
                        get_seg_limit(e1, e2),

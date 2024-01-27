@@ -35,6 +35,14 @@
 #include "trace.h"
 #include "qemu/plugin.h"
 
+/**
+ * cpu_by_arch_id:
+ * @id: Guest-exposed CPU ID of the CPU to obtain.
+ *
+ * Get a CPU with matching @id.
+ *
+ * Returns: The CPU or %NULL if there is no matching CPU.
+ */
 CPUState *cpu_by_arch_id(int64_t id)
 {
     CPUState *cpu;
@@ -49,11 +57,27 @@ CPUState *cpu_by_arch_id(int64_t id)
     return NULL;
 }
 
+/**
+ * cpu_exists:
+ * @id: Guest-exposed CPU ID to lookup.
+ *
+ * Search for CPU with specified ID.
+ *
+ * Returns: %true - CPU is found, %false - CPU isn't found.
+ */
 bool cpu_exists(int64_t id)
 {
     return !!cpu_by_arch_id(id);
 }
 
+/**
+ * cpu_create:
+ * @typename: The CPU type.
+ *
+ * Instantiates a CPU and realizes the CPU.
+ *
+ * Returns: A #CPUState or %NULL if an error occurred.
+ */
 CPUState *cpu_create(const char *typename)
 {
     Error *err = NULL;
@@ -66,6 +90,13 @@ CPUState *cpu_create(const char *typename)
     return cpu;
 }
 
+/**
+ * cpu_reset_interrupt:
+ * @cpu: The CPU to clear the interrupt on.
+ * @mask: The interrupt mask to clear.
+ *
+ * Resets interrupts on the vCPU @cpu.
+ */
 /* Resetting the IRQ comes from across the code base so we take the
  * BQL here if we need to.  cpu_interrupt assumes it is held.*/
 void cpu_reset_interrupt(CPUState *cpu, int mask)
@@ -81,6 +112,12 @@ void cpu_reset_interrupt(CPUState *cpu, int mask)
     }
 }
 
+/**
+ * cpu_exit:
+ * @cpu: The CPU to exit.
+ *
+ * Requests the CPU @cpu to exit execution.
+ */
 void cpu_exit(CPUState *cpu)
 {
     qatomic_set(&cpu->exit_request, 1);
@@ -99,6 +136,13 @@ static int cpu_common_gdb_write_register(CPUState *cpu, uint8_t *buf, int reg)
     return 0;
 }
 
+/**
+ * cpu_dump_state:
+ * @cpu: The CPU whose state is to be dumped.
+ * @f: If non-null, dump to this stream, else to current print sink.
+ *
+ * Dumps CPU state.
+ */
 void cpu_dump_state(CPUState *cpu, FILE *f, int flags)
 {
     CPUClass *cc = CPU_GET_CLASS(cpu);
@@ -109,6 +153,10 @@ void cpu_dump_state(CPUState *cpu, FILE *f, int flags)
     }
 }
 
+/**
+ * cpu_reset:
+ * @cpu: The CPU whose state is to be reset.
+ */
 void cpu_reset(CPUState *cpu)
 {
     device_cold_reset(DEVICE(cpu));
@@ -147,6 +195,15 @@ static bool cpu_common_has_work(CPUState *cs)
     return false;
 }
 
+/**
+ * cpu_class_by_name:
+ * @typename: The CPU base type.
+ * @cpu_model: The model string without any parameters.
+ *
+ * Looks up a CPU #ObjectClass matching name @cpu_model.
+ *
+ * Returns: A #CPUClass or %NULL if not matching class is found.
+ */
 ObjectClass *cpu_class_by_name(const char *typename, const char *cpu_model)
 {
     CPUClass *cc = CPU_CLASS(object_class_by_name(typename));

@@ -178,7 +178,7 @@ void tlb_flush_page_by_mmuidx_all_cpus(CPUState *cpu, vaddr addr,
 void tlb_flush_page_by_mmuidx_all_cpus_synced(CPUState *cpu, vaddr addr,
                                               uint16_t idxmap);
 /**
- * tlb_flush_by_mmuidx:
+ * tlb_flush_by_mmuidxmap:
  * @cpu: CPU whose TLB should be flushed
  * @wait: If true ensure synchronisation by exiting the cpu_loop
  * @idxmap: bitmap of MMU indexes to flush
@@ -186,7 +186,7 @@ void tlb_flush_page_by_mmuidx_all_cpus_synced(CPUState *cpu, vaddr addr,
  * Flush all entries from the TLB of the specified CPU, for the specified
  * MMU indexes.
  */
-void tlb_flush_by_mmuidx(CPUState *cpu, uint16_t idxmap);
+void tlb_flush_by_mmuidxmap(CPUState *cpu, uint16_t idxmap);
 /**
  * tlb_flush_by_mmuidx_all_cpus:
  * @cpu: Originating CPU of the flush
@@ -297,8 +297,8 @@ void tlb_set_page_full(CPUState *cpu, int mmu_idx, vaddr addr,
  * used by tlb_flush_page.
  */
 void tlb_set_page_with_attrs(CPUState *cpu, vaddr addr,
-                             hwaddr paddr, MemTxAttrs attrs,
-                             int prot, int mmu_idx, vaddr size);
+                             hwaddr paddr, int prot, MemTxAttrs attrs,
+                             int mmu_idx, vaddr size);
 /* tlb_set_page:
  *
  * This function is equivalent to calling tlb_set_page_with_attrs()
@@ -338,7 +338,7 @@ static inline void tlb_flush_page_by_mmuidx(CPUState *cpu,
 {
 }
 
-static inline void tlb_flush_by_mmuidx(CPUState *cpu, uint16_t idxmap)
+static inline void tlb_flush_by_mmuidxmap(CPUState *cpu, uint16_t idxmap)
 {
 }
 static inline void tlb_flush_page_by_mmuidx_all_cpus(CPUState *cpu,
@@ -689,7 +689,7 @@ G_NORETURN void cpu_loop_exit_sigbus(CPUState *cpu, target_ulong addr,
                                      MMUAccessType access_type,
                                      uintptr_t ra);
 
-#else
+#else // !defined(CONFIG_USER_ONLY)
 static inline void mmap_lock(void) {}
 static inline void mmap_unlock(void) {}
 #define WITH_MMAP_LOCK_GUARD()

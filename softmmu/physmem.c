@@ -354,8 +354,8 @@ static MemoryRegionSection *address_space_lookup_region(AddressSpaceDispatch *d,
 
 /* Called from RCU critical section */
 static MemoryRegionSection *
-address_space_translate_internal(AddressSpaceDispatch *d, hwaddr addr, hwaddr *xlat,
-                                 hwaddr *plen, bool resolve_subpage)
+address_space_translate_internal(AddressSpaceDispatch *d, hwaddr addr, hwaddr *xlat/*OUT*/,
+                                 hwaddr *plen/*OUT*/, bool resolve_subpage)
 {
     MemoryRegionSection *section;
     MemoryRegion *mr;
@@ -555,6 +555,19 @@ iotlb_fail:
     return (IOMMUTLBEntry) {0};
 }
 
+/* flatview_translate: translate an address range into an address space
+ * into a MemoryRegion and an address range into that section.  Should be
+ * called from an RCU critical section, to avoid that the last reference
+ * to the returned region disappears after address_space_translate returns.
+ *
+ * @fv: #FlatView to be accessed
+ * @addr: address within that address space
+ * @xlat: pointer to address within the returned memory region section's
+ * #MemoryRegion.
+ * @len: pointer to length
+ * @is_write: indicates the transfer direction
+ * @attrs: memory attributes
+ */
 /* Called from RCU critical section */
 MemoryRegion *flatview_translate(FlatView *fv, hwaddr addr, hwaddr *xlat,
                                  hwaddr *plen, bool is_write,
@@ -671,8 +684,8 @@ void tcg_iommu_init_notifier_list(CPUState *cpu)
 /* Called from RCU critical section */
 MemoryRegionSection *
 address_space_translate_for_iotlb(CPUState *cpu, int asidx, hwaddr orig_addr,
-                                  hwaddr *xlat, hwaddr *plen,
-                                  MemTxAttrs attrs, int *prot)
+                                  hwaddr *xlat/*OUT*/, hwaddr *plen/*OUT*/,
+                                  MemTxAttrs attrs, int *prot/*INOUT*/)
 {
     MemoryRegionSection *section;
     IOMMUMemoryRegion *iommu_mr;
@@ -2406,6 +2419,15 @@ static uint16_t dummy_section(PhysPageMap *map, FlatView *fv, MemoryRegion *mr)
     return phys_section_add(map, &section);
 }
 
+/**
+ * iotlb_to_section:
+ * @cpu: CPU performing the access
+ * @index: TCG CPU IOTLB entry
+ *
+ * Given a TCG CPU IOTLB entry, return the MemoryRegionSection that
+ * it refers to. @index will have been initially created and returned
+ * by memory_region_section_get_iotlb().
+ */
 MemoryRegionSection *iotlb_to_section(CPUState *cpu,
                                       hwaddr index, MemTxAttrs attrs)
 {
@@ -2569,6 +2591,22 @@ static void invalidate_and_set_dirty(MemoryRegion *mr, hwaddr addr,
     cpu_physical_memory_set_dirty_range(addr, length, dirty_log_mask);
 }
 
+/**
+ * memory_region_flush_rom_device: Mark a range of pages dirty and invalidate
+ *                                 TBs (for self-modifying code).
+ *
+ * The MemoryRegionOps->write() callback of a ROM device must use this function
+ * to mark byte ranges that have been modified internally, such as by directly
+ * accessing the memory returned by memory_region_get_ram_ptr().
+ *
+ * This function marks the range dirty and invalidates TBs so that TCG can
+ * detect self-modifying code.
+ *
+ * @mr: the region being flushed.
+ * @addr: the start, relative to the start of the region, of the range being
+ *        flushed.
+ * @size: the size, in bytes, of the range being flushed.
+ */
 void memory_region_flush_rom_device(MemoryRegion *mr, hwaddr addr, hwaddr size)
 {
     /*
@@ -2900,6 +2938,28 @@ static inline MemTxResult address_space_write_rom_internal(AddressSpace *as,
     return MEMTX_OK;
 }
 
+/**
+ * address_space_write_rom: write to address space, including ROM.
+ *
+ * This function writes to the specified address space, but will
+ * write data to both ROM and RAM. This is used for non-guest
+ * writes like writes from the gdb debug stub or initial loading
+ * of ROM contents.
+ *
+ * Note that portions of the write which attempt to write data to
+ * a device will be silently ignored -- only real RAM and ROM will
+ * be written to.
+ *
+ * Return a MemTxResult indicating whether the operation succeeded
+ * or failed (eg unassigned memory, device rejected the transaction,
+ * IOMMU fault).
+ *
+ * @as: #AddressSpace to be accessed
+ * @addr: address within that address space
+ * @attrs: memory transaction attributes
+ * @buf: buffer with the data transferred
+ * @len: the number of bytes to write
+ */
 /* used for ROM loading : can write in RAM and ROM */
 MemTxResult address_space_write_rom(AddressSpace *as, hwaddr addr,
                                     MemTxAttrs attrs,
@@ -3036,6 +3096,22 @@ static bool flatview_access_valid(FlatView *fv, hwaddr addr, hwaddr len,
     return true;
 }
 
+/* address_space_access_valid: check for validity of accessing an address
+ * space range
+ *
+ * Check whether memory is assigned to the given address space range, and
+ * access is permitted by any IOMMU regions that are active for the address
+ * space.
+ *
+ * For now, addr and len should be aligned to a page size.  This limitation
+ * will be lifted in the future.
+ *
+ * @as: #AddressSpace to be accessed
+ * @addr: address within that address space
+ * @len: length of the area to be checked
+ * @is_write: indicates the transfer direction
+ * @attrs: memory attributes
+ */
 bool address_space_access_valid(AddressSpace *as, hwaddr addr,
                                 hwaddr len, bool is_write,
                                 MemTxAttrs attrs)
@@ -3074,6 +3150,21 @@ flatview_extend_translation(FlatView *fv, hwaddr addr,
     }
 }
 
+/* address_space_map: map a physical memory region into a host virtual address
+ *
+ * May map a subset of the requested range, given by and returned in @plen.
+ * May return %NULL and set *@plen to zero(0), if resources needed to perform
+ * the mapping are exhausted.
+ * Use only for reads OR writes - not for read-modify-write operations.
+ * Use cpu_register_map_client() to know when retrying the map operation is
+ * likely to succeed.
+ *
+ * @as: #AddressSpace to be accessed
+ * @addr: address within that address space
+ * @plen: pointer to length of buffer; updated on return
+ * @is_write: indicates the transfer direction
+ * @attrs: memory attributes
+ */
 /* Map a physical memory region into a host virtual address.
  * May map a subset of the requested range, given by and returned in *plen.
  * May return NULL if resources needed to perform the mapping are exhausted.
@@ -3664,6 +3755,27 @@ static void ram_block_discard_disable_mutex_unlock(void)
     qemu_mutex_unlock(&ram_block_discard_disable_mutex);
 }
 
+/*
+ * Inhibit technologies that require discarding of pages in RAM blocks, e.g.,
+ * to manage the actual amount of memory consumed by the VM (then, the memory
+ * provided by RAM blocks might be bigger than the desired memory consumption).
+ * This *must* be set if:
+ * - Discarding parts of a RAM blocks does not result in the change being
+ *   reflected in the VM and the pages getting freed.
+ * - All memory in RAM blocks is pinned or duplicated, invaldiating any previous
+ *   discards blindly.
+ * - Discarding parts of a RAM blocks will result in integrity issues (e.g.,
+ *   encrypted VMs).
+ * Technologies that only temporarily pin the current working set of a
+ * driver are fine, because we don't expect such pages to be discarded
+ * (esp. based on guest action like balloon inflation).
+ *
+ * This is *not* to be used to protect from concurrent discards (esp.,
+ * postcopy).
+ *
+ * Returns 0 if successful. Returns -EBUSY if a technology that relies on
+ * discards to work reliably is active.
+ */
 int ram_block_discard_disable(bool state)
 {
     int ret = 0;

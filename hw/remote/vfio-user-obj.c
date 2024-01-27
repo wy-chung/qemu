@@ -63,7 +63,7 @@
 #include "hw/remote/vfio-user-obj.h"
 
 #define TYPE_VFU_OBJECT "x-vfio-user-server"
-OBJECT_DECLARE_TYPE(VfuObject, VfuObjectClass, VFU_OBJECT)
+OBJECT_DECLARE_TYPE(VfuObject, VfuObjectClass, VFU_OBJECT);
 
 /**
  * VFU_OBJECT_ERROR - reports an error message.

@@ -712,4 +712,4 @@ void x86_stq_phys(CPUState *cs, hwaddr addr, uint64_t val)
 
     address_space_stq(as, addr, val, attrs, NULL);
 }
-#endif
+#endif // !defined(CONFIG_USER_ONLY)

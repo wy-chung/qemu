@@ -20,8 +20,7 @@
 
 #define TYPE_VMBUS_DEVICE "vmbus-dev"
 
-OBJECT_DECLARE_TYPE(VMBusDevice, VMBusDeviceClass,
-                    VMBUS_DEVICE)
+OBJECT_DECLARE_TYPE(VMBusDevice, VMBusDeviceClass, VMBUS_DEVICE);
 
 #define TYPE_VMBUS "vmbus"
 OBJECT_DECLARE_SIMPLE_TYPE(VMBus, VMBUS)

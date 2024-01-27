@@ -113,7 +113,7 @@ void console_handle_touch_event(QemuConsole *con,
 /* consoles */
 
 #define TYPE_QEMU_CONSOLE "qemu-console"
-OBJECT_DECLARE_TYPE(QemuConsole, QemuConsoleClass, QEMU_CONSOLE)
+OBJECT_DECLARE_TYPE(QemuConsole, QemuConsoleClass, QEMU_CONSOLE);
 
 
 struct QemuConsoleClass {

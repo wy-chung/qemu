@@ -42,7 +42,7 @@ typedef int ADBDeviceRequest(ADBDevice *d, uint8_t *buf_out,
 typedef bool ADBDeviceHasData(ADBDevice *d);
 
 #define TYPE_ADB_DEVICE "adb-device"
-OBJECT_DECLARE_TYPE(ADBDevice, ADBDeviceClass, ADB_DEVICE)
+OBJECT_DECLARE_TYPE(ADBDevice, ADBDeviceClass, ADB_DEVICE);
 
 struct ADBDevice {
     /*< private >*/

@@ -128,7 +128,7 @@ typedef struct VCChardev VCChardev;
 
 #define TYPE_CHARDEV_VC "chardev-vc"
 DECLARE_INSTANCE_CHECKER(VCChardev, VC_CHARDEV,
-                         TYPE_CHARDEV_VC)
+                         TYPE_CHARDEV_VC); //wyc add ';'
 
 static struct touch_slot touch_slots[INPUT_EVENT_SLOTS_MAX];
 

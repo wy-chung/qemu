@@ -161,7 +161,7 @@ void cpu_check_watchpoint(CPUState *cpu, vaddr addr, vaddr len,
         return;
     }
 
-    if (cc->tcg_ops->adjust_watchpoint_address) {
+    if (cc->tcg_ops->adjust_watchpoint_address) { // NULL
         /* this is currently used only by ARM BE32 */
         addr = cc->tcg_ops->adjust_watchpoint_address(cpu, addr, len);
     }

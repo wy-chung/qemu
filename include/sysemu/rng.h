@@ -17,8 +17,7 @@
 #include "qom/object.h"
 
 #define TYPE_RNG_BACKEND "rng-backend"
-OBJECT_DECLARE_TYPE(RngBackend, RngBackendClass,
-                    RNG_BACKEND)
+OBJECT_DECLARE_TYPE(RngBackend, RngBackendClass, RNG_BACKEND);
 
 #define TYPE_RNG_BUILTIN "rng-builtin"
 

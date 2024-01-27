@@ -32,7 +32,7 @@
 #include "trace.h"
 #include "qom/object.h"
 
-OBJECT_DECLARE_TYPE(KBDState, ADBKeyboardClass, ADB_KEYBOARD)
+OBJECT_DECLARE_TYPE(KBDState, ADBKeyboardClass, ADB_KEYBOARD);
 
 struct KBDState {
     /*< private >*/

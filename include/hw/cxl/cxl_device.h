@@ -348,7 +348,7 @@ struct CXLType3Dev {
 };
 
 #define TYPE_CXL_TYPE3 "cxl-type3"
-OBJECT_DECLARE_TYPE(CXLType3Dev, CXLType3Class, CXL_TYPE3)
+OBJECT_DECLARE_TYPE(CXLType3Dev, CXLType3Class, CXL_TYPE3);
 
 struct CXLType3Class {
     /* Private */

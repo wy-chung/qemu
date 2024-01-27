@@ -72,6 +72,15 @@ static QemuMutex qemu_global_mutex;
  */
 static const AccelOpsClass *cpus_accel;
 
+/**
+ * cpu_is_stopped:
+ * @cpu: The CPU to check.
+ *
+ * Checks whether the CPU is stopped.
+ *
+ * Returns: %true if run state is not running or if artificially stopped;
+ * %false otherwise.
+ */
 bool cpu_is_stopped(CPUState *cpu)
 {
     return cpu->stopped || !runstate_is_running();
@@ -243,6 +252,13 @@ static void generic_handle_interrupt(CPUState *cpu, int mask)
     }
 }
 
+/**
+ * cpu_interrupt:
+ * @cpu: The CPU to set an interrupt on.
+ * @mask: The interrupts to set.
+ *
+ * Invokes the interrupt handler.
+ */
 void cpu_interrupt(CPUState *cpu, int mask)
 {
     if (cpus_accel->handle_interrupt) {
@@ -387,6 +403,14 @@ void qemu_init_cpu_loop(void)
     qemu_thread_get_self(&io_thread);
 }
 
+/**
+ * run_on_cpu:
+ * @cpu: The vCPU to run on.
+ * @func: The function to be executed.
+ * @data: Data to pass to the function.
+ *
+ * Schedules the function @func for execution on the vCPU @cpu.
+ */
 void run_on_cpu(CPUState *cpu, run_on_cpu_func func, run_on_cpu_data data)
 {
     do_run_on_cpu(cpu, func, data, &qemu_global_mutex);
@@ -454,6 +478,12 @@ void cpus_kick_thread(CPUState *cpu)
 #endif
 }
 
+/**
+ * qemu_cpu_kick:
+ * @cpu: The vCPU to kick.
+ *
+ * Kicks @cpu's thread.
+ */
 void qemu_cpu_kick(CPUState *cpu)
 {
     qemu_cond_broadcast(cpu->halt_cond);
@@ -470,6 +500,14 @@ void qemu_cpu_kick_self(void)
     cpus_kick_thread(current_cpu);
 }
 
+/**
+ * qemu_cpu_is_self:
+ * @cpu: The vCPU to check against.
+ *
+ * Checks whether the caller is executing on the vCPU thread.
+ *
+ * Returns: %true if called from @cpu's thread, %false otherwise.
+ */
 bool qemu_cpu_is_self(CPUState *cpu)
 {
     return qemu_thread_is_self(cpu->thread);
@@ -581,6 +619,12 @@ void pause_all_vcpus(void)
     qemu_mutex_lock_iothread();
 }
 
+/**
+ * cpu_resume:
+ * @cpu: The CPU to resume.
+ *
+ * Resumes CPU, i.e. puts CPU into runnable state.
+ */
 void cpu_resume(CPUState *cpu)
 {
     cpu->stop = false;
@@ -602,6 +646,12 @@ void resume_all_vcpus(void)
     }
 }
 
+/**
+ * cpu_remove_sync:
+ * @cpu: The CPU to remove.
+ *
+ * Requests the CPU to be removed and waits till it is removed.
+ */
 void cpu_remove_sync(CPUState *cpu)
 {
     cpu->stop = true;

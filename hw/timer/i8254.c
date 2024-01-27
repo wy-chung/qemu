@@ -38,8 +38,7 @@
 #define RW_STATE_WORD1 4
 
 typedef struct PITClass PITClass;
-DECLARE_CLASS_CHECKERS(PITClass, PIT,
-                       TYPE_I8254)
+DECLARE_CLASS_CHECKERS(PITClass, PIT, TYPE_I8254);
 
 struct PITClass {
     PITCommonClass parent_class;

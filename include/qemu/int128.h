@@ -11,12 +11,12 @@
 #if defined(CONFIG_INT128) && !defined(CONFIG_TCG_INTERPRETER)
 typedef __int128_t Int128;
 
-static inline Int128 int128_make64(uint64_t a)
+static inline Int128 int128_make64(uint64_t a) // the unsigned version
 {
     return a;
 }
 
-static inline Int128 int128_makes64(int64_t a)
+static inline Int128 int128_makes64(int64_t a) // s64 measn singed 64 bit
 {
     return a;
 }

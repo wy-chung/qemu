@@ -1932,8 +1932,8 @@ static TCGLabelQemuLdst *prepare_host_addr(TCGContext *s, HostAddress *h,
     a_mask = (1 << h->aa.align) - 1;
 
 #ifdef CONFIG_SOFTMMU
-    int cmp_ofs = is_ld ? offsetof(CPUTLBEntry, addr_read)
-                        : offsetof(CPUTLBEntry, addr_write);
+    int cmp_ofs = is_ld ? offsetof(CPUTLBEntryFast, addr_read)
+                        : offsetof(CPUTLBEntryFast, addr_write);
     TCGType ttype = TCG_TYPE_I32;
     TCGType tlbtype = TCG_TYPE_I32;
     int trexw = 0, hrexw = 0, tlbrexw = 0;
@@ -2005,7 +2005,7 @@ static TCGLabelQemuLdst *prepare_host_addr(TCGContext *s, HostAddress *h,
 
     /* TLB Hit.  */
     tcg_out_ld(s, TCG_TYPE_PTR, TCG_REG_L0, TCG_REG_L0,
-               offsetof(CPUTLBEntry, addend));
+               offsetof(CPUTLBEntryFast, addend));
 #else
     if (a_mask) {
         ldst = new_ldst_label(s);
