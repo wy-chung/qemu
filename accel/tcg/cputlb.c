@@ -1666,23 +1666,24 @@ static bool victim_tlb_hit(CPUArchState *env, size_t mmu_idx, size_t index,
 
     assert_cpu_is_self(env_cpu(env));
     for (vidx = 0; vidx < CPU_VTLB_SIZE; ++vidx) {
-        CPUTLBEntryFast *vtlb = &env_tlb(env)->dFull[mmu_idx].vfastable[vidx];
-        uint64_t cmp = tlb_read_type(vtlb, access_type); // MMU_DATA_LOAD, MMU_DATA_STORE, MMU_INST_FETCH
+        CPUTLBEntryFast *veFast = &env_tlb(env)->dFull[mmu_idx].vfastable[vidx];
+        uint64_t cmp = tlb_read_type(veFast, access_type); // MMU_DATA_LOAD, MMU_DATA_STORE, MMU_INST_FETCH
 
         if (cmp == page) {
             /* Found entry in victim tlb, swap tlb and iotlb.  */
-            CPUTLBEntryFast tmptlb, *tlb = &env_tlb(env)->dFast[mmu_idx].table[index];
+            CPUTLBEntryFast tmpFast;
+            CPUTLBEntryFast *eFast = &env_tlb(env)->dFast[mmu_idx].table[index];
 
             qemu_spin_lock(&env_tlb(env)->c.lock);
-            copy_tlb_helper_locked(&tmptlb, tlb);
-            copy_tlb_helper_locked(tlb, vtlb);
-            copy_tlb_helper_locked(vtlb, &tmptlb);
+            copy_tlb_helper_locked(&tmpFast, eFast);
+            copy_tlb_helper_locked(eFast, veFast);
+            copy_tlb_helper_locked(veFast, &tmpFast);
             qemu_spin_unlock(&env_tlb(env)->c.lock);
 
             CPUTLBEntryFull *f1 = &env_tlb(env)->dFull[mmu_idx].fulltlb[index];
             CPUTLBEntryFull *f2 = &env_tlb(env)->dFull[mmu_idx].vfulltlb[vidx];
-            CPUTLBEntryFull tmpf;
-            tmpf = *f1; *f1 = *f2; *f2 = tmpf;
+            CPUTLBEntryFull tmpFull;
+            tmpFull = *f1; *f1 = *f2; *f2 = tmpFull;
             return true;
         }
     }
@@ -2050,11 +2051,11 @@ bool tlb_plugin_lookup(CPUState *cpu, vaddr addr, int mmu_idx,
  */
 
 typedef struct MMULookupPageData {
+    vaddr addr; // virtual address
+    int size;
+    int flags;  // TLB_INVALID_MASK, TLB_NOTDIRTY, TLB_MMIO, TLB_DISCARD_WRITE, TLB_FORCE_SLOW
     CPUTLBEntryFull *full;
     void *haddr;
-    vaddr addr;	// virtual address
-    int flags;  // TLB_INVALID_MASK, TLB_NOTDIRTY, TLB_MMIO, TLB_DISCARD_WRITE, TLB_FORCE_SLOW
-    int size;
 } MMULookupPageData;
 
 typedef struct MMULookupLocals {
@@ -2079,7 +2080,7 @@ typedef struct MMULookupLocals {
 static bool mmu_lookup1(CPUArchState *env, MMULookupPageData *data /*IN/OUT*/,
                         int mmu_idx, MMUAccessType access_type, uintptr_t ra)
 {
-    CPUTLBEntryFull *full;
+    CPUTLBEntryFull *eFull;
     int flags;
 
     vaddr addr = data->addr;
@@ -2100,11 +2101,11 @@ static bool mmu_lookup1(CPUArchState *env, MMULookupPageData *data /*IN/OUT*/,
         tlb_addr = tlb_read_type(eFast, access_type) & ~TLB_INVALID_MASK;
     }
 
-    full = &env_tlb(env)->dFull[mmu_idx].fulltlb[index];
+    eFull = &env_tlb(env)->dFull[mmu_idx].fulltlb[index];
     flags = tlb_addr & (TLB_FLAGS_MASK & ~TLB_FORCE_SLOW);
-    flags |= full->slow_flags[access_type];
+    flags |= eFull->slow_flags[access_type];
 
-    data->full = full;
+    data->full = eFull;
     data->flags = flags;
     /* Compute haddr speculatively; depending on flags it might be invalid. */
     data->haddr = (void *)((uintptr_t)addr + eFast->addend);
@@ -2125,7 +2126,7 @@ static bool mmu_lookup1(CPUArchState *env, MMULookupPageData *data /*IN/OUT*/,
 static void mmu_watch_or_dirty(CPUArchState *env, MMULookupPageData *data,
                                MMUAccessType access_type, uintptr_t ra)
 {
-    CPUTLBEntryFull *full = data->full;
+    CPUTLBEntryFull *eFull = data->full;
     vaddr addr = data->addr;
     int flags = data->flags;
     int size = data->size;
@@ -2133,13 +2134,13 @@ static void mmu_watch_or_dirty(CPUArchState *env, MMULookupPageData *data,
     /* On watchpoint hit, this will longjmp out.  */
     if (flags & TLB_WATCHPOINT) {
         int wp = access_type == MMU_DATA_STORE ? BP_MEM_WRITE : BP_MEM_READ;
-        cpu_check_watchpoint(env_cpu(env), addr, size, full->attrs, wp, ra);
+        cpu_check_watchpoint(env_cpu(env), addr, size, eFull->attrs, wp, ra);
         flags &= ~TLB_WATCHPOINT;
     }
 
     /* Note that notdirty is only set for writes. */
     if (flags & TLB_NOTDIRTY) {
-        notdirty_write(env_cpu(env), addr, size, full, ra);
+        notdirty_write(env_cpu(env), addr, size, eFull, ra);
         flags &= ~TLB_NOTDIRTY;
     }
     data->flags = flags;
@@ -2240,7 +2241,7 @@ static void *atomic_mmu_lookup(CPUArchState *env, vaddr addr, MemOpIdx oi,
     CPUTLBEntryFast *tlbe;
     vaddr tlb_addr;
     void *hostaddr;
-    CPUTLBEntryFull *full;
+    CPUTLBEntryFull *eFull;
 
     tcg_debug_assert(mmu_idx < NB_MMU_MODES);
 
@@ -2306,24 +2307,24 @@ static void *atomic_mmu_lookup(CPUArchState *env, vaddr addr, MemOpIdx oi,
     }
 
     hostaddr = (void *)((uintptr_t)addr + tlbe->addend);
-    full = &env_tlb(env)->dFull[mmu_idx].fulltlb[index];
+    eFull = &env_tlb(env)->dFull[mmu_idx].fulltlb[index];
 
     if (unlikely(tlb_addr & TLB_NOTDIRTY)) {
-        notdirty_write(env_cpu(env), addr, size, full, retaddr);
+        notdirty_write(env_cpu(env), addr, size, eFull, retaddr);
     }
 
     if (unlikely(tlb_addr & TLB_FORCE_SLOW)) {
         int wp_flags = 0;
 
-        if (full->slow_flags[MMU_DATA_STORE] & TLB_WATCHPOINT) {
+        if (eFull->slow_flags[MMU_DATA_STORE] & TLB_WATCHPOINT) {
             wp_flags |= BP_MEM_WRITE;
         }
-        if (full->slow_flags[MMU_DATA_LOAD] & TLB_WATCHPOINT) {
+        if (eFull->slow_flags[MMU_DATA_LOAD] & TLB_WATCHPOINT) {
             wp_flags |= BP_MEM_READ;
         }
         if (wp_flags) {
             cpu_check_watchpoint(env_cpu(env), addr, size,
-                                 full->attrs, wp_flags, retaddr);
+                                 eFull->attrs, wp_flags, retaddr);
         }
     }
 
