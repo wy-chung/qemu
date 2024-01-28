@@ -366,8 +366,8 @@ struct CPUState {
     QemuMutex work_mutex;
     QSIMPLEQ_HEAD(, qemu_work_item) work_list;
 
-    CPUAddressSpace *cpu_ases;
-    int num_ases;	// number of address spaces
+    int num_ases;		// 2 address space
+    CPUAddressSpace *cpu_ases;	// 0: normal, 1: SMM
     AddressSpace *as;
     MemoryRegion *memory;
 

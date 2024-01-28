@@ -635,7 +635,7 @@ static void tcg_register_iommu_notifier(CPUState *cpu,
     if (i == cpu->iommu_notifiers->len) {
         /* Not found, add a new entry at the end of the array */
         cpu->iommu_notifiers = g_array_set_size(cpu->iommu_notifiers, i + 1);
-        notifier = g_new0(TCGIOMMUNotifier, 1);
+        notifier = g_new0(TCGIOMMUNotifier, 1); // new and initialize to 0
         g_array_index(cpu->iommu_notifiers, TCGIOMMUNotifier *, i) = notifier;
 
         notifier->mr = mr;
@@ -753,8 +753,8 @@ void cpu_address_space_init(CPUState *cpu, int asidx,
                             const char *prefix, MemoryRegion *mr)
 {
     CPUAddressSpace *newas;
-    AddressSpace *as = g_new0(AddressSpace, 1);
     char *as_name;
+    AddressSpace *as = g_new0(AddressSpace, 1); // new and initialize to 0
 
     assert(mr);
     as_name = g_strdup_printf("%s-%d", prefix, cpu->cpu_index);
@@ -2431,11 +2431,11 @@ static uint16_t dummy_section(PhysPageMap *map, FlatView *fv, MemoryRegion *mr)
 MemoryRegionSection *iotlb_to_section(CPUState *cpu,
                                       hwaddr index, MemTxAttrs attrs)
 {
-    int asidx = cpu_asidx_from_attrs(cpu, attrs);
+    MemoryRegionSection *ret;
+    int asidx = cpu_asidx_from_attrs(cpu, attrs); // only 2 as. 0: normal or 1: SMM
     CPUAddressSpace *cpuas = &cpu->cpu_ases[asidx];
     AddressSpaceDispatch *d = cpuas->memory_dispatch;
     int section_index = index & ~TARGET_PAGE_MASK;
-    MemoryRegionSection *ret;
 
     assert(section_index < d->map.sections_nb);
     ret = d->map.sections + section_index;

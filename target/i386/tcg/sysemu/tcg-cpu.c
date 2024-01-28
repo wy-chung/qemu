@@ -72,7 +72,7 @@ bool tcg_cpu_realizefn(CPUState *cs, Error **errp)
     memory_region_add_subregion_overlap(cpu->cpu_as_root, 0, cpu->cpu_as_mem, 0);
     memory_region_set_enabled(cpu->cpu_as_mem, true);
 
-    cs->num_ases = 2;
+    cs->num_ases = 2;	// 0: normal, 1: SMM
     cpu_address_space_init(cs, 0, "cpu-memory", cs->memory);
     cpu_address_space_init(cs, 1, "cpu-smm", cpu->cpu_as_root);
 

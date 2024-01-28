@@ -5425,7 +5425,7 @@ static void x86_cpu_parse_featurestr(const char *typename, char *features,
             name = "tsc-frequency";
         }
 
-        prop = g_new0(typeof(*prop), 1);
+        prop = g_new0(typeof(*prop), 1); // new and initialize to 0
         prop->driver = typename;
         prop->property = g_strdup(name);
         prop->value = g_strdup(val);
@@ -5962,7 +5962,7 @@ static void x86_register_cpudef_types(const X86CPUDefinition *def)
     assert(def->model_id && strlen(def->model_id) <= 48);
 
     /* Unversioned model: */
-    m = g_new0(X86CPUModel, 1);
+    m = g_new0(X86CPUModel, 1); // new and initialize to 0
     m->cpudef = def;
     m->version = CPU_VERSION_AUTO;
     m->is_alias = true;
@@ -7541,7 +7541,7 @@ static void x86_cpu_register_bit_prop(X86CPUClass *xcc,
         assert(fp->w == w);
         fp->mask |= mask;
     } else {
-        fp = g_new0(BitProperty, 1);
+        fp = g_new0(BitProperty, 1); // new and initialize to 0
         fp->w = w;
         fp->mask = mask;
         object_class_property_add(oc, prop_name, "bool",

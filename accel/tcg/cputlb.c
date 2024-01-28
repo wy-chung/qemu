@@ -1576,20 +1576,20 @@ static void save_iotlb_data(CPUState *cs, MemoryRegionSection *section,
 #endif
 }
 
-static uint64_t io_readx(CPUArchState *env, CPUTLBEntryFull *full,
+static uint64_t io_readx(CPUArchState *env, CPUTLBEntryFull *eFull,
                          int mmu_idx, vaddr addr, uintptr_t retaddr,
                          MMUAccessType access_type, MemOp op)
 {
-    CPUState *cpu = env_cpu(env);
     hwaddr mr_offset;
     MemoryRegionSection *section;
     MemoryRegion *mr;
     uint64_t val;
     MemTxResult r;
+    CPUState *cpu = env_cpu(env);
 
-    section = iotlb_to_section(cpu, full->xlat_section, full->attrs);
+    section = iotlb_to_section(cpu, eFull->xlat_section, eFull->attrs);
     mr = section->mr;
-    mr_offset = (full->xlat_section & TARGET_PAGE_MASK) + addr;
+    mr_offset = (eFull->xlat_section & TARGET_PAGE_MASK) + addr;
     cpu->mem_io_pc = retaddr;
     if (!cpu->can_do_io) {
         cpu_io_recompile(cpu, retaddr);
@@ -1603,7 +1603,7 @@ static uint64_t io_readx(CPUArchState *env, CPUTLBEntryFull *full,
 
     {
         QEMU_IOTHREAD_LOCK_GUARD();
-        r = memory_region_dispatch_read(mr, mr_offset, &val, op, full->attrs);
+        r = memory_region_dispatch_read(mr, mr_offset, &val, op, eFull->attrs);
     }
 
     if (r != MEMTX_OK) {
@@ -1612,24 +1612,24 @@ static uint64_t io_readx(CPUArchState *env, CPUTLBEntryFull *full,
             section->offset_within_region;
 
         cpu_transaction_failed(cpu, physaddr, addr, memop_size(op), access_type,
-                               mmu_idx, full->attrs, r, retaddr);
+                               mmu_idx, eFull->attrs, r, retaddr);
     }
     return val;
 }
 
-static void io_writex(CPUArchState *env, CPUTLBEntryFull *full,
+static void io_writex(CPUArchState *env, CPUTLBEntryFull *eFull,
                       int mmu_idx, uint64_t val, vaddr addr,
                       uintptr_t retaddr, MemOp op)
 {
-    CPUState *cpu = env_cpu(env);
     hwaddr mr_offset;
     MemoryRegionSection *section;
     MemoryRegion *mr;
     MemTxResult r;
+    CPUState *cpu = env_cpu(env);
 
-    section = iotlb_to_section(cpu, full->xlat_section, full->attrs);
+    section = iotlb_to_section(cpu, eFull->xlat_section, eFull->attrs);
     mr = section->mr;
-    mr_offset = (full->xlat_section & TARGET_PAGE_MASK) + addr;
+    mr_offset = (eFull->xlat_section & TARGET_PAGE_MASK) + addr;
     if (!cpu->can_do_io) {
         cpu_io_recompile(cpu, retaddr);
     }
@@ -1643,7 +1643,7 @@ static void io_writex(CPUArchState *env, CPUTLBEntryFull *full,
 
     {
         QEMU_IOTHREAD_LOCK_GUARD();
-        r = memory_region_dispatch_write(mr, mr_offset, val, op, full->attrs);
+        r = memory_region_dispatch_write(mr, mr_offset, val, op, eFull->attrs);
     }
 
     if (r != MEMTX_OK) {
@@ -1652,7 +1652,7 @@ static void io_writex(CPUArchState *env, CPUTLBEntryFull *full,
             section->offset_within_region;
 
         cpu_transaction_failed(cpu, physaddr, addr, memop_size(op),
-                               MMU_DATA_STORE, mmu_idx, full->attrs, r,
+                               MMU_DATA_STORE, mmu_idx, eFull->attrs, r,
                                retaddr);
     }
 }
