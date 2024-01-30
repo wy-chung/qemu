@@ -5537,7 +5537,7 @@ static char *x86_cpu_class_get_alias_of(X86CPUClass *cc)
 }
 
 static void x86_cpu_list_entry(gpointer data, gpointer user_data)
-{   // g_autofree - will invoke g_free() when the variable is going out of scope
+{// g_autofree - will invoke g_free() when the variable is going out of scope
     ObjectClass *oc = data;
     X86CPUClass *cc = X86_CPU_CLASS(oc);
     g_autofree char *name = x86_cpu_class_get_model_name(cc);
@@ -5558,7 +5558,7 @@ static void x86_cpu_list_entry(gpointer data, gpointer user_data)
     if (!desc) {
         desc = g_strdup_printf("%s", model_id);
     }
-    // g_autofree - will invoke g_free() when the variable is going out of scope
+
     if (cc->model && cc->model->cpudef->deprecation_note) {
         g_autofree char *olddesc = desc;
         desc = g_strdup_printf("%s (deprecated)", olddesc);
