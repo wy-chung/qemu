@@ -34,7 +34,7 @@ typedef struct AccelCPUClass {
 
     void (*cpu_class_init)(CPUClass *cc);
     void (*cpu_instance_init)(CPUState *cpu);
-    bool (*cpu_realizefn)(CPUState *cpu, Error **errp);
+    bool (*cpu_realizefn)(CPUState *cpu, Error **errp); // tcg_cpu_realizefn
 } AccelCPUClass;
 
 #endif /* ACCEL_CPU_H */

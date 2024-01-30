@@ -1728,7 +1728,7 @@ static char *x86_cpu_type_name(const char *model_name)
 }
 
 static ObjectClass *x86_cpu_class_by_name(const char *cpu_model)
-{
+{// g_autofree - will invoke g_free() when the variable is going out of scope
     g_autofree char *typename = x86_cpu_type_name(cpu_model);
     return object_class_by_name(typename);
 }
@@ -5499,7 +5499,7 @@ static gint x86_cpu_list_compare(gconstpointer a, gconstpointer b)
 
     if (cc_a->ordering != cc_b->ordering) {
         ret = cc_a->ordering - cc_b->ordering;
-    } else {
+    } else { // g_autofree - will invoke g_free() when the variable is going out of scope
         g_autofree char *name_a = x86_cpu_class_get_model_name(cc_a);
         g_autofree char *name_b = x86_cpu_class_get_model_name(cc_b);
         ret = strcmp(name_a, name_b);
@@ -5537,7 +5537,7 @@ static char *x86_cpu_class_get_alias_of(X86CPUClass *cc)
 }
 
 static void x86_cpu_list_entry(gpointer data, gpointer user_data)
-{
+{   // g_autofree - will invoke g_free() when the variable is going out of scope
     ObjectClass *oc = data;
     X86CPUClass *cc = X86_CPU_CLASS(oc);
     g_autofree char *name = x86_cpu_class_get_model_name(cc);
@@ -5558,7 +5558,7 @@ static void x86_cpu_list_entry(gpointer data, gpointer user_data)
     if (!desc) {
         desc = g_strdup_printf("%s", model_id);
     }
-
+    // g_autofree - will invoke g_free() when the variable is going out of scope
     if (cc->model && cc->model->cpudef->deprecation_note) {
         g_autofree char *olddesc = desc;
         desc = g_strdup_printf("%s (deprecated)", olddesc);
@@ -5931,7 +5931,7 @@ static void x86_cpu_cpudef_class_init(ObjectClass *oc, void *data)
 }
 
 static void x86_register_cpu_model_type(const char *name, X86CPUModel *model)
-{
+{// g_autofree - will invoke g_free() when the variable is going out of scope
     g_autofree char *typename = x86_cpu_type_name(name);
     TypeInfo ti = {
         .name = typename,
@@ -7381,7 +7381,7 @@ static void x86_cpu_realizefn(DeviceState *dev, Error **errp)
     if (!cpu->legacy_cache) {
         const CPUCaches *cache_info =
             x86_cpu_get_versioned_cache_info(cpu, xcc->model);
-
+        // g_autofree - will invoke g_free() when the variable is going out of scope
         if (!xcc->model || !cache_info) {
             g_autofree char *name = x86_cpu_class_get_model_name(xcc);
             error_setg(errp,

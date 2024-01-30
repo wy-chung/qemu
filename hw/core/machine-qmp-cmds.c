@@ -196,7 +196,7 @@ MemdevList *qmp_query_memdev(Error **errp)
 }
 
 HumanReadableText *qmp_x_query_numa(Error **errp)
-{
+{// g_autoptr: will invoke the cleanup func created by a previous use of G_DEFINE_AUTOPTR_CLEANUP_FUNC
     g_autoptr(GString) buf = g_string_new("");
     int i, nb_numa_nodes;
     NumaNodeMem *node_mem;
@@ -314,7 +314,7 @@ static int qmp_x_query_rdma_foreach(Object *obj, void *opaque)
 }
 
 HumanReadableText *qmp_x_query_rdma(Error **errp)
-{
+{// g_autoptr: will invoke the cleanup func created by a previous use of G_DEFINE_AUTOPTR_CLEANUP_FUNC
     g_autoptr(GString) buf = g_string_new("");
 
     object_child_foreach_recursive(object_get_root(),
@@ -324,7 +324,7 @@ HumanReadableText *qmp_x_query_rdma(Error **errp)
 }
 
 HumanReadableText *qmp_x_query_ramblock(Error **errp)
-{
+{// g_autoptr: will invoke the cleanup func created by a previous use of G_DEFINE_AUTOPTR_CLEANUP_FUNC
     g_autoptr(GString) buf = ram_block_format();
 
     return human_readable_text_from_str(buf);
@@ -364,7 +364,7 @@ static int qmp_x_query_irq_foreach(Object *obj, void *opaque)
 }
 
 HumanReadableText *qmp_x_query_irq(Error **errp)
-{
+{// g_autoptr: will invoke the cleanup func created by a previous use of G_DEFINE_AUTOPTR_CLEANUP_FUNC
     g_autoptr(GString) buf = g_string_new("");
 
     object_child_foreach_recursive(object_get_root(),

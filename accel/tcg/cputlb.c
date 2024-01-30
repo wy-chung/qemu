@@ -1279,8 +1279,8 @@ static inline void tlb_set_compare(CPUTLBEntryFull *full, CPUTLBEntryFast *ent,
  * @full must be filled, except for xlat_section, and constitute
  * the complete description of the translated page.
  *
- * This is generally called by the target tlb_fill function after
- * having performed a successful page table walk (x86_cpu_tlb_fill) to find the physical
+ * This is generally called by the target tlb_fill(x86_cpu_tlb_fill) function after
+ * having performed a successful page table walk to find the physical
  * address and attributes for the translation.
  *
  * At most one entry for a given virtual address is permitted. Only a
@@ -1288,10 +1288,6 @@ static inline void tlb_set_compare(CPUTLBEntryFull *full, CPUTLBEntryFast *ent,
  * used by tlb_flush_page.
  */
 /*
- * Add a new TLB entry. At most one entry for a given virtual address
- * is permitted. Only a single TARGET_PAGE_SIZE region is mapped, the
- * supplied size is only used by tlb_flush_page.
- *
  * Called from TCG-generated code, which is under an RCU read-side
  * critical section.
  */
@@ -1323,7 +1319,7 @@ void tlb_set_page_full(CPUState *cpu, int mmu_idx,
     paddr_page = eFull->phys_addr & TARGET_PAGE_MASK;
 
     prot = eFull->prot; // PAGE_READ, PAGE_WRITE, PAGE_EXEC
-    asidx = cpu_asidx_from_attrs(cpu, eFull->attrs); // returns 0 most of the time
+    asidx = cpu_asidx_from_attrs(cpu, eFull->attrs); // 0: normal , 1: SMM
     section = address_space_translate_for_iotlb(cpu, asidx, paddr_page,
                                                 &xlat, &sz, eFull->attrs, &prot);
     assert(sz >= TARGET_PAGE_SIZE);
@@ -1528,7 +1524,7 @@ static void tlb_fill(CPUState *cpu, vaddr addr, int size,
     ok = cpu->cc->tcg_ops->tlb_fill(cpu, addr, size,
                                     access_type, mmu_idx, false, retaddr);
 #if defined(WYC)
-    ok = x86_cpu_tlb_fill(cpu, addr, size, access_type, mmu_idx, false, retaddr);
+    ok = x86_cpu_tlb_fill(cpu, addr, size, access_type, mmu_idx, /*probe*/false, retaddr);
 #endif
     assert(ok);
 }

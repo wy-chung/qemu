@@ -337,8 +337,8 @@ static MemoryRegionSection *address_space_lookup_region(AddressSpaceDispatch *d,
                                                         hwaddr addr,
                                                         bool resolve_subpage)
 {
-    MemoryRegionSection *section = qatomic_read(&d->mru_section);
     subpage_t *subpage;
+    MemoryRegionSection *section = qatomic_read(&d->mru_section);
 
     if (!section || section == &d->map.sections[PHYS_SECTION_UNASSIGNED] ||
         !section_covers_addr(section, addr)) {

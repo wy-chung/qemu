@@ -114,7 +114,7 @@ typedef struct CPUTLBEntryFull {
      */
     hwaddr phys_addr;
     MemTxAttrs attrs;	// the memory transaction attributes for the page.
-    uint8_t prot;	// the complete protections for the page
+    uint8_t prot;	// PAGE_READ, PAGE_WRITE, PAGE_EXEC, the complete protections for the page
     uint8_t lg_page_size; // the log2 of the page size
     /*
      * Additional tlb flags for use by the slow path. If non-zero,
@@ -137,7 +137,7 @@ typedef struct CPUTLBEntryFull {
  * Data elements that are per MMU mode, minus the bits accessed by
  * the TCG fast path.
  */
-typedef struct CPUTLBDescFull {
+typedef struct CPUTLBDescFull { // ori CPUTLBDesc
     /*
      * Describe a region covering all of the large pages allocated
      * into the tlb.  When any page within this region is flushed,
@@ -153,7 +153,7 @@ typedef struct CPUTLBDescFull {
 
     /* The tlb victim table, in two parts.  */
     size_t vindex;	// The next index to use for the victim table
-    CPUTLBEntryFast vfastable[CPU_VTLB_SIZE];	// 8
+    CPUTLBEntryFast vfastable[CPU_VTLB_SIZE];	// 8, ori CPUTLBEntry vtable[]
     CPUTLBEntryFull vfulltlb[CPU_VTLB_SIZE];	// 8
 
     CPUTLBEntryFull *fulltlb; // array size is stored in CPUTLBDescFast.mask

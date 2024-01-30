@@ -1180,23 +1180,23 @@ uint64_t x86_cpu_get_supported_feature_word(FeatureWord w,
 #endif
 
 #define EXCP00_DIVZ	0
-#define EXCP01_DB	1
+#define EXCP01_DB	1	// debug
 #define EXCP02_NMI	2
-#define EXCP03_INT3	3
-#define EXCP04_INTO	4
-#define EXCP05_BOUND	5
-#define EXCP06_ILLOP	6
-#define EXCP07_PREX	7
-#define EXCP08_DBLE	8
-#define EXCP09_XERR	9
-#define EXCP0A_TSS	10
-#define EXCP0B_NOSEG	11
-#define EXCP0C_STACK	12
-#define EXCP0D_GPF	13
-#define EXCP0E_PAGE	14
-#define EXCP10_COPR	16
-#define EXCP11_ALGN	17
-#define EXCP12_MCHK	18
+#define EXCP03_INT3	3	// breakpoint
+#define EXCP04_INTO	4	// overflow
+#define EXCP05_BOUND	5	// boundary range exceeded
+#define EXCP06_ILLOP	6	// undefined opcode
+#define EXCP07_PREX	7	// device not available
+#define EXCP08_DBLE	8	// double fault
+#define EXCP09_XERR	9	// reserved, previously was 80387 coprocessor segment overrun
+#define EXCP0A_TSS	10	// invalid TSS
+#define EXCP0B_NOSEG	11	// segment not present
+#define EXCP0C_STACK	12	// stack-segment fault
+#define EXCP0D_GPF	13	// general protection fault
+#define EXCP0E_PAGE	14	// page fault
+#define EXCP10_COPR	16	// x87 floating-point exception
+#define EXCP11_ALGN	17	// alignment checking
+#define EXCP12_MCHK	18	// machine check
 
 #define EXCP_VMEXIT     0x100 /* only for system emulation */
 #define EXCP_SYSCALL    0x101 /* only for user emulation */
@@ -1221,7 +1221,7 @@ uint64_t x86_cpu_get_supported_feature_word(FeatureWord w,
  * using this information. Condition codes are not generated if they
  * are only needed for conditional branches.
  */
-typedef enum {
+typedef enum CCOp {
     CC_OP_DYNAMIC, /* must use dynamic code to get cc_op */
     CC_OP_EFLAGS,  /* all cc are explicitly computed, CC_SRC = flags */
 
@@ -1622,7 +1622,7 @@ typedef struct CPUArchState /* CPUX86State */ {
 
     bool pdptrs_valid;
     uint64_t pdptrs[4];
-    int32_t a20_mask;
+    int32_t a20_mask; //  == ~0x0
 
     BNDReg bnd_regs[4];
     BNDCSReg bndcs_regs;

@@ -176,7 +176,7 @@ qio_channel_websock_handshake_send_res(QIOChannelWebsock *ioc,
 }
 
 static gchar *qio_channel_websock_date_str(void)
-{
+{// g_autoptr: will invoke the cleanup func created by a previous use of G_DEFINE_AUTOPTR_CLEANUP_FUNC
     g_autoptr(GDateTime) now = g_date_time_new_now_utc();
 
     return g_date_time_format(now, "%a, %d %b %Y %H:%M:%S GMT");

@@ -24,7 +24,7 @@
 
 typedef struct TranslateParams {
     target_ulong addr;
-    target_ulong cr3;
+    target_ulong cr3; // PDBR
     int pg_mode;
     int mmu_idx;
     int ptw_idx; // page table walk
@@ -603,9 +603,9 @@ bool x86_cpu_tlb_fill(CPUState *cs, vaddr addr, int size,
                       MMUAccessType access_type, int mmu_idx,
                       bool probe, uintptr_t retaddr)
 {
-    CPUX86State *env = cs->env_ptr;
     TranslateResult out;
     TranslateFault err;
+    CPUX86State *env = cs->env_ptr;
 
     if (get_physical_address(env, addr, access_type, mmu_idx, &out, &err)) {
         /*
@@ -631,7 +631,7 @@ bool x86_cpu_tlb_fill(CPUState *cs, vaddr addr, int size,
     }
 
     if (env->intercept_exceptions & (1 << err.exception_index)) {
-        /* cr2 is not modified in case of exceptions */
+        /* cr2(page fault linear address) is not modified in case of exceptions */
         x86_stq_phys(cs, env->vm_vmcb +
                      offsetof(struct vmcb, control.exit_info_2),
                      err.cr2);

@@ -51,7 +51,7 @@ static void dump_accel_info(GString *buf)
 }
 
 HumanReadableText *qmp_x_query_jit(Error **errp)
-{
+{// g_autoptr: will invoke the cleanup func created by a previous use of G_DEFINE_AUTOPTR_CLEANUP_FUNC
     g_autoptr(GString) buf = g_string_new("");
 
     if (!tcg_enabled()) {
@@ -67,7 +67,7 @@ HumanReadableText *qmp_x_query_jit(Error **errp)
 }
 
 HumanReadableText *qmp_x_query_opcount(Error **errp)
-{
+{// g_autoptr: will invoke the cleanup func created by a previous use of G_DEFINE_AUTOPTR_CLEANUP_FUNC
     g_autoptr(GString) buf = g_string_new("");
 
     if (!tcg_enabled()) {

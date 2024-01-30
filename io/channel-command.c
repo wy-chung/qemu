@@ -73,7 +73,7 @@ QIOChannelCommand *
 qio_channel_command_new_spawn(const char *const argv[],
                               int flags,
                               Error **errp)
-{
+{// g_autoptr: will invoke the cleanup func created by a previous use of G_DEFINE_AUTOPTR_CLEANUP_FUNC
     g_autoptr(GError) err = NULL;
     GPid pid = 0;
     GSpawnFlags gflags = G_SPAWN_CLOEXEC_PIPES | G_SPAWN_DO_NOT_REAP_CHILD;

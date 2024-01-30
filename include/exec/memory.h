@@ -1084,10 +1084,10 @@ struct AddressSpace {
     QTAILQ_HEAD(, MemoryListener) listeners;
     QTAILQ_ENTRY(AddressSpace) address_spaces_link;
 };
-
+#if !defined(WYC)
 typedef struct AddressSpaceDispatch AddressSpaceDispatch;
 typedef struct FlatRange FlatRange;
-
+#endif
 /* Flattened global view of current active memory hierarchy.  Kept in sorted
  * order.
  */

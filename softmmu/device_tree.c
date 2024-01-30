@@ -649,7 +649,7 @@ out:
 }
 
 void qmp_dumpdtb(const char *filename, Error **errp)
-{
+{// g_autoptr: will invoke the cleanup func created by a previous use of G_DEFINE_AUTOPTR_CLEANUP_FUNC
     g_autoptr(GError) err = NULL;
     uint32_t size;
 
