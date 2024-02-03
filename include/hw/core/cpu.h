@@ -76,7 +76,7 @@ DECLARE_CLASS_CHECKERS(CPUClass, CPU, TYPE_CPU);
  *   - provide three standard type cast functions
  *
  * The object struct and class struct need to be declared manually.
- */
+ */ // OBJECT_DECLARE_CPU_TYPE(X86CPU, X86CPUClass, X86_CPU);
 #define OBJECT_DECLARE_CPU_TYPE(CpuInstanceType, CpuClassType, CPU_MODULE_OBJ_NAME) \
     typedef struct ArchCPU CpuInstanceType; \
     OBJECT_DECLARE_TYPE(ArchCPU, CpuClassType, CPU_MODULE_OBJ_NAME) //wyc semicolon removed

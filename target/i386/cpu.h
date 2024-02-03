@@ -292,57 +292,57 @@ typedef enum X86Seg {
 #define DR7_TYPE_DATA_RW     0x3
 
 #define DR_RESERVED_MASK 0xffffffff00000000ULL
-
+// page table entry bits definitions
 #define PG_PRESENT_BIT  0
 #define PG_RW_BIT       1
 #define PG_USER_BIT     2
-#define PG_PWT_BIT      3
-#define PG_PCD_BIT      4
+#define PG_PWT_BIT      3 // Page-level write-through
+#define PG_PCD_BIT      4 // Page-level cache disable
 #define PG_ACCESSED_BIT 5
 #define PG_DIRTY_BIT    6
-#define PG_PSE_BIT      7
+#define PG_PSE_BIT      7 // page size extension. 2 MiB or 1 GiB
 #define PG_GLOBAL_BIT   8
 #define PG_PSE_PAT_BIT  12
-#define PG_PKRU_BIT     59
-#define PG_NX_BIT       63
+#define PG_PKRU_BIT     59 // bit 59 ~ 62
+#define PG_NX_BIT       63 // execute-disable
 
-#define PG_PRESENT_MASK  (1 << PG_PRESENT_BIT)
-#define PG_RW_MASK       (1 << PG_RW_BIT)
-#define PG_USER_MASK     (1 << PG_USER_BIT)
-#define PG_PWT_MASK      (1 << PG_PWT_BIT)
-#define PG_PCD_MASK      (1 << PG_PCD_BIT)
-#define PG_ACCESSED_MASK (1 << PG_ACCESSED_BIT)
-#define PG_DIRTY_MASK    (1 << PG_DIRTY_BIT)
-#define PG_PSE_MASK      (1 << PG_PSE_BIT)
-#define PG_GLOBAL_MASK   (1 << PG_GLOBAL_BIT)
-#define PG_PSE_PAT_MASK  (1 << PG_PSE_PAT_BIT)
-#define PG_ADDRESS_MASK  0x000ffffffffff000LL
-#define PG_HI_USER_MASK  0x7ff0000000000000LL
-#define PG_PKRU_MASK     (15ULL << PG_PKRU_BIT)
-#define PG_NX_MASK       (1ULL << PG_NX_BIT)
+#define PG_PRESENT_MASK  (1 << PG_PRESENT_BIT)	// bit 0
+#define PG_RW_MASK       (1 << PG_RW_BIT)	// bit 1
+#define PG_USER_MASK     (1 << PG_USER_BIT)	// bit 2
+#define PG_PWT_MASK      (1 << PG_PWT_BIT)	// Page-level write-through
+#define PG_PCD_MASK      (1 << PG_PCD_BIT)	// Page-level cache disable
+#define PG_ACCESSED_MASK (1 << PG_ACCESSED_BIT)	// bit 5
+#define PG_DIRTY_MASK    (1 << PG_DIRTY_BIT)	// bit 6
+#define PG_PSE_MASK      (1 << PG_PSE_BIT)	// page size extension. 2 MiB or 1 GiB
+#define PG_GLOBAL_MASK   (1 << PG_GLOBAL_BIT)	// bit 8
+#define PG_PSE_PAT_MASK  (1 << PG_PSE_PAT_BIT)	// bit 12
+#define PG_ADDRESS_MASK  0x000ffffffffff000LL	// 0x000f,ffff,ffff,f000
+#define PG_HI_USER_MASK  0x7ff0000000000000LL	// 0x7ff0,0000,0000,0000
+#define PG_PKRU_MASK     (15ULL << PG_PKRU_BIT) // bit 59 ~ 62
+#define PG_NX_MASK       (1ULL << PG_NX_BIT)	// bit 63: execute-disable
 
-#define PG_ERROR_W_BIT     1
+#define PG_ERROR_W_BIT     1	// referenced by tcg user code
 
-#define PG_ERROR_P_MASK    0x01
-#define PG_ERROR_W_MASK    (1 << PG_ERROR_W_BIT)
-#define PG_ERROR_U_MASK    0x04
-#define PG_ERROR_RSVD_MASK 0x08
-#define PG_ERROR_I_D_MASK  0x10
-#define PG_ERROR_PK_MASK   0x20
-
-#define PG_MODE_PAE      (1 << 0)	// Physical Address Extension
-#define PG_MODE_LMA      (1 << 1)	// long mode active
-#define PG_MODE_NXE      (1 << 2)	// No-Execute Enable
-#define PG_MODE_PSE      (1 << 3)	// Page Size Extension
-#define PG_MODE_LA57     (1 << 4)	// 57-Bit Linear Addresses
-#define PG_MODE_SVM_MASK MAKE_64BIT_MASK(0, 15)
+#define PG_ERROR_P_MASK    0x01 // protection fault error
+#define PG_ERROR_W_MASK    (1 << PG_ERROR_W_BIT) // error on write
+#define PG_ERROR_U_MASK    0x04 // the page cannot be accessed by user mode program
+#define PG_ERROR_RSVD_MASK 0x08 // reserved bits are not zero
+#define PG_ERROR_I_D_MASK  0x10 // cannot fetch and execute from this page
+#define PG_ERROR_PK_MASK   0x20 // protection key error
+enum page_mode { //wyc see get_pg_mode()
+    PG_MODE_PAE      = (1 << 0),	// Physical Address Extension
+    PG_MODE_LMA      = (1 << 1),	// long mode active
+    PG_MODE_NXE      = (1 << 2),	// No-Execute Enable
+    PG_MODE_PSE      = (1 << 3),	// Page Size Extension
+    PG_MODE_LA57     = (1 << 4),	// 57-Bit Linear Addresses
+    PG_MODE_SVM_MASK = ~0U >> (32-15), //MAKE_64BIT_MASK(0, 15),
 
 /* Bits of CR4 that do not affect the NPT page format.  */
-#define PG_MODE_WP       (1 << 16)	// can't write to read-only pages when privilege level is 0
-#define PG_MODE_PKE      (1 << 17)	// Protection Key Enable
-#define PG_MODE_PKS      (1 << 18)	// Protection Keys for Supervisor-Mode Pages
-#define PG_MODE_SMEP     (1 << 19)	// Supervisor Mode Execution Prevention
-
+    PG_MODE_WP       = (1 << 16),	// can't write to read-only pages when privilege level is 0
+    PG_MODE_PKE      = (1 << 17),	// Protection Key Enable
+    PG_MODE_PKS      = (1 << 18),	// Protection Keys for Supervisor-Mode Pages
+    PG_MODE_SMEP     = (1 << 19),	// Supervisor Mode Execution Prevention
+};
 #define MCG_CTL_P       (1ULL<<8)   /* MCG_CAP register available */
 #define MCG_SER_P       (1ULL<<24) /* MCA recovery/new status bits */
 #define MCG_LMCE_P      (1ULL<<27) /* Local Machine Check Supported */
@@ -677,62 +677,62 @@ uint64_t x86_cpu_get_supported_feature_word(FeatureWord w,
 #define CPUID_PBE (1U << 31)
 
 #define CPUID_EXT_SSE3     (1U << 0)
-#define CPUID_EXT_PCLMULQDQ (1U << 1)
-#define CPUID_EXT_DTES64   (1U << 2)
-#define CPUID_EXT_MONITOR  (1U << 3)
-#define CPUID_EXT_DSCPL    (1U << 4)
-#define CPUID_EXT_VMX      (1U << 5)
-#define CPUID_EXT_SMX      (1U << 6)
-#define CPUID_EXT_EST      (1U << 7)
-#define CPUID_EXT_TM2      (1U << 8)
+#define CPUID_EXT_PCLMULQDQ (1U << 1)	// PCLMULQDQ (carry-less multiply) instruction
+#define CPUID_EXT_DTES64   (1U << 2)	// 64-bit debug store (edx bit 21)
+#define CPUID_EXT_MONITOR  (1U << 3)	// MONITOR and MWAIT instructions (PNI)
+#define CPUID_EXT_DSCPL    (1U << 4)	// CPL qualified debug store
+#define CPUID_EXT_VMX      (1U << 5)	// Virtual Machine eXtensions
+#define CPUID_EXT_SMX      (1U << 6)	// Safer Mode Extensions (LaGrande) (GETSEC instruction)
+#define CPUID_EXT_EST      (1U << 7)	// Enhanced SpeedStep
+#define CPUID_EXT_TM2      (1U << 8)	// Thermal Monitor 2
 #define CPUID_EXT_SSSE3    (1U << 9)
-#define CPUID_EXT_CID      (1U << 10)
-#define CPUID_EXT_FMA      (1U << 12)
-#define CPUID_EXT_CX16     (1U << 13)
-#define CPUID_EXT_XTPR     (1U << 14)
-#define CPUID_EXT_PDCM     (1U << 15)
-#define CPUID_EXT_PCID     (1U << 17)
-#define CPUID_EXT_DCA      (1U << 18)
+#define CPUID_EXT_CID      (1U << 10)	// L1 Context ID
+#define CPUID_EXT_FMA      (1U << 12)	// Fused multiply-add (FMA3)
+#define CPUID_EXT_CX16     (1U << 13)	// CMPXCHG16B instruction
+#define CPUID_EXT_XTPR     (1U << 14)	// Can disable sending task priority messages
+#define CPUID_EXT_PDCM     (1U << 15)	// Perfmon & debug capability
+#define CPUID_EXT_PCID     (1U << 17)	// Process context identifiers (CR4 bit 17)
+#define CPUID_EXT_DCA      (1U << 18)	// Direct cache access for DMA writes
 #define CPUID_EXT_SSE41    (1U << 19)
 #define CPUID_EXT_SSE42    (1U << 20)
 #define CPUID_EXT_X2APIC   (1U << 21)
-#define CPUID_EXT_MOVBE    (1U << 22)
-#define CPUID_EXT_POPCNT   (1U << 23)
-#define CPUID_EXT_TSC_DEADLINE_TIMER (1U << 24)
-#define CPUID_EXT_AES      (1U << 25)
-#define CPUID_EXT_XSAVE    (1U << 26)
-#define CPUID_EXT_OSXSAVE  (1U << 27)
-#define CPUID_EXT_AVX      (1U << 28)
-#define CPUID_EXT_F16C     (1U << 29)
-#define CPUID_EXT_RDRAND   (1U << 30)
-#define CPUID_EXT_HYPERVISOR  (1U << 31)
+#define CPUID_EXT_MOVBE    (1U << 22)	// MOVBE instruction (big-endian)
+#define CPUID_EXT_POPCNT   (1U << 23)	// POPCNT instruction
+#define CPUID_EXT_TSC_DEADLINE_TIMER (1U << 24) // APIC implements one-shot operation using a TSC deadline value
+#define CPUID_EXT_AES      (1U << 25)	// AES instruction set
+#define CPUID_EXT_XSAVE    (1U << 26)	// Extensible processor state save/restore instructions: XSAVE, XRSTOR, XSETBV, XGETBV
+#define CPUID_EXT_OSXSAVE  (1U << 27)	// XSAVE enabled by OS
+#define CPUID_EXT_AVX      (1U << 28)	// Advanced Vector Extensions (256-bit SIMD)
+#define CPUID_EXT_F16C     (1U << 29)	// Floating-point conversion instructions to/from FP16 format
+#define CPUID_EXT_RDRAND   (1U << 30)	// RDRAND (on-chip random number generator) feature
+#define CPUID_EXT_HYPERVISOR  (1U << 31) // Hypervisor present (always zero on physical CPUs)
 
-#define CPUID_EXT2_FPU     (1U << 0)
-#define CPUID_EXT2_VME     (1U << 1)
-#define CPUID_EXT2_DE      (1U << 2)
-#define CPUID_EXT2_PSE     (1U << 3)
-#define CPUID_EXT2_TSC     (1U << 4)
-#define CPUID_EXT2_MSR     (1U << 5)
-#define CPUID_EXT2_PAE     (1U << 6)
-#define CPUID_EXT2_MCE     (1U << 7)
-#define CPUID_EXT2_CX8     (1U << 8)
-#define CPUID_EXT2_APIC    (1U << 9)
-#define CPUID_EXT2_SYSCALL (1U << 11)
-#define CPUID_EXT2_MTRR    (1U << 12)
-#define CPUID_EXT2_PGE     (1U << 13)
-#define CPUID_EXT2_MCA     (1U << 14)
-#define CPUID_EXT2_CMOV    (1U << 15)
-#define CPUID_EXT2_PAT     (1U << 16)
-#define CPUID_EXT2_PSE36   (1U << 17)
-#define CPUID_EXT2_MP      (1U << 19)
-#define CPUID_EXT2_NX      (1U << 20)
-#define CPUID_EXT2_MMXEXT  (1U << 22)
-#define CPUID_EXT2_MMX     (1U << 23)
-#define CPUID_EXT2_FXSR    (1U << 24)
-#define CPUID_EXT2_FFXSR   (1U << 25)
-#define CPUID_EXT2_PDPE1GB (1U << 26)
-#define CPUID_EXT2_RDTSCP  (1U << 27)
-#define CPUID_EXT2_LM      (1U << 29)
+#define CPUID_EXT2_FPU     (1U << 0)	// Onboard x87 FPU
+#define CPUID_EXT2_VME     (1U << 1)	// Virtual 8086 mode extensions
+#define CPUID_EXT2_DE      (1U << 2)	// Debugging extensions
+#define CPUID_EXT2_PSE     (1U << 3)	// Page Size Extension
+#define CPUID_EXT2_TSC     (1U << 4)	// Time Stamp Counter and RDTSC instruction
+#define CPUID_EXT2_MSR     (1U << 5)	// Model-specific registers and RDMSR/WRMSR instructions
+#define CPUID_EXT2_PAE     (1U << 6)	// Physical Address Extension
+#define CPUID_EXT2_MCE     (1U << 7)	// Machine Check Exception
+#define CPUID_EXT2_CX8     (1U << 8)	// CMPXCHG8B (compare-and-swap) instruction
+#define CPUID_EXT2_APIC    (1U << 9)	// Onboard Advanced Programmable Interrupt Controller
+#define CPUID_EXT2_SYSCALL (1U << 11)	// SYSENTER and SYSEXIT fast system call instructions
+#define CPUID_EXT2_MTRR    (1U << 12)	// Memory Type Range Registers
+#define CPUID_EXT2_PGE     (1U << 13)	// Page Global Enable bit in CR4
+#define CPUID_EXT2_MCA     (1U << 14)	// Machine check architecture
+#define CPUID_EXT2_CMOV    (1U << 15)	// Conditional move: CMOV, FCMOV and FCOMI instructions
+#define CPUID_EXT2_PAT     (1U << 16)	// Page Attribute Table
+#define CPUID_EXT2_PSE36   (1U << 17)	// 36-bit page size extension
+#define CPUID_EXT2_MP      (1U << 19)	// CLFLUSH cache line flush instruction (SSE2)
+#define CPUID_EXT2_NX      (1U << 20)	// No-execute (NX) bit (Itanium only)
+#define CPUID_EXT2_MMXEXT  (1U << 22)	// ?? Onboard thermal control MSRs for ACPI
+#define CPUID_EXT2_MMX     (1U << 23)	// MMX instructions (64-bit SIMD)
+#define CPUID_EXT2_FXSR    (1U << 24)	// FXSAVE, FXRSTOR instructions, CR4 bit 9
+#define CPUID_EXT2_FFXSR   (1U << 25)	// ?? Streaming SIMD Extensions (SSE) instructions
+#define CPUID_EXT2_PDPE1GB (1U << 26)	// ?? SSE2 instructions
+#define CPUID_EXT2_RDTSCP  (1U << 27)	// ?? CPU cache implements self-snoop
+#define CPUID_EXT2_LM      (1U << 29)	// ?? Thermal monitor automatically limits temperature
 #define CPUID_EXT2_3DNOWEXT (1U << 30)
 #define CPUID_EXT2_3DNOW   (1U << 31)
 
@@ -1594,7 +1594,7 @@ typedef struct HVFX86LazyFlags {
     target_ulong auxbits;
 } HVFX86LazyFlags;
 
-typedef struct CPUArchState /* CPUX86State */ {
+typedef struct CPUArchState { // Arch==X86
     /* standard registers */
     target_ulong regs[CPU_NB_REGS];
     target_ulong eip;
@@ -1700,8 +1700,8 @@ typedef struct CPUArchState /* CPUX86State */ {
     uint32_t smbase;
     uint64_t msr_smi_count;
 
-    uint32_t pkru;
-    uint32_t pkrs;
+    uint32_t pkru; // Memory Protection Keys for user pages
+    uint32_t pkrs; // Memory protection keys for kernel pages
     uint32_t tsx_ctrl;
 
     uint64_t spec_ctrl;
@@ -1899,7 +1899,7 @@ struct kvm_msrs;
  *
  * An x86 CPU.
  */
-struct ArchCPU {
+typedef struct ArchCPU { // Arch==X86
     /*< private >*/
     CPUState parent_obj;
     /*< public >*/
@@ -1993,36 +1993,16 @@ struct ArchCPU {
      * If true present the old cache topology information
      */
     bool legacy_cache;
-
-    /* Compatibility bits for old machine types: */
-    bool enable_cpuid_0xb;
-
-    /* Enable auto level-increase for all CPUID leaves */
-    bool full_cpuid_auto_level;
-
-    /* Only advertise CPUID leaves defined by the vendor */
-    bool vendor_cpuid_only;
-
-    /* Enable auto level-increase for Intel Processor Trace leave */
-    bool intel_pt_auto_level;
-
-    /* if true fill the top bits of the MTRR_PHYSMASKn variable range */
-    bool fill_mtrr_mask;
-
-    /* if true override the phys_bits value with a value read from the host */
-    bool host_phys_bits;
-
-    /* if set, limit maximum value for phys_bits when host_phys_bits is true */
-    uint8_t host_phys_bits_limit;
-
-    /* Stop SMI delivery for migration compatibility with old machines */
-    bool kvm_no_smi_migration;
-
-    /* Forcefully disable KVM PV features not exposed in guest CPUIDs */
-    bool kvm_pv_enforce_cpuid;
-
-    /* Number of physical address bits supported */
-    uint32_t phys_bits;
+    bool enable_cpuid_0xb; /* Compatibility bits for old machine types: */
+    bool full_cpuid_auto_level; /* Enable auto level-increase for all CPUID leaves */
+    bool vendor_cpuid_only; /* Only advertise CPUID leaves defined by the vendor */
+    bool intel_pt_auto_level; /* Enable auto level-increase for Intel Processor Trace leave */
+    bool fill_mtrr_mask; /* if true fill the top bits of the MTRR_PHYSMASKn variable range */
+    bool host_phys_bits; /* if true override the phys_bits value with a value read from the host */
+    bool kvm_no_smi_migration; /* Stop SMI delivery for migration compatibility with old machines */
+    bool kvm_pv_enforce_cpuid; /* Forcefully disable KVM PV features not exposed in guest CPUIDs */
+    uint8_t host_phys_bits_limit; /* if set, limit maximum value for phys_bits when host_phys_bits is true */
+    uint32_t phys_bits; // TCG_PHYS_ADDR_BITS==40 /* Number of physical address bits supported */
 
     /* in order to simplify APIC support, we leave this pointer to the
        user */
@@ -2041,7 +2021,7 @@ struct ArchCPU {
     int32_t hv_max_vps;
 
     bool xen_vapic;
-};
+} X86CPU; //wyc
 
 
 #ifndef CONFIG_USER_ONLY

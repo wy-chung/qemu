@@ -1522,7 +1522,7 @@ static void tlb_fill(CPUState *cpu, vaddr addr, int size,
      * should result in exception + longjmp to the cpu loop.
      */
     ok = cpu->cc->tcg_ops->tlb_fill(cpu, addr, size,
-                                    access_type, mmu_idx, false, retaddr);
+                                    access_type, mmu_idx, /*probe*/false, retaddr);
 #if defined(WYC)
     ok = x86_cpu_tlb_fill(cpu, addr, size, access_type, mmu_idx, /*probe*/false, retaddr);
 #endif
@@ -1713,13 +1713,13 @@ static void notdirty_write(CPUState *cpu, vaddr mem_vaddr, unsigned size,
 static int probe_access_internal(CPUArchState *env, vaddr addr,
                                  int fault_size, MMUAccessType access_type,
                                  int mmu_idx, bool nonfault,
-                                 void **phost, CPUTLBEntryFull **pfull,
-                                 uintptr_t retaddr, bool check_mem_cbs)
+                                 void **phost/*OUT*/, CPUTLBEntryFull **pfull/*OUT*/,
+                                 uintptr_t retaddr, bool check_mem_cbs) // check memory callbacks
 {
-    CPUTLBEntryFull *full;
+    CPUTLBEntryFull *eFull;
     uintptr_t index = tlb_index(env, mmu_idx, addr);
-    CPUTLBEntryFast *entry = tlb_fastentry(env, mmu_idx, index);
-    uint64_t tlb_addr = tlb_read_type(entry, access_type);
+    CPUTLBEntryFast *eFast = tlb_fastentry(env, mmu_idx, index);
+    uint64_t tlb_addr = tlb_read_type(eFast, access_type);
     vaddr page_addr = addr & TARGET_PAGE_MASK;
     int flags = TLB_FLAGS_MASK & ~TLB_FORCE_SLOW;
     bool force_mmio = check_mem_cbs && cpu_plugin_mem_cbs_enabled(env_cpu(env));
@@ -1741,7 +1741,7 @@ static int probe_access_internal(CPUArchState *env, vaddr addr,
 
             /* TLB resize via tlb_fill may have moved the entry.  */
             index = tlb_index(env, mmu_idx, addr);
-            entry = tlb_fastentry(env, mmu_idx, index);
+            eFast = tlb_fastentry(env, mmu_idx, index);
 
             /*
              * With PAGE_WRITE_INV, we set TLB_INVALID_MASK immediately,
@@ -1750,12 +1750,12 @@ static int probe_access_internal(CPUArchState *env, vaddr addr,
              */
             flags &= ~TLB_INVALID_MASK;
         }
-        tlb_addr = tlb_read_type(entry, access_type);
+        tlb_addr = tlb_read_type(eFast, access_type);
     }
     flags &= tlb_addr;
 
-    *pfull = full = &env_tlb(env)->dFull[mmu_idx].fulltlb[index];
-    flags |= full->slow_flags[access_type];
+    *pfull = eFull = &env_tlb(env)->dFull[mmu_idx].fulltlb[index];
+    flags |= eFull->slow_flags[access_type];
 
     /* Fold all "mmio-like" bits into TLB_MMIO.  This is not RAM.  */
     if (unlikely(flags & ~(TLB_WATCHPOINT | TLB_NOTDIRTY))
@@ -1766,7 +1766,7 @@ static int probe_access_internal(CPUArchState *env, vaddr addr,
     }
 
     /* Everything else is RAM. */
-    *phost = (void *)((uintptr_t)addr + entry->addend);
+    *phost = (void *)((uintptr_t)addr + eFast->addend);
     return flags;
 }
 

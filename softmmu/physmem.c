@@ -696,7 +696,7 @@ address_space_translate_for_iotlb(CPUState *cpu, int asidx, hwaddr orig_addr,
     AddressSpaceDispatch *d = cpu->cpu_ases[asidx].memory_dispatch;
 
     for (;;) {
-        section = address_space_translate_internal(d, addr, &addr, plen, false);
+        section = address_space_translate_internal(d, addr, &addr, plen, /*resolve_subpage*/false);
 
         iommu_mr = memory_region_get_iommu(section->mr);
         if (!iommu_mr) {

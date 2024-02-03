@@ -25,7 +25,7 @@
 typedef struct TranslateParams {
     target_ulong addr;
     target_ulong cr3; // PDBR
-    int pg_mode;
+    int pg_mode; // see enum page_mode
     int mmu_idx;
     int ptw_idx; // page table walk
     MMUAccessType access_type;
@@ -39,8 +39,8 @@ typedef struct TranslateResult {
 
 typedef enum TranslateFaultStage2 {
     S2_NONE,
-    S2_GPA,
-    S2_GPT,
+    S2_GPA, // guest physical address?
+    S2_GPT, // guest page table?
 } TranslateFaultStage2;
 
 typedef struct TranslateFault {
@@ -129,7 +129,7 @@ static inline bool ptw_setl(const PTETranslate *in, uint32_t old, uint32_t set)
     }
     return true;
 }
-
+// page table walk
 static bool mmu_translate(CPUX86State *env, const TranslateParams *in,
                           TranslateResult *out, TranslateFault *err)
 {
@@ -180,7 +180,7 @@ static bool mmu_translate(CPUX86State *env, const TranslateParams *in,
                     goto restart_5;
                 }
                 ptep = pte ^ PG_NX_MASK;
-            } else {
+            } else { // !PG_MODE_LA57
                 pte = in->cr3;
                 ptep = PG_NX_MASK | PG_USER_MASK | PG_RW_MASK;
             }
@@ -232,8 +232,8 @@ static bool mmu_translate(CPUX86State *env, const TranslateParams *in,
                 goto do_check_protect;
             }
         } else
-#endif
-        {
+#endif // TARGET_X86_64
+        { // !PG_MODE_LMA
             /*
              * Page table level 3
              */
@@ -254,7 +254,7 @@ static bool mmu_translate(CPUX86State *env, const TranslateParams *in,
                 goto restart_3_nolma;
             }
             ptep = PG_NX_MASK | PG_USER_MASK | PG_RW_MASK;
-        }
+        } // !PG_MODE_LMA
 
         /*
          * Page table level 2
