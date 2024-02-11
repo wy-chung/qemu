@@ -90,8 +90,8 @@ RAMList ram_list = { .blocks = QLIST_HEAD_INITIALIZER(ram_list.blocks) };
 static MemoryRegion *system_memory;
 static MemoryRegion *system_io;
 
-AddressSpace address_space_io;
-AddressSpace address_space_memory;
+AddressSpace address_space_memory; // kvm mode?
+AddressSpace address_space_io; // kvm mode?
 
 static MemoryRegion io_mem_unassigned;
 
@@ -2549,13 +2549,11 @@ static void tcg_commit(MemoryListener *listener)
 static void memory_map_init(void)
 {
     system_memory = g_malloc(sizeof(*system_memory));
-
     memory_region_init(system_memory, NULL, "system", UINT64_MAX);
     address_space_init(&address_space_memory, system_memory, "memory");
 
     system_io = g_malloc(sizeof(*system_io));
-    memory_region_init_io(system_io, NULL, &unassigned_io_ops, NULL, "io",
-                          65536);
+    memory_region_init_io(system_io, NULL, &unassigned_io_ops, NULL, "io", 65536);
     address_space_init(&address_space_io, system_io, "I/O");
 }
 

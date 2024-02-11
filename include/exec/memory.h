@@ -238,13 +238,11 @@ static inline void iommu_notifier_init(IOMMUNotifier *n, IOMMUNotify fn,
  * Memory region callbacks
  */
 struct MemoryRegionOps {
-    /* Read from the memory region. @addr is relative to @mr; @size is
-     * in bytes. */
+    /* Read from the memory region. @addr is relative to @mr; @size is in bytes. */
     uint64_t (*read)(void *opaque,
                      hwaddr addr,
                      unsigned size);
-    /* Write to the memory region. @addr is relative to @mr; @size is
-     * in bytes. */
+    /* Write to the memory region. @addr is relative to @mr; @size is in bytes. */
     void (*write)(void *opaque,
                   hwaddr addr,
                   uint64_t data,
@@ -750,8 +748,8 @@ struct MemoryRegion {
     /* private: */
 
     /* The following fields should fit in a cache line */
-    bool rom_device;
-    bool romd_mode; // a rom device that supports direct read
+    bool rom_device; // if not readonly, it is a MMIO-writable regions
+    bool romd_mode;  // ROMD or MMIO mode; in MMIO mode, reads/writes are handled by ops.read and ops.write
     bool ram;
     bool subpage;
     bool readonly; /* For RAM regions */

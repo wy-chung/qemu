@@ -754,7 +754,7 @@ static MemoryRegion *memory_region_get_flatview_root(MemoryRegion *mr)
 }
 
 /* Render a memory topology into a list of disjoint absolute ranges. */
-static FlatView *generate_memory_topology(MemoryRegion *mr)
+static FlatView *generate_memory_topology(MemoryRegion *mr) // generate the flatview cache of memory
 {
     int i;
     FlatView *view;
@@ -1226,7 +1226,7 @@ static void memory_region_do_init(MemoryRegion *mr,
  * @owner: the object that tracks the region's reference count
  * @name: used for debugging; not visible to the user or ABI
  * @size: size of the region; any subregions beyond this size will be clipped
- */
+ */ // to create a container
 void memory_region_init(MemoryRegion *mr,
                         Object *owner,
                         const char *name,
@@ -3903,8 +3903,8 @@ static void mtree_info_as(bool dispatch_tree, bool owner, bool disabled)
     MemoryRegionListHead ml_head;
     MemoryRegionList *ml, *ml2;
     AddressSpace *as;
-    GHashTable *views = g_hash_table_new(g_direct_hash, g_direct_equal);
     GSList *as_same_root_mr_list;
+    GHashTable *views = g_hash_table_new(g_direct_hash, g_direct_equal);
     struct AddressSpaceInfo asi = {
         .ml_head = &ml_head,
         .owner = owner,

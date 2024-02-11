@@ -33,7 +33,7 @@ typedef struct MemTxAttrs {
      * ARM/AMBA: TrustZone Secure access
      * x86: System Management Mode access
      */
-    unsigned int secure:1;
+    unsigned int secure:1; // 0: normal, 1: SMM
     /*
      * ARM: ArmSecuritySpace.  This partially overlaps secure, but it is
      * easier to have both fields to assist code that does not understand
