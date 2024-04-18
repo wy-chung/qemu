@@ -145,17 +145,12 @@ typedef enum X86Seg {
    states. Only the INHIBIT_IRQ, SMM and SVMI are not redundant. We
    avoid using the IOPL_MASK, TF_MASK, VM_MASK and AC_MASK bit
    positions to ease oring with eflags. */
-/* current cpl */
-#define HF_CPL_SHIFT         0
-/* true if hardware interrupts must be disabled for next instruction */
-#define HF_INHIBIT_IRQ_SHIFT 3
-/* 16 or 32 segments */
-#define HF_CS32_SHIFT        4
+#define HF_CPL_SHIFT         0 /* current cpl */
+#define HF_INHIBIT_IRQ_SHIFT 3 /* true if hardware interrupts must be disabled for next instruction */
+#define HF_CS32_SHIFT        4 /* 16 or 32 segments */
 #define HF_SS32_SHIFT        5
-/* zero base for DS, ES and SS : can be '0' only in 32 bit CS segment */
-#define HF_ADDSEG_SHIFT      6
-/* copy of CR0.PE (protected mode) */
-#define HF_PE_SHIFT          7
+#define HF_ADDSEG_SHIFT      6 /* zero base for DS, ES and SS : can be '0' only in 32 bit CS segment */
+#define HF_PE_SHIFT          7 /* copy of CR0.PE (protected mode) */
 #define HF_TF_SHIFT          8 /* must be same as eflags' trap flag */
 #define HF_MP_SHIFT          9 /* the order must be MP, EM, TS */
 #define HF_EM_SHIFT         10
@@ -1289,7 +1284,7 @@ typedef enum CCOp {
 typedef struct SegmentCache {
     uint32_t selector;
     target_ulong base;
-    uint32_t limit;
+    target_ulong limit; //wyc uint32_t -> target_ulong
     uint32_t flags; // the second DW (byte 4..7) of segment descriptor. See DESC_G_MASK for example
 } SegmentCache;
 

@@ -167,10 +167,17 @@ typedef struct DisasContext {
 #define SS32(S)   true
 #define ADDSEG(S) false
 #else
-#define VM86(S)   (((S)->flags & HF_VM_MASK) != 0)
-#define CODE32(S) (((S)->flags & HF_CS32_MASK) != 0)
-#define SS32(S)   (((S)->flags & HF_SS32_MASK) != 0)
-#define ADDSEG(S) (((S)->flags & HF_ADDSEG_MASK) != 0)
+//#define VM86(S)   (((S)->flags & HF_VM_MASK) != 0)
+static inline bool VM86(DisasContext *s) { return (s->flags & HF_VM_MASK) != 0; }
+
+//#define CODE32(S) (((S)->flags & HF_CS32_MASK) != 0)
+static inline bool CODE32(DisasContext *s) { return (s->flags & HF_CS32_MASK) != 0; }
+
+//#define SS32(S)   (((S)->flags & HF_SS32_MASK) != 0)
+static inline bool SS32(DisasContext *s)   { return (s->flags & HF_SS32_MASK) != 0; }
+
+//#define ADDSEG(S) (((S)->flags & HF_ADDSEG_MASK) != 0)
+#define ADDSEG(S) true	// always add segment base
 #endif
 #if !defined(TARGET_X86_64)
 #define CODE64(S) false
@@ -187,64 +194,34 @@ typedef struct DisasContext {
 
 #ifdef TARGET_X86_64
 //#define REX_PREFIX(S)  (((S)->prefix & PREFIX_REX) != 0)
-static inline bool REX_PREFIX(DisasContext *s)
-{
-	return (s->prefix & PREFIX_REX) != 0;
-}
+static inline bool REX_PREFIX(DisasContext *s) { return (s->prefix & PREFIX_REX) != 0; }
 
 //#define REX_W(S)       ((S)->vex_w)
-static inline bool REX_W(DisasContext *s)
-{
-	return s->vex_w;
-}
+static inline bool REX_W(DisasContext *s)      { return s->vex_w; }
 
-//#define REX_R(S)       ((S)->rex_r + 0)
-static inline uint8_t REX_R(DisasContext *s) // 4th bit for register
-{
-	return s->rex_r;
-}
+//#define REX_R(S)       ((S)->rex_r + 0) // 4th bit for register
+static inline uint8_t REX_R(DisasContext *s)   { return s->rex_r; }
 
-//#define REX_X(S)       ((S)->rex_x + 0)
-static inline uint8_t REX_X(DisasContext *s) // 4th bit for index register
-{
-	return s->rex_x;
-}
+//#define REX_X(S)       ((S)->rex_x + 0) // 4th bit for index register
+static inline uint8_t REX_X(DisasContext *s)   { return s->rex_x; }
 
-//#define REX_B(S)       ((S)->rex_b + 0)
-static inline uint8_t REX_B(DisasContext *s) // 4th bit for base register
-{
-	return s->rex_b;
-}
+//#define REX_B(S)       ((S)->rex_b + 0) // 4th bit for base register
+static inline uint8_t REX_B(DisasContext *s)   { return s->rex_b; }
 #else
 //#define REX_PREFIX(S)  false
-static inline bool REX_PREFIX(DisasContext *s)
-{
-	return false;
-}
+static inline bool REX_PREFIX(DisasContext *s) { return false; }
 
 //#define REX_W(S)       false
-static inline bool REX_W(DisasContext *s)
-{
-	return false;
-}
+static inline bool REX_W(DisasContext *s)      { return false; }
 
 //#define REX_R(S)       0
-static inline uint8_t REX_R(DisasContext *s)
-{
-	return 0;
-}
+static inline uint8_t REX_R(DisasContext *s)   { return 0; }
 
 //#define REX_X(S)       0
-static inline uint8_t REX_X(DisasContext *s)
-{
-	return 0;
-}
+static inline uint8_t REX_X(DisasContext *s)   { return 0; }
 
 //#define REX_B(S)       0
-static inline uint8_t REX_B(DisasContext *s)
-{
-	return 0;
-}
+static inline uint8_t REX_B(DisasContext *s)   { return 0; }
 #endif
 
 #ifdef CONFIG_USER_ONLY
@@ -705,7 +682,7 @@ static void gen_lea_v_seg(DisasContext *s, MemOp aflag, TCGv a0,
 #endif
     case MO_32:
         /* 32 bit address */
-        if (ovr_seg < 0 && 1/*ADDSEG(s)*/) {
+        if (ovr_seg < 0 && ADDSEG(s)) {
             ovr_seg = def_seg;
         }
         if (ovr_seg < 0) {
@@ -718,7 +695,7 @@ static void gen_lea_v_seg(DisasContext *s, MemOp aflag, TCGv a0,
         tcg_gen_ext16u_tl(s->A0, a0);
         a0 = s->A0;
         if (ovr_seg < 0) {
-            if (1/*ADDSEG(s)*/) {
+            if (ADDSEG(s)) {
                 ovr_seg = def_seg;
             } else {
                 return;
@@ -2655,7 +2632,7 @@ static void gen_push_v(DisasContext *s, TCGv val)
     tcg_gen_subi_tl(s->A0, cpu_regs[R_ESP], size); // s->A0 = R_ESP - size
 
     if (!CODE64(s)) {
-        if (1/*ADDSEG(s)*/) {
+        if (ADDSEG(s)) {
             new_esp = s->tmp4;
             tcg_gen_mov_tl(new_esp, s->A0);
         }

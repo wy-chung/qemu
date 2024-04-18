@@ -21,7 +21,7 @@ static const VMStateDescription vmstate_segment = {
     .fields = (VMStateField[]) {
         VMSTATE_UINT32(selector, SegmentCache),
         VMSTATE_UINTTL(base, SegmentCache),
-        VMSTATE_UINT32(limit, SegmentCache),
+        VMSTATE_UINTTL(limit, SegmentCache),
         VMSTATE_UINT32(flags, SegmentCache),
         VMSTATE_END_OF_LIST()
     }

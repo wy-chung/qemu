@@ -99,14 +99,14 @@ cpu_x86_dump_seg_cache(CPUX86State *env, FILE *f,
 {
 #ifdef TARGET_X86_64
     if (env->hflags & HF_CS64_MASK) {
-        qemu_fprintf(f, "%-3s=%04x %016" PRIx64 " %08x %08x", name,
+        qemu_fprintf(f, "%-3s=%04x %016" PRIx64 " %016" PRIx64 " %08x", name,
                      sc->selector, sc->base, sc->limit,
                      sc->flags & 0x00ffff00);
     } else
 #endif
     {
         qemu_fprintf(f, "%-3s=%04x %08x %08x %08x", name, sc->selector,
-                     (uint32_t)sc->base, sc->limit,
+                     (uint32_t)sc->base, (uint32_t)sc->limit,
                      sc->flags & 0x00ffff00);
     }
 
@@ -423,9 +423,9 @@ void x86_cpu_dump_state(CPUState *cs, FILE *f, int flags)
 
 #ifdef TARGET_X86_64
     if (env->hflags & HF_LMA_MASK) {
-        qemu_fprintf(f, "GDT=     %016" PRIx64 " %08x\n",
+        qemu_fprintf(f, "GDT=     %016" PRIx64 " %016" PRIx64 "\n",
                      env->gdt.base, env->gdt.limit);
-        qemu_fprintf(f, "IDT=     %016" PRIx64 " %08x\n",
+        qemu_fprintf(f, "IDT=     %016" PRIx64 " %016" PRIx64 "\n",
                      env->idt.base, env->idt.limit);
         qemu_fprintf(f, "CR0=%08x CR2=%016" PRIx64 " CR3=%016" PRIx64 " CR4=%08x\n",
                      (uint32_t)env->cr[0],
@@ -440,9 +440,9 @@ void x86_cpu_dump_state(CPUState *cs, FILE *f, int flags)
 #endif
     {
         qemu_fprintf(f, "GDT=     %08x %08x\n",
-                     (uint32_t)env->gdt.base, env->gdt.limit);
+                     (uint32_t)env->gdt.base, (uint32_t)env->gdt.limit);
         qemu_fprintf(f, "IDT=     %08x %08x\n",
-                     (uint32_t)env->idt.base, env->idt.limit);
+                     (uint32_t)env->idt.base, (uint32_t)env->idt.limit);
         qemu_fprintf(f, "CR0=%08x CR2=%08x CR3=%08x CR4=%08x\n",
                      (uint32_t)env->cr[0],
                      (uint32_t)env->cr[2],
