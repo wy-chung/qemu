@@ -215,14 +215,8 @@ void helper_wrmsr(CPUX86State *env)
         break;
     case MSR_CSBASE: //wyc
         env->segs[R_CS].base = val;
-        break;
-    case MSR_DSBASE: //wyc
         env->segs[R_DS].base = val;
-        break;
-    case MSR_ESBASE: //wyc
         env->segs[R_ES].base = val;
-        break;
-    case MSR_SSBASE: //wyc
         env->segs[R_SS].base = val;
         break;
     case MSR_FSBASE:
@@ -373,15 +367,6 @@ void helper_rdmsr(CPUX86State *env)
         break;
     case MSR_CSBASE: //wyc
         val = env->segs[R_CS].base;
-        break;
-    case MSR_DSBASE: //wyc
-        val = env->segs[R_DS].base;
-        break;
-    case MSR_ESBASE: //wyc
-        val = env->segs[R_ES].base;
-        break;
-    case MSR_SSBASE: //wyc
-        val = env->segs[R_SS].base;
         break;
     case MSR_FSBASE:
         val = env->segs[R_FS].base;

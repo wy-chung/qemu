@@ -186,17 +186,65 @@ typedef struct DisasContext {
 #endif
 
 #ifdef TARGET_X86_64
-#define REX_PREFIX(S)  (((S)->prefix & PREFIX_REX) != 0)
-#define REX_W(S)       ((S)->vex_w)
-#define REX_R(S)       ((S)->rex_r + 0) // 4th bit for register
-#define REX_X(S)       ((S)->rex_x + 0) // 4th bit for index register
-#define REX_B(S)       ((S)->rex_b + 0) // 4th bit for base register
+//#define REX_PREFIX(S)  (((S)->prefix & PREFIX_REX) != 0)
+static inline bool REX_PREFIX(DisasContext *s)
+{
+	return (s->prefix & PREFIX_REX) != 0;
+}
+
+//#define REX_W(S)       ((S)->vex_w)
+static inline bool REX_W(DisasContext *s)
+{
+	return s->vex_w;
+}
+
+//#define REX_R(S)       ((S)->rex_r + 0)
+static inline uint8_t REX_R(DisasContext *s) // 4th bit for register
+{
+	return s->rex_r;
+}
+
+//#define REX_X(S)       ((S)->rex_x + 0)
+static inline uint8_t REX_X(DisasContext *s) // 4th bit for index register
+{
+	return s->rex_x;
+}
+
+//#define REX_B(S)       ((S)->rex_b + 0)
+static inline uint8_t REX_B(DisasContext *s) // 4th bit for base register
+{
+	return s->rex_b;
+}
 #else
-#define REX_PREFIX(S)  false
-#define REX_W(S)       false
-#define REX_R(S)       0
-#define REX_X(S)       0
-#define REX_B(S)       0
+//#define REX_PREFIX(S)  false
+static inline bool REX_PREFIX(DisasContext *s)
+{
+	return false;
+}
+
+//#define REX_W(S)       false
+static inline bool REX_W(DisasContext *s)
+{
+	return false;
+}
+
+//#define REX_R(S)       0
+static inline uint8_t REX_R(DisasContext *s)
+{
+	return 0;
+}
+
+//#define REX_X(S)       0
+static inline uint8_t REX_X(DisasContext *s)
+{
+	return 0;
+}
+
+//#define REX_B(S)       0
+static inline uint8_t REX_B(DisasContext *s)
+{
+	return 0;
+}
 #endif
 
 #ifdef CONFIG_USER_ONLY
@@ -647,8 +695,10 @@ static void gen_lea_v_seg(DisasContext *s, MemOp aflag, TCGv a0,
     switch (aflag) {
 #ifdef TARGET_X86_64
     case MO_64:
+        if (ovr_seg < 0)
+            ovr_seg = def_seg;
         if (ovr_seg < 0) {
-            tcg_gen_mov_tl(s->A0, a0);
+            tcg_gen_mov_tl(s->A0, a0); // tl means target long. it may be i32 or i64
             return;
         }
         break;

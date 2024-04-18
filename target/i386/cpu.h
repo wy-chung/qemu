@@ -512,16 +512,12 @@ enum page_mode { //wyc see get_pg_mode()
 #define MSR_LSTAR                       0xc0000082
 #define MSR_CSTAR                       0xc0000083
 #define MSR_FMASK                       0xc0000084 // system call flag mask
-#define MSR_FSBASE                      0xc0000100
-#define MSR_GSBASE                      0xc0000101
+#define MSR_CSBASE                      0xc00000ff //wyc the base address for the process
+#define MSR_FSBASE                      0xc0000100 // IA32_FS_BASE
+#define MSR_GSBASE                      0xc0000101 // IA32_GS_BASE
 #define MSR_KERNELGSBASE                0xc0000102
 #define MSR_TSC_AUX                     0xc0000103
 #define MSR_AMD64_TSC_RATIO             0xc0000104
-//wyc
-#define MSR_CSBASE                      0xc000010c
-#define MSR_DSBASE                      0xc000010d
-#define MSR_ESBASE                      0xc000010e
-#define MSR_SSBASE                      0xc000010f
 
 #define MSR_AMD64_TSC_RATIO_DEFAULT     0x100000000ULL
 
