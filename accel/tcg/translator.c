@@ -162,6 +162,9 @@ void translator_loop(CPUState *cpu, TranslationBlock *tb, int *max_insns,
          * the next instruction.
          */
         ops->translate_insn(db, cpu);
+#if defined(WYC)
+        riscv_tr_translate_insn(db, cpu);
+#endif
 
         /*
          * We can't instrument after instructions that change control

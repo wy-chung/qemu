@@ -16,7 +16,7 @@
  * For struct types used in only a few headers, judicious use of the
  * struct tag instead of the typedef name is commonly preferable.
  */
-
+#if !defined(WYC)
 /*
  * Incomplete struct types
  * Please keep this list in case-insensitive alphabetical order.
@@ -152,5 +152,5 @@ typedef struct IRQState *qemu_irq;
  * Function types
  */
 typedef void (*qemu_irq_handler)(void *opaque, int n, int level);
-
+#endif // !defined(WYC)
 #endif /* QEMU_TYPEDEFS_H */
