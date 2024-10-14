@@ -82,6 +82,7 @@ typedef enum {
 #define SET_LAST_RUN_CLOCK(s) \
     (s)->last_run_ns = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
 
+#if !defined(WYC)
 /* nifty macros from Arnon's EHCI version  */
 #define get_field(data, field) \
     (((data) & field##_MASK) >> field##_SH)
@@ -92,6 +93,7 @@ typedef enum {
     val |= ((newval) << field##_SH) & field##_MASK; \
     *data = val; \
     } while(0)
+#endif // !defined(WYC)
 
 static const char *ehci_state_names[] = {
     [EST_INACTIVE]     = "INACTIVE",

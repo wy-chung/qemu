@@ -213,6 +213,7 @@ enum {
 #define SLOT_CONTEXT_ENTRIES_MASK 0x1f
 #define SLOT_CONTEXT_ENTRIES_SHIFT 27
 
+#if !defined(WYC)
 #define get_field(data, field)                  \
     (((data) >> field##_SHIFT) & field##_MASK)
 
@@ -222,6 +223,7 @@ enum {
         val_ |= ((newval) & field##_MASK) << field##_SHIFT;     \
         *data = val_;                                           \
     } while (0)
+#endif // !defined(WYC)
 
 typedef enum EPType {
     ET_INVALID = 0,

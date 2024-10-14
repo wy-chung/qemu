@@ -47,6 +47,7 @@
 #define USB_HZ_HS       96000000
 #define USB_FRMINTVL    12000
 
+#if !defined(WYC)
 /* nifty macros from Arnon's EHCI version  */
 #define get_field(data, field) \
     (((data) & field##_MASK) >> field##_SHIFT)
@@ -57,6 +58,7 @@
     val |= ((newval) << field##_SHIFT) & field##_MASK; \
     *(data) = val; \
 } while (0)
+#endif // !defined(WYC)
 
 #define get_bit(data, bitmask) \
     (!!((data) & (bitmask)))

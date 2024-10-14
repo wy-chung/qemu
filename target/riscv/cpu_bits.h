@@ -2,13 +2,18 @@
 
 #ifndef TARGET_RISCV_CPU_BITS_H
 #define TARGET_RISCV_CPU_BITS_H
-
+#if !defined(WYC)
 #define get_field(reg, mask) (((reg) & \
                  (uint64_t)(mask)) / ((mask) & ~((mask) << 1)))
 #define set_field(reg, mask, val) (((reg) & ~(uint64_t)(mask)) | \
                  (((uint64_t)(val) * ((mask) & ~((mask) << 1))) & \
                  (uint64_t)(mask)))
-
+#else
+uint64_t get_field(uint64_t reg, uint64_t mask)
+    { return (reg & mask) / (mask & ~(mask << 1)); }
+uint64_t set_field(uint64_t reg, uint64_t mask, uint64_t val)
+    { return (reg & ~mask) | ((val * (mask & ~(mask << 1))) & mask); }
+#endif // defined(WYC)
 /* Extension context status mask */
 #define EXT_STATUS_MASK     0x3ULL
 
@@ -212,6 +217,7 @@
 /* Supervisor Protection and Translation */
 #define CSR_SPTBR           0x180
 #define CSR_SATP            0x180
+#define CSR_SPROCBASE       0x181	//wyc
 
 /* Supervisor-Level Window to Indirectly Accessed Registers (AIA) */
 #define CSR_SISELECT        0x150

@@ -843,6 +843,9 @@ static bool do_csrr(DisasContext *ctx, int rd, int rc)
 
     translator_io_start(&ctx->base);
     gen_helper_csrr(dest, tcg_env, csr);
+#if defined(WYC)
+    helper_csrr();
+#endif
     gen_set_gpr(ctx, rd, dest);
     return do_csr_post(ctx);
 }
@@ -853,6 +856,9 @@ static bool do_csrw(DisasContext *ctx, int rc, TCGv src)
 
     translator_io_start(&ctx->base);
     gen_helper_csrw(tcg_env, csr, src);
+#if defined(WYC)
+    helper_csrw();
+#endif
     return do_csr_post(ctx);
 }
 

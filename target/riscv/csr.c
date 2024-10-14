@@ -3055,6 +3055,22 @@ static RISCVException write_satp(CPURISCVState *env, int csrno,
     return RISCV_EXCP_NONE;
 }
 
+//wyc
+static RISCVException read_sprocbase(CPURISCVState *env, int csrno,
+                                target_ulong *val)
+{
+    *val = env->sprocbase;
+    return RISCV_EXCP_NONE;
+}
+
+//wyc
+static RISCVException write_sprocbase(CPURISCVState *env, int csrno,
+                                 target_ulong val)
+{
+    env->sprocbase = val;
+    return RISCV_EXCP_NONE;
+}
+
 static RISCVException read_vstopi(CPURISCVState *env, int csrno,
                                   target_ulong *val)
 {
@@ -4357,7 +4373,8 @@ static inline RISCVException riscv_csrrw_check(CPURISCVState *env,
      */
     RISCVException ret = csr_ops[csrno].predicate(env, csrno);
 #if defined(WYC)
-    RISCVException ret = satp(env, csrno);
+    RISCVException ret = satp();
+    RISCVException ret = any();
 #endif
     if (ret != RISCV_EXCP_NONE) {
         return ret;
@@ -4449,7 +4466,8 @@ RISCVException riscv_csrrw(CPURISCVState *env, int csrno,
         return ret;
     }
 
-    return riscv_csrrw_do64(env, csrno, ret_value, new_value, write_mask);
+    ret = riscv_csrrw_do64(env, csrno, ret_value, new_value, write_mask);
+    return ret;
 }
 
 static RISCVException riscv_csrrw_do128(CPURISCVState *env, int csrno,
@@ -4753,7 +4771,8 @@ riscv_csr_operations csr_ops[CSR_TABLE_SIZE] = {
                          .min_priv_ver = PRIV_VERSION_1_12_0 },
 
     /* Supervisor Protection and Translation */
-    [CSR_SATP]     = { "satp",     satp, read_satp,     write_satp     },
+    [CSR_SATP]      = { "satp",     satp, read_satp,     write_satp     },
+    [CSR_SPROCBASE] = { "sprocbase", any /*smode*/, read_sprocbase, write_sprocbase },
 
     /* Supervisor-Level Window to Indirectly Accessed Registers (AIA) */
     [CSR_SISELECT]   = { "siselect",   aia_smode, NULL, NULL, rmw_xiselect },
