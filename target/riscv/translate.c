@@ -582,15 +582,15 @@ static TCGv get_address(DisasContext *ctx, int rs1, int imm)
 {
     TCGv addr = tcg_temp_new();
     TCGv src1 = get_gpr(ctx, rs1, EXT_NONE);
-#if 1 // ori
+#if 0 // ori
 
     tcg_gen_addi_tl(addr, src1, imm);
 #else
-    TCGv_i32 csr = tcg_constant_i32(CSR_SPROCBASE);
+    //TCGv_i32 csr = tcg_constant_i32(CSR_SPROCBASE);
 
-    gen_helper_csrr(addr, tcg_env, csr);
+    gen_helper_csrr_sprocbase(addr, tcg_env);
  #if defined(WYC)
-    helper_csrr();
+    helper_csrr_sprocbase();
  #endif
     tcg_gen_add_tl(addr, addr, src1);
     tcg_gen_addi_tl(addr, addr, imm);
@@ -612,15 +612,15 @@ static TCGv get_address_indexed(DisasContext *ctx, int rs1, TCGv offs)
 {
     TCGv addr = tcg_temp_new();
     TCGv src1 = get_gpr(ctx, rs1, EXT_NONE);
-#if 1 // ori
+#if 0 // ori
 
     tcg_gen_add_tl(addr, src1, offs);
 #else
-    TCGv_i32 csr = tcg_constant_i32(CSR_SPROCBASE);
+    //TCGv_i32 csr = tcg_constant_i32(CSR_SPROCBASE);
 
-    gen_helper_csrr(addr, tcg_env, csr);
+    gen_helper_csrr_sprocbase(addr, tcg_env);
  #if defined(WYC)
-    helper_csrr();
+    helper_csrr_sprocbase();
  #endif
     tcg_gen_add_tl(addr, addr, src1);
     tcg_gen_add_tl(addr, addr, offs);

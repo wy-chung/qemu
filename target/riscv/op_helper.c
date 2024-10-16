@@ -59,6 +59,11 @@ target_ulong helper_csrr(CPURISCVState *env, int csr)
     return val;
 }
 
+target_ulong helper_csrr_sprocbase(CPURISCVState *env)
+{
+    return env->sprocbase;
+}
+
 void helper_csrw(CPURISCVState *env, int csr, target_ulong src)
 {
     target_ulong mask = env->xl == MXL_RV32 ? UINT32_MAX : (target_ulong)-1;
