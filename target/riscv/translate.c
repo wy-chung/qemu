@@ -43,6 +43,7 @@ static TCGv_i64 cpu_fpr[32]; /* assume F and D extensions */
 static TCGv load_res;
 static TCGv load_val;
 /* globals for PM CSRs */
+// pm means pointer masking. it is used for memory tagging
 static TCGv pm_mask;
 static TCGv pm_base;
 
@@ -581,8 +582,19 @@ static TCGv get_address(DisasContext *ctx, int rs1, int imm)
 {
     TCGv addr = tcg_temp_new();
     TCGv src1 = get_gpr(ctx, rs1, EXT_NONE);
+#if 1 // ori
 
     tcg_gen_addi_tl(addr, src1, imm);
+#else
+    TCGv_i32 csr = tcg_constant_i32(CSR_SPROCBASE);
+
+    gen_helper_csrr(addr, tcg_env, csr);
+ #if defined(WYC)
+    helper_csrr();
+ #endif
+    tcg_gen_add_tl(addr, addr, src1);
+    tcg_gen_addi_tl(addr, addr, imm);
+#endif
     if (ctx->pm_mask_enabled) {
         tcg_gen_andc_tl(addr, addr, pm_mask);
     } else if (get_address_xl(ctx) == MXL_RV32) {
@@ -600,8 +612,19 @@ static TCGv get_address_indexed(DisasContext *ctx, int rs1, TCGv offs)
 {
     TCGv addr = tcg_temp_new();
     TCGv src1 = get_gpr(ctx, rs1, EXT_NONE);
+#if 1 // ori
 
     tcg_gen_add_tl(addr, src1, offs);
+#else
+    TCGv_i32 csr = tcg_constant_i32(CSR_SPROCBASE);
+
+    gen_helper_csrr(addr, tcg_env, csr);
+ #if defined(WYC)
+    helper_csrr();
+ #endif
+    tcg_gen_add_tl(addr, addr, src1);
+    tcg_gen_add_tl(addr, addr, offs);
+#endif
     if (ctx->pm_mask_enabled) {
         tcg_gen_andc_tl(addr, addr, pm_mask);
     } else if (get_xl(ctx) == MXL_RV32) {

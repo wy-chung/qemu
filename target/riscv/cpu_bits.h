@@ -217,7 +217,7 @@ uint64_t set_field(uint64_t reg, uint64_t mask, uint64_t val)
 /* Supervisor Protection and Translation */
 #define CSR_SPTBR           0x180
 #define CSR_SATP            0x180
-#define CSR_SPROCBASE       0x181	//wyc
+#define CSR_SPROCBASE       0x081	//wyc '0' means that it can be accessed in user-level
 
 /* Supervisor-Level Window to Indirectly Accessed Registers (AIA) */
 #define CSR_SISELECT        0x150

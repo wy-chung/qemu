@@ -57,8 +57,8 @@ typedef struct CPUArchState CPURISCVState;
  * Update misa_bits[], misa_ext_info_arr[] and misa_ext_cfgs[]
  * when adding new MISA bits here.
  */
-#define RVI RV('I')
-#define RVE RV('E') /* E and I are mutually exclusive */
+#define RVI RV('I') // RV32I/64I/128I base ISA
+#define RVE RV('E') // RV32E/64E base ISA /* E and I are mutually exclusive */
 #define RVM RV('M') // Integer Multiplication and Division
 #define RVA RV('A') // Atomic
 #define RVF RV('F') // Single-Precision Floating-Point
