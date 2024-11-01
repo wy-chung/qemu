@@ -246,11 +246,11 @@ struct CPUArchState {
 
     target_ulong satp;   /* since: priv-1.10.0 */
     target_ulong sprocbase; //wyc process base address
-    target_ulong stval;
+    target_ulong stval;	// exception-specific information for handling the trap
     target_ulong medeleg;
 
-    target_ulong stvec;
-    target_ulong sepc;
+    target_ulong stvec;	// trap vector base address
+    target_ulong sepc;	// the pc of the instruction that caused the trap
     target_ulong scause;
 
     target_ulong mtvec;

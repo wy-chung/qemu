@@ -61,7 +61,7 @@ target_ulong helper_csrr(CPURISCVState *env, int csr)
 
 target_ulong helper_csrr_sprocbase(CPURISCVState *env)
 {
-    return env->sprocbase;
+    return env->priv == PRV_U ? env->sprocbase : 0; // procbase is only used in user mode
 }
 
 void helper_csrw(CPURISCVState *env, int csr, target_ulong src)

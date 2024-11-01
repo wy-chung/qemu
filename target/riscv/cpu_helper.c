@@ -71,13 +71,12 @@ void cpu_get_tb_cpu_state(CPURISCVState *env, vaddr *pc,
 
 #if 0 // ori
     *pc = env->xl == MXL_RV32 ? env->pc & UINT32_MAX : env->pc;
-    *cs_base = 0;
 #else
-    *cs_base = env->sprocbase;
-    *pc = env->pc + *cs_base;
+    *pc = env->pc + (env->priv == PRV_U ? env->sprocbase : 0);
     if (env->xl == MXL_RV32)
-        *pc =  *pc & UINT32_MAX;
+        *pc = *pc & UINT32_MAX;
 #endif
+    *cs_base = 0;
 
     if (cpu->cfg.ext_zve32f) {
         /*
