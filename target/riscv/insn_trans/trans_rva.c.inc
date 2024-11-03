@@ -30,7 +30,7 @@
     }                                                     \
 } while (0)
 
-static bool gen_lr(DisasContext *ctx, arg_atomic *a, MemOp mop)
+static bool gen_lr(DisasContext *ctx, arg_atomic *a, MemOp mop) // Load-Reserved also known as Load-linked
 {
     TCGv src1;
 
@@ -55,7 +55,7 @@ static bool gen_lr(DisasContext *ctx, arg_atomic *a, MemOp mop)
     return true;
 }
 
-static bool gen_sc(DisasContext *ctx, arg_atomic *a, MemOp mop)
+static bool gen_sc(DisasContext *ctx, arg_atomic *a, MemOp mop) // Store-Conditional
 {
     TCGv dest, src1, src2;
     TCGLabel *l1 = gen_new_label();
