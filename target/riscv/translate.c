@@ -580,20 +580,14 @@ static void gen_jal(DisasContext *ctx, int rd, target_ulong imm)
 /* Compute a canonical address from a register plus offset. */
 static TCGv get_address(DisasContext *ctx, int rs1, int imm)
 {
-    TCGv addr = tcg_temp_new();
+    TCGv uaddr = tcg_temp_new();
+    TCGv addr  = tcg_temp_new();
     TCGv src1 = get_gpr(ctx, rs1, EXT_NONE);
-#if 0 // ori
 
-    tcg_gen_addi_tl(addr, src1, imm);
-#else
-    //TCGv_i32 csr = tcg_constant_i32(CSR_SPROCBASE);
-
-    gen_helper_csrr_sprocbase(addr, tcg_env);
- #if defined(WYC)
-    helper_csrr_sprocbase();
- #endif
-    tcg_gen_add_tl(addr, addr, src1);
-    tcg_gen_addi_tl(addr, addr, imm);
+    tcg_gen_addi_tl(uaddr, src1, imm);
+    gen_helper_add_procbase(addr, tcg_env, uaddr);
+#if defined(WYC)
+    helper_add_procbase();
 #endif
     if (ctx->pm_mask_enabled) {
         tcg_gen_andc_tl(addr, addr, pm_mask);
@@ -610,21 +604,12 @@ static TCGv get_address(DisasContext *ctx, int rs1, int imm)
 /* Compute a canonical address from a register plus reg offset. */
 static TCGv get_address_indexed(DisasContext *ctx, int rs1, TCGv offs)
 {
-    TCGv addr = tcg_temp_new();
+    TCGv uaddr = tcg_temp_new();
+    TCGv addr  = tcg_temp_new();
     TCGv src1 = get_gpr(ctx, rs1, EXT_NONE);
-#if 0 // ori
 
-    tcg_gen_add_tl(addr, src1, offs);
-#else
-    //TCGv_i32 csr = tcg_constant_i32(CSR_SPROCBASE);
-
-    gen_helper_csrr_sprocbase(addr, tcg_env);
- #if defined(WYC)
-    helper_csrr_sprocbase();
- #endif
-    tcg_gen_add_tl(addr, addr, src1);
-    tcg_gen_add_tl(addr, addr, offs);
-#endif
+    tcg_gen_add_tl(uaddr, src1, offs);
+    gen_helper_add_procbase(addr, tcg_env, uaddr);
     if (ctx->pm_mask_enabled) {
         tcg_gen_andc_tl(addr, addr, pm_mask);
     } else if (get_xl(ctx) == MXL_RV32) {

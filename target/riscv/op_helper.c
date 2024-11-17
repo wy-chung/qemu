@@ -59,9 +59,16 @@ target_ulong helper_csrr(CPURISCVState *env, int csr)
     return val;
 }
 
-target_ulong helper_csrr_sprocbase(CPURISCVState *env)
+target_ulong helper_add_procbase(CPURISCVState *env, target_ulong uaddr)
 {
-    return env->priv == PRV_U ? env->sprocbase : 0; // procbase is only used in user mode
+#if defined(TARGET_RISCV64)
+    if (env->priv == PRV_U) {
+        if (uaddr >= 0x100000000)
+            riscv_raise_exception(env, RISCV_EXCP_LOAD_GUEST_ACCESS_FAULT, GETPC());
+        return env->sprocbase + uaddr;
+    }
+#endif
+    return uaddr;
 }
 
 void helper_csrw(CPURISCVState *env, int csr, target_ulong src)
