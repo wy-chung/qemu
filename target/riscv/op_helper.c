@@ -63,8 +63,8 @@ target_ulong helper_add_procbase(CPURISCVState *env, target_ulong uaddr)
 {
 #if defined(TARGET_RISCV64)
     if (env->priv == PRV_U) {
-        if (uaddr >= 0x100000000)
-            riscv_raise_exception(env, RISCV_EXCP_LOAD_GUEST_ACCESS_FAULT, GETPC());
+        if (uaddr >= 0x100000000UL)
+            riscv_raise_exception(env, RISCV_EXCP_LOAD_ACCESS_FAULT, GETPC());
         return env->sprocbase + uaddr;
     }
 #endif

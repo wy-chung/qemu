@@ -72,7 +72,14 @@ void cpu_get_tb_cpu_state(CPURISCVState *env, vaddr *pc,
 #if 0 // ori
     *pc = env->xl == MXL_RV32 ? env->pc & UINT32_MAX : env->pc;
 #else
-    *pc = env->pc + (env->priv == PRV_U ? env->sprocbase : 0);
+ #if defined(TARGET_RISCV64)
+    if (env->priv == PRV_U) {
+        if (env->pc >= 0x100000000UL)
+            riscv_raise_exception(env, RISCV_EXCP_INST_ACCESS_FAULT, GETPC());
+        *pc = env->pc + env->sprocbase;
+    } else
+ #endif
+        *pc = env->pc;
     if (env->xl == MXL_RV32)
         *pc = *pc & UINT32_MAX;
 #endif
