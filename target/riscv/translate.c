@@ -610,6 +610,9 @@ static TCGv get_address_indexed(DisasContext *ctx, int rs1, TCGv offs)
 
     tcg_gen_add_tl(uaddr, src1, offs);
     gen_helper_add_procbase(addr, tcg_env, uaddr);
+#if defined(WYC)
+    helper_add_procbase();
+#endif
     if (ctx->pm_mask_enabled) {
         tcg_gen_andc_tl(addr, addr, pm_mask);
     } else if (get_xl(ctx) == MXL_RV32) {

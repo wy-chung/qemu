@@ -58,14 +58,17 @@ target_ulong helper_csrr(CPURISCVState *env, int csr)
     }
     return val;
 }
-
+#define UMAX 0x100000000UL
 target_ulong helper_add_procbase(CPURISCVState *env, target_ulong uaddr)
 {
 #if defined(TARGET_RISCV64)
     if (env->priv == PRV_U) {
-        if (uaddr >= 0x100000000UL)
-            riscv_raise_exception(env, RISCV_EXCP_LOAD_ACCESS_FAULT, GETPC());
-        return env->sprocbase + uaddr;
+        //if (uaddr >= UMAX) {
+        //    riscv_raise_exception(env, RISCV_EXCP_LOAD_ACCESS_FAULT, GETPC());
+        //    uaddr &= (UMAX-1);
+        //}
+	target_ulong addr = uaddr | env->sprocbase;
+        return addr;
     }
 #endif
     return uaddr;
@@ -272,7 +275,7 @@ void helper_cbo_inval(CPURISCVState *env, target_ulong address)
 }
 
 #ifndef CONFIG_USER_ONLY
-
+// in the execute path
 target_ulong helper_sret(CPURISCVState *env)
 {
     uint64_t mstatus;
