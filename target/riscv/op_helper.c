@@ -58,18 +58,31 @@ target_ulong helper_csrr(CPURISCVState *env, int csr)
     }
     return val;
 }
-#define UMAX 0x100000000UL
+
 target_ulong helper_add_procbase(CPURISCVState *env, target_ulong uaddr)
 {
 #if defined(TARGET_RISCV64)
-    if (env->priv == PRV_U) {
-        //if (uaddr >= UMAX) {
-        //    riscv_raise_exception(env, RISCV_EXCP_LOAD_ACCESS_FAULT, GETPC());
-        //    uaddr &= (UMAX-1);
-        //}
-	target_ulong addr = uaddr | env->sprocbase;
-        return addr;
-    }
+#define UMAX 0x100000000UL
+#define UPPER ~(UMAX-1)
+#define LOWER (UMAX-1)
+	if (env->priv == PRV_U) {
+		target_ulong addr;
+		target_ulong upper = uaddr & UPPER;
+		if (upper == 0) {
+			addr = env->sprocbase | uaddr;
+		} else if (upper == env->sprocbase) {
+			addr = uaddr;
+		} else {
+			printf("%s: uaddr %lx procbase %lx\n", __func__, uaddr, env->sprocbase);
+			//addr = uaddr;
+			addr = env->sprocbase | (uaddr & LOWER);
+			//riscv_raise_exception(env, RISCV_EXCP_INST_ACCESS_FAULT, GETPC());
+		}
+		return addr;
+	}
+#undef UMAX
+#undef UPPER
+#undef LOWER
 #endif
     return uaddr;
 }

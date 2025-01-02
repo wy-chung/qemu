@@ -415,8 +415,9 @@ struct CPUArchState {
     target_ulong senvcfg;
     uint64_t henvcfg;
 #endif
-    target_ulong cur_pmmask;
-    target_ulong cur_pmbase;
+    // actual_address = (requested_address & ~pmmask) | pmbase
+    target_ulong cur_pmmask; // pointer masking mask
+    target_ulong cur_pmbase; // pointer masking base
 
     /* Fields from here on are preserved across CPU reset. */
     QEMUTimer *stimer; /* Internal timer for S-mode interrupt */

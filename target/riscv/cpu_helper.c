@@ -62,7 +62,6 @@ int riscv_env_mmu_index(CPURISCVState *env, bool ifetch)
 #endif
 }
 
-#define UMAX 0x100000000UL
 void cpu_get_tb_cpu_state(CPURISCVState *env, vaddr *pc,
                           uint64_t *cs_base, uint32_t *pflags)
 {
@@ -73,14 +72,25 @@ void cpu_get_tb_cpu_state(CPURISCVState *env, vaddr *pc,
     //ori *pc = env->xl == MXL_RV32 ? env->pc & UINT32_MAX : env->pc;
     //ori *cs_base = 0;
 #if defined(TARGET_RISCV64) // the following code will not compile in RV32
+#define UMAX 0x100000000UL
+#define UPPER ~(UMAX-1)
+//#define LOWER (UMAX-1)
     if (env->priv == PRV_U) {
-        //if (env->pc >= UMAX) {
-        //    riscv_raise_exception(env, RISCV_EXCP_INST_ACCESS_FAULT, GETPC());
-        //    env->pc &= (UMAX-1);
-        //}
-        *pc = env->sprocbase | env->pc; //wycdebug
+        target_ulong upper = env->pc & UPPER;
+        if (upper == 0) {
+            *pc = env->sprocbase | env->pc;
+        } else if (upper == env->sprocbase) {
+            *pc = env->pc;
+        } else {
+            printf("%s: pc %lx procbase %lx\n", __func__, env->pc, env->sprocbase);
+            *pc = env->pc | 0xffffffff00000000UL;
+            //riscv_raise_exception(env, RISCV_EXCP_INST_ACCESS_FAULT, GETPC());
+        }
         *cs_base = 0;//env->sprocbase;
     } else
+#undef UMAX
+#undef UPPER
+//#undef LOWER
 #endif // defined(TARGET_RISCV64)
     {
 	*pc = env->xl == MXL_RV32 ? env->pc & UINT32_MAX : env->pc;
