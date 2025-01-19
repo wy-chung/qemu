@@ -130,23 +130,28 @@ void cpu_get_tb_cpu_state(CPURISCVState *env, vaddr *pc,
 #if defined(TARGET_RISCV64) // the following code will not compile in RV32
 #define UMAX 0x100000000UL
 #define UPPER ~(UMAX-1)
-//#define LOWER (UMAX-1)
     if (env->priv == PRV_U) {
-        target_ulong upper = env->pc & UPPER;
-        if (upper == 0) {
-            *pc = env->sprocbase | env->pc;
-        } else if (upper == env->sprocbase) {
-            *pc = env->pc;
-        } else {
-            printf("%s: pc %lx procbase %lx\n", __func__, env->pc, env->sprocbase);
-            *pc = env->pc | 0xffffffff00000000UL;
-            //riscv_raise_exception(env, RISCV_EXCP_INST_ACCESS_FAULT, GETPC());
-        }
-        *cs_base = 0;//env->sprocbase;
+	target_ulong upper = env->pc & UPPER;
+#if 0
+	if (upper == 0) {
+		*pc = env->sprocbase | env->pc;
+	} else if (upper == env->sprocbase) {
+		*pc = env->pc;
+	} else {
+		printf("%s: pc %lx procbase %lx\n", __func__, env->pc, env->sprocbase);
+		*pc = env->pc | 0xffffffff00000000UL;
+		//riscv_raise_exception(env, RISCV_EXCP_INST_ACCESS_FAULT, GETPC());
+	}
+#else
+	if (upper != 0 || env->sprocbase != 0) {
+		printf("%s: pc %lx procbase %lx\n", __func__, env->pc, env->sprocbase);
+	}
+	*pc = env->pc;
+#endif
+	*cs_base = 0;//env->sprocbase;
     } else
 #undef UMAX
 #undef UPPER
-//#undef LOWER
 #endif // defined(TARGET_RISCV64)
     {
 	*pc = env->xl == MXL_RV32 ? env->pc & UINT32_MAX : env->pc;

@@ -68,6 +68,7 @@ target_ulong helper_add_procbase(CPURISCVState *env, target_ulong uaddr)
 	if (env->priv == PRV_U) {
 		target_ulong addr;
 		target_ulong upper = uaddr & UPPER;
+#if 0
 		if (upper == 0) {
 			addr = env->sprocbase | uaddr;
 		} else if (upper == env->sprocbase) {
@@ -78,6 +79,12 @@ target_ulong helper_add_procbase(CPURISCVState *env, target_ulong uaddr)
 			addr = env->sprocbase | (uaddr & LOWER);
 			//riscv_raise_exception(env, RISCV_EXCP_INST_ACCESS_FAULT, GETPC());
 		}
+#else
+		if (upper != 0 || env->sprocbase != 0) {
+			printf("%s: uaddr %lx procbase %lx\n", __func__, uaddr, env->sprocbase);
+		}
+		addr = uaddr;
+#endif
 		return addr;
 	}
 #undef UMAX
