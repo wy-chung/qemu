@@ -3402,6 +3402,21 @@ static RISCVException write_satp(CPURISCVState *env, int csrno,
     return RISCV_EXCP_NONE;
 }
 
+//wyc
+static RISCVException read_sprocbase(CPURISCVState *env, int csrno,
+                                target_ulong *val)
+{
+    *val = env->sprocbase;
+    return RISCV_EXCP_NONE;
+}
+//wyc
+static RISCVException write_sprocbase(CPURISCVState *env, int csrno,
+                                 target_ulong val)
+{
+    env->sprocbase = val;
+    return RISCV_EXCP_NONE;
+}
+
 static RISCVException read_vstopi(CPURISCVState *env, int csrno,
                                   target_ulong *val)
 {
@@ -4739,6 +4754,10 @@ static inline RISCVException riscv_csrrw_check(CPURISCVState *env,
      * instruction exception. Hence this comes after the read / write check.
      */
     RISCVException ret = csr_ops[csrno].predicate(env, csrno);
+#if defined(WYC)
+    RISCVException ret = satp();
+    RISCVException ret = any(); // CSR_SPROCBASE
+#endif
     if (ret != RISCV_EXCP_NONE) {
         return ret;
     }
@@ -4790,6 +4809,9 @@ static RISCVException riscv_csrrw_do64(CPURISCVState *env, int csrno,
         }
         /* read old value */
         ret = csr_ops[csrno].read(env, csrno, &old_value);
+#if defined(WYC)
+        ret = read_sprocbase(env, csrno, &old_value); // CSR_SPROCBASE
+#endif
         if (ret != RISCV_EXCP_NONE) {
             return ret;
         }
@@ -4800,6 +4822,9 @@ static RISCVException riscv_csrrw_do64(CPURISCVState *env, int csrno,
         new_value = (old_value & ~write_mask) | (new_value & write_mask);
         if (csr_ops[csrno].write) {
             ret = csr_ops[csrno].write(env, csrno, new_value);
+#if defined(WYC)
+            ret = write_sprocbase(env, csrno, new_value); // CSR_SPROCBASE
+#endif
             if (ret != RISCV_EXCP_NONE) {
                 return ret;
             }
@@ -5182,6 +5207,7 @@ riscv_csr_operations csr_ops[CSR_TABLE_SIZE] = {
 
     /* Supervisor Protection and Translation */
     [CSR_SATP]     = { "satp",     satp, read_satp,     write_satp     },
+    [CSR_SPROCBASE] = { "sprocbase", any /*smode*/, read_sprocbase, write_sprocbase },
 
     /* Supervisor-Level Window to Indirectly Accessed Registers (AIA) */
     [CSR_SISELECT]   = { "siselect",   aia_smode, NULL, NULL, rmw_xiselect },

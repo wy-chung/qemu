@@ -42,6 +42,7 @@ static TCGv_i64 cpu_fpr[32]; /* assume F and D extensions */
 static TCGv load_res;
 static TCGv load_val;
 /* globals for PM CSRs */
+// pm means pointer masking. it is used for memory tagging
 static TCGv pm_mask;
 static TCGv pm_base;
 

@@ -30,6 +30,7 @@
     }                                                     \
 } while (0)
 
+// Load-Reserved also known as Load-linked
 static bool gen_lr(DisasContext *ctx, arg_atomic *a, MemOp mop)
 {
     TCGv src1;
@@ -55,6 +56,7 @@ static bool gen_lr(DisasContext *ctx, arg_atomic *a, MemOp mop)
     return true;
 }
 
+// Store-Conditional
 static bool gen_sc(DisasContext *ctx, arg_atomic *a, MemOp mop)
 {
     TCGv dest, src1, src2;

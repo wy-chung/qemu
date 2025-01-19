@@ -74,6 +74,15 @@ static bool trans_uret(DisasContext *ctx, arg_uret *a)
     return false;
 }
 
+/*
+#0  trans_sret @ ../target/riscv/insn_trans/trans_privileged.c.inc:87
+#1  decode_insn32 @ libqemu-riscv64-softmmu.fa.p/decode-insn32.c.inc:6846
+#2  decode_opc @ ../target/riscv/translate.c:1173
+#3  riscv_tr_translate_insn @ ../target/riscv/translate.c:1244
+#4  translator_loop @ ../accel/tcg/translator.c:164
+#5  gen_intermediate_code @ ../target/riscv/translate.c:1311
+*/
+// in the gen code path
 static bool trans_sret(DisasContext *ctx, arg_sret *a)
 {
 #ifndef CONFIG_USER_ONLY
@@ -81,6 +90,9 @@ static bool trans_sret(DisasContext *ctx, arg_sret *a)
         decode_save_opc(ctx, 0);
         translator_io_start(&ctx->base);
         gen_helper_sret(cpu_pc, tcg_env);
+    #if defined(WYC)
+        helper_sret();
+    #endif
         exit_tb(ctx); /* no chaining */
         ctx->base.is_jmp = DISAS_NORETURN;
     } else {

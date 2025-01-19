@@ -854,6 +854,9 @@ static inline bool cpu_handle_interrupt(CPUState *cpu,
         else {
             const TCGCPUOps *tcg_ops = cpu->cc->tcg_ops;
 
+        #if defined(WYC)
+            tcg_ops->cpu_exec_interrupt = riscv_cpu_exec_interrupt;
+        #endif
             if (tcg_ops->cpu_exec_interrupt(cpu, interrupt_request)) {
                 if (!tcg_ops->need_replay_interrupt ||
                     tcg_ops->need_replay_interrupt(interrupt_request)) {

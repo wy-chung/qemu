@@ -122,7 +122,8 @@ DEF_HELPER_2(cbo_inval, void, env, tl)
 DEF_HELPER_2(cbo_zero, void, env, tl)
 
 /* Special functions */
-DEF_HELPER_2(csrr, tl, env, int)
+DEF_HELPER_2(add_procbase, tl, env, tl)	//wyc helper_add_procbase
+DEF_HELPER_2(csrr, tl, env, int)	//wyc helper_csrr
 DEF_HELPER_3(csrw, void, env, int, tl)
 DEF_HELPER_4(csrrw, tl, env, int, tl, tl)
 DEF_HELPER_2(csrr_i128, tl, env, int)
