@@ -168,9 +168,9 @@ struct RISCVCPUConfig {
     RISCVSATPMap satp_mode;
 #endif
 };
-
+#if !defined(WYC)
 typedef struct RISCVCPUConfig RISCVCPUConfig;
-
+#endif
 /* Helper functions to test for extensions.  */
 
 static inline bool always_true_p(const RISCVCPUConfig *cfg __attribute__((__unused__)))

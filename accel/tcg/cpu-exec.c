@@ -283,8 +283,8 @@ static void log_cpu_exec(vaddr pc, CPUState *cpu,
         qemu_log_mask(CPU_LOG_EXEC,
                       "Trace %d: %p [%08" PRIx64
                       "/%016" VADDR_PRIx "/%08x/%08x] %s\n",
-                      cpu->cpu_index, tb->tc.ptr, tb->cs_base, pc,
-                      tb->flags, tb->cflags, lookup_symbol(pc));
+                      cpu->cpu_index, tb->tc.ptr, tb->cs_base,
+                      pc, tb->flags, tb->cflags, lookup_symbol(pc));
 
         if (qemu_loglevel_mask(CPU_LOG_TB_CPU)) {
             FILE *logfile = qemu_log_trylock();
@@ -846,6 +846,9 @@ static inline bool cpu_handle_interrupt(CPUState *cpu,
         else {
             const TCGCPUOps *tcg_ops = cpu->cc->tcg_ops;
 
+        #if defined(WYC)
+		tcg_ops->cpu_exec_interrupt = riscv_cpu_exec_interrupt;
+        #endif
             if (tcg_ops->cpu_exec_interrupt &&
                 tcg_ops->cpu_exec_interrupt(cpu, interrupt_request)) {
                 if (!tcg_ops->need_replay_interrupt ||

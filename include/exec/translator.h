@@ -45,9 +45,9 @@ void gen_intermediate_code(CPUState *cpu, TranslationBlock *tb, int *max_insns,
  * What instruction to disassemble next.
  */
 typedef enum DisasJumpType {
-    DISAS_NEXT,
-    DISAS_TOO_MANY,
-    DISAS_NORETURN,
+    DISAS_NEXT,		// Next instruction in program order.
+    DISAS_TOO_MANY,	// Too many instructions translated.
+    DISAS_NORETURN,	// Following code is dead.
     DISAS_TARGET_0,
     DISAS_TARGET_1,
     DISAS_TARGET_2,

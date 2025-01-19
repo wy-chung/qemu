@@ -2,13 +2,18 @@
 
 #ifndef TARGET_RISCV_CPU_BITS_H
 #define TARGET_RISCV_CPU_BITS_H
-
+#if !defined(WYC)
 #define get_field(reg, mask) (((reg) & \
                  (uint64_t)(mask)) / ((mask) & ~((mask) << 1)))
 #define set_field(reg, mask, val) (((reg) & ~(uint64_t)(mask)) | \
                  (((uint64_t)(val) * ((mask) & ~((mask) << 1))) & \
                  (uint64_t)(mask)))
-
+#else
+uint64_t get_field(uint64_t reg, uint64_t mask)
+    { return (reg & mask) / (mask & ~(mask << 1)); }
+uint64_t set_field(uint64_t reg, uint64_t mask, uint64_t val)
+    { return (reg & ~mask) | ((val * (mask & ~(mask << 1))) & mask); }
+#endif // defined(WYC)
 /* Extension context status mask */
 #define EXT_STATUS_MASK     0x3ULL
 
@@ -212,6 +217,7 @@
 /* Supervisor Protection and Translation */
 #define CSR_SPTBR           0x180
 #define CSR_SATP            0x180
+#define CSR_SPROCBASE       0x081	//wyc '0' means that it can be accessed in user-level
 
 /* Supervisor-Level Window to Indirectly Accessed Registers (AIA) */
 #define CSR_SISELECT        0x150
@@ -655,13 +661,13 @@ typedef enum {
 /* Exception causes */
 typedef enum RISCVException {
     RISCV_EXCP_NONE = -1, /* sentinel value */
-    RISCV_EXCP_INST_ADDR_MIS = 0x0,
+    RISCV_EXCP_INST_ADDR_MIS = 0x0,	// MIS means misaligned
     RISCV_EXCP_INST_ACCESS_FAULT = 0x1,
     RISCV_EXCP_ILLEGAL_INST = 0x2,
     RISCV_EXCP_BREAKPOINT = 0x3,
     RISCV_EXCP_LOAD_ADDR_MIS = 0x4,
     RISCV_EXCP_LOAD_ACCESS_FAULT = 0x5,
-    RISCV_EXCP_STORE_AMO_ADDR_MIS = 0x6,
+    RISCV_EXCP_STORE_AMO_ADDR_MIS = 0x6,	// AMO (Aomic Memory Operation)
     RISCV_EXCP_STORE_AMO_ACCESS_FAULT = 0x7,
     RISCV_EXCP_U_ECALL = 0x8,
     RISCV_EXCP_S_ECALL = 0x9,

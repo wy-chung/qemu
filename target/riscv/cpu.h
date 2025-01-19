@@ -57,20 +57,20 @@ typedef struct CPUArchState CPURISCVState;
  * Update misa_bits[], misa_ext_info_arr[] and misa_ext_cfgs[]
  * when adding new MISA bits here.
  */
-#define RVI RV('I')
-#define RVE RV('E') /* E and I are mutually exclusive */
-#define RVM RV('M')
-#define RVA RV('A')
-#define RVF RV('F')
-#define RVD RV('D')
-#define RVV RV('V')
-#define RVC RV('C')
-#define RVS RV('S')
-#define RVU RV('U')
-#define RVH RV('H')
-#define RVJ RV('J')
+#define RVI RV('I') // RV32I/64I/128I base ISA
+#define RVE RV('E') // RV32E/64E base ISA /* E and I are mutually exclusive */
+#define RVM RV('M') // Integer Multiplication and Division
+#define RVA RV('A') // Atomic
+#define RVF RV('F') // Single-Precision Floating-Point
+#define RVD RV('D') // Double-Precision Floating-Point
+#define RVV RV('V') // Vector
+#define RVC RV('C') // Compressed
+#define RVS RV('S') // Supervisor
+#define RVU RV('U') // User
+#define RVH RV('H') // Hypervisor
+#define RVJ RV('J') // Dynamically Translated Languages
 #define RVG RV('G')
-#define RVB RV('B')
+#define RVB RV('B') // Bit Manipulation
 
 extern const uint32_t misa_bits[];
 const char *riscv_get_misa_ext_name(uint32_t bit);
@@ -245,11 +245,12 @@ struct CPUArchState {
     uint64_t vsie;
 
     target_ulong satp;   /* since: priv-1.10.0 */
-    target_ulong stval;
+    target_ulong sprocbase; //wyc process base address
+    target_ulong stval;	// exception-specific information for handling the trap
     target_ulong medeleg;
 
-    target_ulong stvec;
-    target_ulong sepc;
+    target_ulong stvec;	// trap vector base address
+    target_ulong sepc;	// the pc of the instruction that caused the trap
     target_ulong scause;
 
     target_ulong mtvec;
@@ -414,8 +415,9 @@ struct CPUArchState {
     target_ulong senvcfg;
     uint64_t henvcfg;
 #endif
-    target_ulong cur_pmmask;
-    target_ulong cur_pmbase;
+    // actual_address = (requested_address & ~pmmask) | pmbase
+    target_ulong cur_pmmask; // pointer masking mask
+    target_ulong cur_pmbase; // pointer masking base
 
     /* Fields from here on are preserved across CPU reset. */
     QEMUTimer *stimer; /* Internal timer for S-mode interrupt */
@@ -756,7 +758,7 @@ typedef struct {
     riscv_csr_predicate_fn predicate;
     riscv_csr_read_fn read;
     riscv_csr_write_fn write;
-    riscv_csr_op_fn op;
+    riscv_csr_op_fn op;	// combined read/write operation
     riscv_csr_read128_fn read128;
     riscv_csr_write128_fn write128;
     /* The default priv spec version should be PRIV_VERSION_1_10_0 (i.e 0) */

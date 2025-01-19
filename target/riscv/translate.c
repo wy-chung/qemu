@@ -43,6 +43,7 @@ static TCGv_i64 cpu_fpr[32]; /* assume F and D extensions */
 static TCGv load_res;
 static TCGv load_val;
 /* globals for PM CSRs */
+// pm means pointer masking. it is used for memory tagging
 static TCGv pm_mask;
 static TCGv pm_base;
 
@@ -579,10 +580,15 @@ static void gen_jal(DisasContext *ctx, int rd, target_ulong imm)
 /* Compute a canonical address from a register plus offset. */
 static TCGv get_address(DisasContext *ctx, int rs1, int imm)
 {
-    TCGv addr = tcg_temp_new();
+    TCGv uaddr = tcg_temp_new();
+    TCGv addr  = tcg_temp_new();
     TCGv src1 = get_gpr(ctx, rs1, EXT_NONE);
 
-    tcg_gen_addi_tl(addr, src1, imm);
+    tcg_gen_addi_tl(uaddr, src1, imm);
+    gen_helper_add_procbase(addr, tcg_env, uaddr);
+#if defined(WYC)
+    helper_add_procbase();
+#endif
     if (ctx->pm_mask_enabled) {
         tcg_gen_andc_tl(addr, addr, pm_mask);
     } else if (get_address_xl(ctx) == MXL_RV32) {
@@ -598,10 +604,15 @@ static TCGv get_address(DisasContext *ctx, int rs1, int imm)
 /* Compute a canonical address from a register plus reg offset. */
 static TCGv get_address_indexed(DisasContext *ctx, int rs1, TCGv offs)
 {
-    TCGv addr = tcg_temp_new();
+    TCGv uaddr = tcg_temp_new();
+    TCGv addr  = tcg_temp_new();
     TCGv src1 = get_gpr(ctx, rs1, EXT_NONE);
 
-    tcg_gen_add_tl(addr, src1, offs);
+    tcg_gen_add_tl(uaddr, src1, offs);
+    gen_helper_add_procbase(addr, tcg_env, uaddr);
+#if defined(WYC)
+    helper_add_procbase();
+#endif
     if (ctx->pm_mask_enabled) {
         tcg_gen_andc_tl(addr, addr, pm_mask);
     } else if (get_xl(ctx) == MXL_RV32) {
