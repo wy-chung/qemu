@@ -273,10 +273,10 @@ static bool tcg_target_const_match(int64_t val, int ct,
 #define P_VEXL          0x80000         /* Set VEX.L = 1 */
 #define P_EVEX          0x100000        /* Requires EVEX encoding */
 
-#define OPC_ARITH_EbIb	(0x80)
-#define OPC_ARITH_EvIz	(0x81)
+#define OPC_ARITH_EbIb	(0x80)	// E: register/memory target; b:byte; I: immediate
+#define OPC_ARITH_EvIz	(0x81)	// v: default 32bit or 64-bit if P_REXW prefix is attached; z: compact
 #define OPC_ARITH_EvIb	(0x83)
-#define OPC_ARITH_GvEv	(0x03)		/* ... plus (ARITH_FOO << 3) */
+#define OPC_ARITH_GvEv	(0x03)	// G: general purpose register	/* ... plus (ARITH_FOO << 3) */
 #define OPC_ANDN        (0xf2 | P_EXT38)
 #define OPC_ADD_GvEv	(OPC_ARITH_GvEv | (ARITH_ADD << 3))
 #define OPC_AND_GvEv    (OPC_ARITH_GvEv | (ARITH_AND << 3))
@@ -2166,7 +2166,7 @@ static TCGLabelQemuLdst *prepare_host_addr(TCGContext *s, HostAddress *h,
     TCGLabelQemuLdst *ldst = NULL;
     MemOp opc = get_memop(oi);
     MemOp s_bits = opc & MO_SIZE;
-    unsigned a_mask;
+    unsigned a_mask;	// alignment mask
 
     if (tcg_use_softmmu) {
         h->index = TCG_REG_L0;

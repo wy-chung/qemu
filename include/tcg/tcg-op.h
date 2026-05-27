@@ -93,7 +93,7 @@ tcg_gen_qemu_st_i32(TCGv_i32 v, TCGv a, TCGArg i, MemOp m)
 static inline void
 tcg_gen_qemu_ld_i64(TCGv_i64 v, TCGv a, TCGArg i, MemOp m)
 {
-    tcg_gen_qemu_ld_i64_chk(v, tcgv_tl_temp(a), i, m, TCG_TYPE_TL);
+    tcg_gen_qemu_ld_i64_chk(v, tcgv_tl_temp(a), i, m, TCG_TYPE_TL); // TCG_TYPE_I64
 }
 
 static inline void
@@ -124,6 +124,7 @@ tcg_gen_qemu_st_i128(TCGv_i128 v, TCGv a, TCGArg i, MemOp m)
                                TCGv_##S n, TCGArg i, MemOp m)           \
     { N##_##S##_chk(r, tcgv_tl_temp(a), o, n, i, m, TCG_TYPE_TL); }
 
+#ifndef WYC
 DEF_ATOMIC3(tcg_gen_atomic_cmpxchg, i32)
 DEF_ATOMIC3(tcg_gen_atomic_cmpxchg, i64)
 DEF_ATOMIC3(tcg_gen_atomic_cmpxchg, i128)
@@ -171,6 +172,7 @@ DEF_ATOMIC2(tcg_gen_atomic_smax_fetch, i32)
 DEF_ATOMIC2(tcg_gen_atomic_smax_fetch, i64)
 DEF_ATOMIC2(tcg_gen_atomic_umax_fetch, i32)
 DEF_ATOMIC2(tcg_gen_atomic_umax_fetch, i64)
+#endif // ndef WYC
 
 #undef DEF_ATOMIC2
 #undef DEF_ATOMIC3

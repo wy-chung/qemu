@@ -144,11 +144,17 @@ void translator_loop(CPUState *cpu, TranslationBlock *tb, int *max_insns,
     db->code_mmuidx = cpu_mmu_index(cpu, true);
 
     ops->init_disas_context(db, cpu);
+#ifdef WYC
+	 riscv_tr_init_disas_context();
+#endif
     tcg_debug_assert(db->is_jmp == DISAS_NEXT);  /* no early exit */
 
     /* Start translating.  */
     icount_start_insn = gen_tb_start(db, cflags);
     ops->tb_start(db, cpu);
+#ifdef WYC
+	 riscv_tr_tb_start();
+#endif
     tcg_debug_assert(db->is_jmp == DISAS_NEXT);  /* no early exit */
 
     plugin_enabled = plugin_gen_tb_start(cpu, db);
@@ -157,6 +163,9 @@ void translator_loop(CPUState *cpu, TranslationBlock *tb, int *max_insns,
     while (true) {
         *max_insns = ++db->num_insns;
         ops->insn_start(db, cpu);
+#ifdef WYC
+	     riscv_tr_insn_start();
+#endif
         db->insn_start = tcg_last_op();
         if (first_insn_start == NULL) {
             first_insn_start = db->insn_start;
@@ -174,6 +183,9 @@ void translator_loop(CPUState *cpu, TranslationBlock *tb, int *max_insns,
          * the next instruction.
          */
         ops->translate_insn(db, cpu);
+#ifdef WYC
+	     riscv_tr_translate_insn();
+#endif
 
         /*
          * We can't instrument after instructions that change control
@@ -203,6 +215,9 @@ void translator_loop(CPUState *cpu, TranslationBlock *tb, int *max_insns,
 
     /* Emit code to exit the TB, as indicated by db->is_jmp.  */
     ops->tb_stop(db, cpu);
+#ifdef WYC
+	 riscv_tr_tb_stop();
+#endif
     gen_tb_end(tb, cflags, icount_start_insn, db->num_insns);
 
     /*

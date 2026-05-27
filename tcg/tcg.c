@@ -70,7 +70,9 @@ static bool patch_reloc(tcg_insn_unit *code_ptr, int type,
                         intptr_t value, intptr_t addend);
 static void tcg_out_nop_fill(tcg_insn_unit *p, int count);
 
+#ifndef WYC
 typedef struct TCGLabelQemuLdst TCGLabelQemuLdst;
+#endif
 static bool tcg_out_qemu_ld_slow_path(TCGContext *s, TCGLabelQemuLdst *l);
 static bool tcg_out_qemu_st_slow_path(TCGContext *s, TCGLabelQemuLdst *l);
 

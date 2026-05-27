@@ -1255,6 +1255,9 @@ void riscv_tcg_cpu_finalize_dynamic_decoder(RISCVCPU *cpu)
     }
 
     cpu->decoders = dynamic_decoders;
+#ifdef WYC
+    cpu->decoders = {decode_insn32}; // decode_xthread, decode_XVentanaCodeOps
+#endif
 }
 
 bool riscv_cpu_tcg_compatible(RISCVCPU *cpu)

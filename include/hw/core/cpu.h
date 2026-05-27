@@ -62,9 +62,11 @@ typedef int (*WriteCoreDumpFunction)(const void *buf, size_t size,
  * has a cached value for the class in cs->cc which is set up in
  * cpu_exec_realizefn() for use in hot code paths.
  */
+#ifndef WYC
 typedef struct CPUClass CPUClass;
 DECLARE_CLASS_CHECKERS(CPUClass, CPU,
                        TYPE_CPU)
+#endif
 
 /**
  * OBJECT_DECLARE_CPU_TYPE:

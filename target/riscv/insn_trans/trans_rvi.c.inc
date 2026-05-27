@@ -414,7 +414,7 @@ static bool gen_load(DisasContext *ctx, arg_lb *a, MemOp memop)
     }
 
     if (ctx->ztso) {
-        tcg_gen_mb(TCG_MO_ALL | TCG_BAR_LDAQ);
+        tcg_gen_mb(TCG_MO_ALL | TCG_BAR_LDAQ); // memory barrier
     }
 
     return out;

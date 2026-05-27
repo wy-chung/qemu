@@ -249,6 +249,9 @@ static int setjmp_gen_code(CPUArchState *env, TranslationBlock *tb,
     CPUState *cs = env_cpu(env);
     tcg_ctx->cpu = cs;
     cs->cc->tcg_ops->translate_code(cs, tb, max_insns, pc, host_pc);
+#ifdef WYC
+		     riscv_translate_code();
+#endif
 
     assert(tb->size != 0);
     tcg_ctx->cpu = NULL;

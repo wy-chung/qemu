@@ -66,7 +66,7 @@ typedef struct DisasContext {
     uint32_t opcode;
     RISCVExtStatus mstatus_fs;
     RISCVExtStatus mstatus_vs;
-    uint32_t mem_idx;
+    uint32_t mem_idx; // 0: user mode tlb table, 1: kernel mode tlb table
     uint32_t priv;
     /*
      * Remember the rounding mode encoded in the previous fp instruction,
@@ -135,7 +135,7 @@ static inline MemOp mo_endian(DisasContext *ctx)
      *  - MSTATUS_MBE (Machine-mode)
      * but we don't implement that yet.
      */
-    return MO_TE;
+    return MO_TE; // target endian
 }
 
 #ifdef TARGET_RISCV32
@@ -1281,7 +1281,12 @@ static void decode_opc(CPURISCVState *env, DisasContext *ctx)
 
         for (guint i = 0; i < ctx->decoders->len; ++i) {
             riscv_cpu_decode_fn func = g_ptr_array_index(ctx->decoders, i);
-            if (func(ctx, opcode)) {
+#ifndef WYC
+            if (func(ctx, opcode))
+#else
+            if (decode_insn32(ctx, opcode))
+#endif
+	    {
                 return;
             }
         }

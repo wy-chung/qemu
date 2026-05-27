@@ -16,7 +16,7 @@
  * For struct types used in only a few headers, judicious use of the
  * struct tag instead of the typedef name is commonly preferable.
  */
-
+#ifndef WYC
 /*
  * Incomplete struct types
  * Please keep this list in case-insensitive alphabetical order.
@@ -120,7 +120,7 @@ typedef struct VirtIODevice VirtIODevice;
 typedef struct Visitor Visitor;
 typedef struct VMChangeStateEntry VMChangeStateEntry;
 typedef struct VMStateDescription VMStateDescription;
-
+#endif // ndef WYC
 /*
  * Pointer types
  * Such typedefs should be limited to cases where the typedef's users

@@ -139,7 +139,7 @@ static void cpu_common_reset_exit(Object *obj, ResetType type)
 ObjectClass *cpu_class_by_name(const char *typename, const char *cpu_model)
 {
     ObjectClass *oc;
-    CPUClass *cc;
+    struct CPUClass *cc;
 
     oc = object_class_by_name(typename);
     cc = CPU_CLASS(oc);

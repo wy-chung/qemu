@@ -58,6 +58,12 @@
 #define TYPE_RISCV_CPU_XIANGSHAN_KMH    RISCV_CPU_TYPE_NAME("xiangshan-kunminghu")
 #define TYPE_RISCV_CPU_HOST             RISCV_CPU_TYPE_NAME("host")
 
-OBJECT_DECLARE_CPU_TYPE(RISCVCPU, RISCVCPUClass, RISCV_CPU)
-
+#ifndef WYC
+OBJECT_DECLARE_CPU_TYPE(RISCVCPU, RISCVCPUClass, RISCV_CPU) // include/hw/core
+#else
+//typedef struct ArchCPU RISCVCPU;
+//OBJECT_DECLARE_TYPE(ArchCPU, RISCVCPUClass, RISCV_CPU); // include/qom/object.h
+typedef struct ArchCPU ArchCPU;
+typedef struct RISCVCPUClass RISCVCPUClass;
+#endif
 #endif /* RISCV_CPU_QOM_H */

@@ -537,6 +537,9 @@ typedef struct {
  *
  * A RISCV CPU.
  */
+#ifdef WYC
+typedef
+#endif
 struct ArchCPU {
     CPUState parent_obj;
 
@@ -555,7 +558,11 @@ struct ArchCPU {
     /* Mapping of events to counters */
     GHashTable *pmu_event_ctr_map;
     const GPtrArray *decoders;
-};
+}
+#ifdef WYC
+  RISCVCPU
+#endif
+;
 
 typedef struct RISCVCSR RISCVCSR;
 
