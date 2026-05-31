@@ -277,8 +277,8 @@ DEF_ATOMIC2(tcg_gen_atomic_umax_fetch, i64)
 #define tcg_gen_umin_tl tcg_gen_umin_i64
 #define tcg_gen_smax_tl tcg_gen_smax_i64
 #define tcg_gen_umax_tl tcg_gen_umax_i64
-#define tcg_gen_atomic_cmpxchg_tl tcg_gen_atomic_cmpxchg_i64
-#define tcg_gen_atomic_xchg_tl tcg_gen_atomic_xchg_i64
+#define tcg_gen_atomic_cmpxchg_tl tcg_gen_atomic_cmpxchg_i64	// see DEF_ATOMIC3
+#define tcg_gen_atomic_xchg_tl tcg_gen_atomic_xchg_i64		// see DEF_ATOMIC2
 #define tcg_gen_atomic_fetch_add_tl tcg_gen_atomic_fetch_add_i64
 #define tcg_gen_atomic_fetch_and_tl tcg_gen_atomic_fetch_and_i64
 #define tcg_gen_atomic_fetch_or_tl tcg_gen_atomic_fetch_or_i64

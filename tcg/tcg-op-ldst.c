@@ -106,24 +106,30 @@ static void gen_ldst2(TCGOpcode opc, TCGType type, TCGTemp *vl, TCGTemp *vh,
 
 static void gen_ld_i64(TCGv_i64 v, TCGTemp *addr, MemOpIdx oi)
 {
-    if (TCG_TARGET_REG_BITS == 32) {
+    //if (TCG_TARGET_REG_BITS == 32) {
+#if TCG_TARGET_REG_BITS == 32
         gen_ldst2(INDEX_op_qemu_ld2, TCG_TYPE_I64,
                   tcgv_i32_temp(TCGV_LOW(v)), tcgv_i32_temp(TCGV_HIGH(v)),
                   addr, oi);
-    } else {
+    //} else {
+#else
         gen_ldst1(INDEX_op_qemu_ld, TCG_TYPE_I64, tcgv_i64_temp(v), addr, oi);
-    }
+    //}
+#endif
 }
 
 static void gen_st_i64(TCGv_i64 v, TCGTemp *addr, MemOpIdx oi)
 {
-    if (TCG_TARGET_REG_BITS == 32) {
+    //if (TCG_TARGET_REG_BITS == 32) {
+#if TCG_TARGET_REG_BITS == 32
         gen_ldst2(INDEX_op_qemu_st2, TCG_TYPE_I64,
                   tcgv_i32_temp(TCGV_LOW(v)), tcgv_i32_temp(TCGV_HIGH(v)),
                   addr, oi);
-    } else {
+    //} else {
+#else
         gen_ldst1(INDEX_op_qemu_st, TCG_TYPE_I64, tcgv_i64_temp(v), addr, oi);
-    }
+    //}
+#endif
 }
 
 static void tcg_gen_req_mo(TCGBar type)
@@ -1024,7 +1030,8 @@ static void tcg_gen_atomic_cmpxchg_i64_int(TCGv_i64 retv, TCGTemp *addr,
         return;
     }
 
-    if (TCG_TARGET_REG_BITS == 32) {
+    //if (TCG_TARGET_REG_BITS == 32) {
+#if TCG_TARGET_REG_BITS == 32
         tcg_gen_atomic_cmpxchg_i32_int(TCGV_LOW(retv), addr, TCGV_LOW(cmpv),
                                        TCGV_LOW(newv), idx, memop);
         if (memop & MO_SIGN) {
@@ -1032,7 +1039,8 @@ static void tcg_gen_atomic_cmpxchg_i64_int(TCGv_i64 retv, TCGTemp *addr,
         } else {
             tcg_gen_movi_i32(TCGV_HIGH(retv), 0);
         }
-    } else {
+    //} else {
+#else
         TCGv_i32 c32 = tcg_temp_ebb_new_i32();
         TCGv_i32 n32 = tcg_temp_ebb_new_i32();
         TCGv_i32 r32 = tcg_temp_ebb_new_i32();
@@ -1050,7 +1058,8 @@ static void tcg_gen_atomic_cmpxchg_i64_int(TCGv_i64 retv, TCGTemp *addr,
         if (memop & MO_SIGN) {
             tcg_gen_ext_i64(retv, retv, memop);
         }
-    }
+    //}
+#endif
 }
 
 void tcg_gen_atomic_cmpxchg_i64_chk(TCGv_i64 retv, TCGTemp *addr,

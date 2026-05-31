@@ -2195,7 +2195,8 @@ static TCGLabelQemuLdst *prepare_host_addr(TCGContext *s, HostAddress *h,
         ldst->oi = oi;
         ldst->addr_reg = addr;
 
-        if (TCG_TARGET_REG_BITS == 64) {
+        //if (TCG_TARGET_REG_BITS == 64) {
+#if TCG_TARGET_REG_BITS == 64
             ttype = s->addr_type;
             trexw = (ttype == TCG_TYPE_I32 ? 0 : P_REXW);
             if (TCG_TYPE_PTR == TCG_TYPE_I64) {
@@ -2203,7 +2204,8 @@ static TCGLabelQemuLdst *prepare_host_addr(TCGContext *s, HostAddress *h,
                 tlbtype = TCG_TYPE_I64;
                 tlbrexw = P_REXW;
             }
-        }
+        //}
+#endif
 
         tcg_out_mov(s, tlbtype, TCG_REG_L0, addr);
         tcg_out_shifti(s, SHIFT_SHR + tlbrexw, TCG_REG_L0,
@@ -2424,7 +2426,7 @@ static void tcg_out_qemu_ld_direct(TCGContext *s, TCGReg datalo, TCGReg datahi,
 static void tgen_qemu_ld(TCGContext *s, TCGType type, TCGReg data,
                          TCGReg addr, MemOpIdx oi)
 {
-    TCGLabelQemuLdst *ldst;
+    TCGLabelQemuLdst *ldst; // slow-path jump stub
     HostAddress h;
 
     ldst = prepare_host_addr(s, &h, addr, oi, true);

@@ -23,7 +23,7 @@
  */
 
 /*
- * DEF(name, oargs, iargs, cargs, flags)
+ * DEF(name, oargs, iargs, cargs, flags)	output, input and constant arguments
  */
 
 /* predefined ops */

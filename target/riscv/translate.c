@@ -54,6 +54,7 @@ typedef enum {
     EXT_ZERO,
 } DisasExtend;
 
+// instruction layout at compile time. the runtime state is stored in CPUArchState
 typedef struct DisasContext {
     DisasContextBase base;
     target_ulong cur_insn_len;

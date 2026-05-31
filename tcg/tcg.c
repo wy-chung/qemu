@@ -1180,6 +1180,7 @@ static const TCGOutOpLoad outop_ld = {
  * This prevents trivial mistakes within each arch/tcg-target.c.inc.
  */
 #define OUTOP(O, T, V)  [O] = _Generic(V, T: &V.base)
+	// [O] = &V.base
 
 /* Register allocation descriptions for every TCGOpcode. */
 static const TCGOutOp * const all_outop[NB_OPS] = {
