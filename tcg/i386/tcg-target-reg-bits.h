@@ -8,7 +8,7 @@
 #define TCG_TARGET_REG_BITS_H
 
 #ifdef __x86_64__
-# define TCG_TARGET_REG_BITS  64
+# define TCG_TARGET_REG_BITS  64	// TCG_TARGET means host machine
 #else
 # define TCG_TARGET_REG_BITS  32
 #endif

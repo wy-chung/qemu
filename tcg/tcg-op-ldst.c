@@ -107,7 +107,7 @@ static void gen_ldst2(TCGOpcode opc, TCGType type, TCGTemp *vl, TCGTemp *vh,
 static void gen_ld_i64(TCGv_i64 v, TCGTemp *addr, MemOpIdx oi)
 {
     //if (TCG_TARGET_REG_BITS == 32) {
-#if TCG_TARGET_REG_BITS == 32
+#if (TCG_TARGET_REG_BITS == 32)
         gen_ldst2(INDEX_op_qemu_ld2, TCG_TYPE_I64,
                   tcgv_i32_temp(TCGV_LOW(v)), tcgv_i32_temp(TCGV_HIGH(v)),
                   addr, oi);
@@ -121,7 +121,7 @@ static void gen_ld_i64(TCGv_i64 v, TCGTemp *addr, MemOpIdx oi)
 static void gen_st_i64(TCGv_i64 v, TCGTemp *addr, MemOpIdx oi)
 {
     //if (TCG_TARGET_REG_BITS == 32) {
-#if TCG_TARGET_REG_BITS == 32
+#if (TCG_TARGET_REG_BITS == 32)
         gen_ldst2(INDEX_op_qemu_st2, TCG_TYPE_I64,
                   tcgv_i32_temp(TCGV_LOW(v)), tcgv_i32_temp(TCGV_HIGH(v)),
                   addr, oi);
@@ -1031,7 +1031,7 @@ static void tcg_gen_atomic_cmpxchg_i64_int(TCGv_i64 retv, TCGTemp *addr,
     }
 
     //if (TCG_TARGET_REG_BITS == 32) {
-#if TCG_TARGET_REG_BITS == 32
+#if (TCG_TARGET_REG_BITS == 32)
         tcg_gen_atomic_cmpxchg_i32_int(TCGV_LOW(retv), addr, TCGV_LOW(cmpv),
                                        TCGV_LOW(newv), idx, memop);
         if (memop & MO_SIGN) {
@@ -1075,7 +1075,8 @@ static void tcg_gen_nonatomic_cmpxchg_i128_int(TCGv_i128 retv, TCGTemp *addr,
                                                TCGv_i128 cmpv, TCGv_i128 newv,
                                                TCGArg idx, MemOp memop)
 {
-    if (TCG_TARGET_REG_BITS == 32) {
+    //if (TCG_TARGET_REG_BITS == 32) {
+#if (TCG_TARGET_REG_BITS == 32)
         /* Inline expansion below is simply too large for 32-bit hosts. */
         MemOpIdx oi = make_memop_idx(memop, idx);
         TCGv_i64 a64 = maybe_extend_addr64(addr);
@@ -1083,7 +1084,8 @@ static void tcg_gen_nonatomic_cmpxchg_i128_int(TCGv_i128 retv, TCGTemp *addr,
         gen_helper_nonatomic_cmpxchgo(retv, tcg_env, a64, cmpv, newv,
                                       tcg_constant_i32(oi));
         maybe_free_addr64(a64);
-    } else {
+    //} else {
+#else
         TCGv_i128 oldv = tcg_temp_ebb_new_i128();
         TCGv_i128 tmpv = tcg_temp_ebb_new_i128();
         TCGv_i64 t0 = tcg_temp_ebb_new_i64();
@@ -1111,7 +1113,8 @@ static void tcg_gen_nonatomic_cmpxchg_i128_int(TCGv_i128 retv, TCGTemp *addr,
         tcg_temp_free_i64(t1);
         tcg_temp_free_i128(tmpv);
         tcg_temp_free_i128(oldv);
-    }
+    //}
+#endif
 }
 
 void tcg_gen_nonatomic_cmpxchg_i128_chk(TCGv_i128 retv, TCGTemp *addr,
