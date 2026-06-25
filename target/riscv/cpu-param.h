@@ -8,10 +8,10 @@
 #ifndef RISCV_CPU_PARAM_H
 #define RISCV_CPU_PARAM_H
 
-#if defined(TARGET_RISCV64)
+#if defined(TARGET_RISCV64)	// defined in build/riscv64-softmmu-config-target.h
 # define TARGET_PHYS_ADDR_SPACE_BITS 56 /* 44-bit PPN */
 # define TARGET_VIRT_ADDR_SPACE_BITS 48 /* sv48 */
-#elif defined(TARGET_RISCV32)
+#elif defined(TARGET_RISCV32)	// defined in build/riscv32-softmmu-config-target.h
 # define TARGET_PHYS_ADDR_SPACE_BITS 34 /* 22-bit PPN */
 # define TARGET_VIRT_ADDR_SPACE_BITS 32 /* sv32 */
 #endif

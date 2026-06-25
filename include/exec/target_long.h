@@ -16,7 +16,7 @@
  * object we can include directly. However the build-system must
  * ensure TARGET_LONG_BITS is defined directly.
  */
-#ifndef TARGET_LONG_BITS
+#ifndef TARGET_LONG_BITS	// defined in build/riscv##-softmmu-config-target.h
 #error TARGET_LONG_BITS not defined
 #endif
 

@@ -34,9 +34,9 @@
 #include "cpu_cfg.h"
 #include "qapi/qapi-types-common.h"
 #include "cpu-qom.h"
-
+#ifndef WYC
 typedef struct CPUArchState CPURISCVState;
-
+#endif
 #define CPU_RESOLVING_TYPE TYPE_RISCV_CPU
 
 #if defined(TARGET_RISCV32)
@@ -217,7 +217,9 @@ typedef struct PMUFixedCtrState {
         uint64_t counter_virt[2];
         uint64_t counter_virt_prev[2];
 } PMUFixedCtrState;
-
+#ifdef WYC
+typedef
+#endif
 struct CPUArchState {
     target_ulong gpr[32];
     target_ulong gprh[32]; /* 64 top bits of the 128-bit registers */
@@ -516,7 +518,11 @@ struct CPUArchState {
     target_ulong rnmip;
     uint64_t rnmi_irqvec;
     uint64_t rnmi_excpvec;
-};
+}
+#ifdef WYC
+CPURISCVState
+#endif
+;
 
 /*
  * map is a 16-bit bitmap: the most significant set bit in map is the maximum

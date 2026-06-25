@@ -26,9 +26,9 @@ struct RISCVCPUConfig {
 #define TYPED_FIELD(type, x, default) type x;
 #include "cpu_cfg_fields.h.inc"
 };
-
+#ifndef WYC
 typedef struct RISCVCPUConfig RISCVCPUConfig;
-
+#endif
 /* Helper functions to test for extensions.  */
 
 static inline bool always_true_p(const RISCVCPUConfig *cfg __attribute__((__unused__)))

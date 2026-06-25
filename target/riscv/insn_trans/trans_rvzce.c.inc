@@ -16,16 +16,21 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// Zc*: Code Size Reduction extensions
+
+// Zcb: Adds byte/halfword loads, stores, extensions, and multiplies
 #define REQUIRE_ZCB(ctx) do {   \
     if (!ctx->cfg_ptr->ext_zcb) \
         return false;           \
 } while (0)
 
+// Zcmp: Code Size Reduction via Push/Pop and Double-Move Instructions
 #define REQUIRE_ZCMP(ctx) do {   \
     if (!ctx->cfg_ptr->ext_zcmp) \
         return false;            \
 } while (0)
 
+// Zcmt: Code Size Reduction via Table Jumps
 #define REQUIRE_ZCMT(ctx) do {   \
     if (!ctx->cfg_ptr->ext_zcmt) \
         return false;            \

@@ -222,6 +222,7 @@ static void gen_check_nanbox_s(TCGv_i64 out, TCGv_i64 in)
     tcg_gen_movcond_i64(TCG_COND_GEU, out, in, t_max, in, t_nan);
 }
 
+// for Precise Exceptions in a JIT Compiler
 static void decode_save_opc(DisasContext *ctx, target_ulong excp_uw2)
 {
     assert(!ctx->insn_start_updated);
@@ -1285,7 +1286,7 @@ static void decode_opc(CPURISCVState *env, DisasContext *ctx)
 #ifndef WYC
             if (func(ctx, opcode))
 #else
-            if (decode_insn32(ctx, opcode))
+            if (decode_insn32(ctx, opcode)) // see decoder_table
 #endif
 	    {
                 return;

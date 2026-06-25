@@ -403,7 +403,7 @@ static bool gen_load(DisasContext *ctx, arg_lb *a, MemOp memop)
     bool out;
 
     memop |= mo_endian(ctx);
-    if (ctx->cfg_ptr->ext_zama16b) {
+    if (ctx->cfg_ptr->ext_zama16b) { // Misaligned Atomatic support
         memop |= MO_ATOM_WITHIN16;
     }
     decode_save_opc(ctx, 0);
